@@ -1,0 +1,7 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "tools/*"
+
+catalog:
+  "@foomakers/pair-cli": ^0.4.3

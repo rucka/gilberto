@@ -1,0 +1,29 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+catalogs:
+  default:
+    '@foomakers/pair-cli':
+      specifier: ^0.4.3
+      version: 0.4.3
+
+importers:
+
+  .:
+    devDependencies:
+      '@foomakers/pair-cli':
+        specifier: 'catalog:'
+        version: 0.4.3
+
+packages:
+
+  '@foomakers/pair-cli@0.4.3':
+    resolution: {integrity: sha512-gCe2L99TWYolsQfYczd8zeBk6MSq8qm1lN7M+h7wLPlzjqmPkDIUhAukPzhZDQTG/xvziPdNX9PXcdicD/rIeg==}
+    hasBin: true
+
+snapshots:
+
+  '@foomakers/pair-cli@0.4.3': {}

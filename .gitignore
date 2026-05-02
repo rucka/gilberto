@@ -141,3 +141,20 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Web frontend (React / Next.js / Vercel / monorepo build tools)
+.vercel/
+.turbo/
+.swc/
+build/
+storybook-static/
+.contentlayer/
+
+# Project-specific
+_inputs/
+.DS_Store
+.tmp/
+_docs
+
+# Claude Code (local settings + linked skills)
+.claude/settings.local

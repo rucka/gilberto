@@ -1,0 +1,21 @@
+{
+  "name": "gilberto",
+  "version": "0.0.0",
+  "private": true,
+  "description": "gilberto — your personal work/life (secure) assistant",
+  "license": "MIT",
+  "author": "Gianluca Carucci",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rucka/gilberto.git"
+  },
+  "scripts": {
+    "pair:install": "pair-cli install",
+    "pair:update": "pair-cli update",
+    "quality-gate": "echo 'quality-gate placeholder — workspace tooling not configured yet (see Initiative 1, Epic 1.1-1.2)' && exit 0"
+  },
+  "devDependencies": {
+    "@foomakers/pair-cli": "catalog:"
+  },
+  "packageManager": "pnpm@10.33.2"
+}
