@@ -187,7 +187,7 @@ Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspa
 - **AI runtime:** Assistant-agnostic and model-agnostic. Works with Claude Code, OpenAI Codex, Cowork, and any AI assistant supporting markdown-based skills, on any underlying model. No lock-in to a specific AI provider. Skill format is portable; conventions follow common patterns (frontmatter + markdown body + optional scripts).
 - **Platform:** macOS first (launchd, native scheduling). Linux supported. Windows not in v1 scope.
 - **Single contributor:** One developer (Gianluca) initially; framework must remain comprehensible to a second contributor without long onboarding.
-- **Time budget:** Estimated 200-240 dev-days from start to v1.0 (4 initiatives × ~5 epics × ~5 user stories each).
+- **Time budget:** Estimated 220-260 dev-days from start to v1.0 (5 initiatives × ~5 epics × ~5 user stories each).
 - **No external paid services:** Project must run end-to-end on free tiers / user-owned tooling for v1.
 
 ## 9. Design Requirements
@@ -210,48 +210,64 @@ Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspa
 
 ### Development Phases
 
-**Phase 1: Foundation** (Weeks 1-4 from project start)
+> Reordered 2026-05-03 to migration-first sequencing — see [decision-log/2026-05-03-replan-migration-first.md](../decision-log/2026-05-03-replan-migration-first.md).
 
-- Monorepo + CI/CD baseline
-- CLI scaffolding
-- 9 mechanic primitives (`vault-new`, `vault-promote`, `forge-*`)
-- `gilberto-process-vault-bootstrap` interactive wizard
-- **M1:** User can install CLI and bootstrap an empty vault.
+**Phase 1: Foundation (slim)** (Weeks 1-3)
 
-**Phase 2: Core Vault & Processes** (Weeks 5-12)
+- Monorepo + CI/CD baseline (turbo, ESLint, Prettier, Husky, commitlint, Changesets)
+- CLI scaffolding (commander base, sub-commands `install/update/status/plugin`)
+- 9 mechanic primitives (`vault-new`, `vault-promote`, `vault-collapse`, `forge-*`)
+- `gilberto-process-vault-bootstrap` interactive wizard (vault skeleton: 5 pillars + network + anatomy seeds)
+- Lifecycle processes deferred to Phase 5
+- **M1:** User can install CLI and bootstrap an empty navigable vault.
 
-- `gilberto-process-ingest` + `gilberto-capability-fetch` + first utilities (`fetch-rss`, `classify-medical`)
-- `gilberto-process-structure` + per-pillar refresh capabilities
-- `gilberto-process-surface` + per-pillar summarize capabilities
-- `gilberto-process-reflect` with consolidate-day playbook
-- `gilberto-process-act` + `gilberto-process-next`
-- CRUD-homogeneous capabilities (network-people, anatomy-topics, etc.)
-- Lifecycle processes (`vault-upgrade`, `vault-migrate`, `vault-export`, `vault-archive`)
+**Phase 2: Intelligence Migration** (Weeks 4-9)
+
+- Core processes (slice intelligence): `gilberto-process-ingest`, `gilberto-process-structure`, `gilberto-process-surface`, `gilberto-process-reflect`
+- `gilberto-capability-fetch` cross-pillar dispatcher
+- Default utilities: `utility-fetch-rss`, `utility-download-html`, `utility-transcript-from-video`
+- Per-pillar `intelligence` capabilities: `archive`, `refresh-index`, `summarize`, `distill`
+- Anatomy seeds for `intelligence` (playbooks + preferences)
+- Migration: `my-intelligence/{content-strategy, investire-azioni, newsletter-marcocasario, references, telegram-marcocasario, trader, youtube}` → vault `intelligence/`
 - **M2:** Drop file in `_ingest/` → archived in correct pillar with sidecar.
-- **M3:** Morning-briefing 07:00 + reflect-day 22:00 working end-to-end.
+- **M3a:** Intelligence pillar fully populated from migrated content; download+analysis automated end-to-end.
 
-**Phase 3: Plugins** (Weeks 13-20)
+**Phase 3: Pulse + Ratko Integration** (Weeks 10-15)
 
-- Plugin protocol implementation (manifest, CLI commands, registry, routing)
-- `pulse-health-tracking` plugin (Oura + Withings)
-- `pulse-ratko` plugin (Ratko-app integration)
-- `projects-venture` plugin (11 phase capabilities + 2 plugin processes)
-- `projects-editorial` plugin (5 capabilities + 4 plugin processes)
-- **M4:** All four first-party plugins installable via CLI and functional.
+- Plugin protocol (manifest schema, CLI commands `list/enable/disable/install/update/remove`, registry `anatomy/plugins.md`, file-per-contributor merge, universal-process → plugin-process routing)
+- Plugin `pulse-health-tracking` (`utility-fetch-oura`, `utility-fetch-withings`)
+- Plugin `pulse-ratko` (`gilberto-capability-pulse-ratko-{plan, review}`, `utility-classify-ratko-session`, `utility-fetch-ratko`)
+- Core: `utility-classify-medical`
+- Per-pillar `pulse` capabilities (`archive`, `refresh-index`, `summarize`)
+- **Ratko-app integration contract** (Initiative #3 epic): HTTP API contract preserving current Ratko JSON shapes for sessions/wearables/medical/reviews/trainer, replacing skill-direct file writes with `POST` to Ratko-app backend. Implementation in `ratko-mvp` repo coordinated with this phase.
+- Migration: `ratko-mvp/users/<user>/{sessions, plans, medical, wearable}` → vault `pulse/`
+- **M3b:** Morning-briefing + reflect-day work end-to-end across intelligence + pulse.
+- **M4a:** ratko-mvp KB dismissed; workout-session creation remains in Ratko-app via contract.
 
-**Phase 4: Calendar/Mail + Distribution** (Weeks 21-28)
+**Phase 4: Content Authoring Plugins** (Weeks 16-21)
 
-- `gilberto-capability-journey-tasks` + Calendar/Mail integration via extended `gilberto-capability-fetch`
-- `utility-calendar-gcalcli` primary
-- `utility-fetch-gmail` lightweight
+- `gilberto-process-act` + `gilberto-process-next`
+- Per-pillar `projects` capabilities
+- Plugin `projects-venture` (11 phase capabilities + `process-projects-venture-{next, status}`)
+- Plugin `projects-editorial` (5 capabilities + `process-projects-editorial-{next, status, analytics, plan}`)
+- `utility-scrape-linkedin` (extracted from `my-intelligence/scrape-linkedin-posts`)
+- Migration: `my-intelligence/{cm-*, publishing-*, copymastery, content-strategy, publishing}` → plugins
+- **M4b:** All four first-party plugins installable via CLI and functional.
+- **M4c:** my-intelligence repo fully dismissed.
+
+**Phase 5: Distribution + Lifecycle + Calendar/Mail** (Weeks 22-30)
+
+- Lifecycle processes: `gilberto-process-vault-upgrade`, `vault-migrate`, `vault-export`, `vault-archive` (fork-on-write pattern + snapshot/rollback)
+- CRUD-homogeneous capabilities (`network-people`, `network-companies`, `network-level`, `anatomy-topics`, `anatomy-playbooks`, `anatomy-preferences`, `me-update`)
+- Calendar + Task + Mail integration: `gilberto-capability-journey-tasks`, `utility-calendar-gcalcli`, `utility-fetch-gmail`, `gilberto-capability-fetch` extension for `type=google-calendar`
+- Daily-journey `## Agenda` aggregation; email triage in `gilberto-process-reflect`; bidirectional ACT (write-restricted)
 - CLI npm release (v0.1.0-alpha)
-- GitHub Release Action
-- Fork-on-write pattern for anatomy customizations during upgrade
-- Documentation site (Fumadocs) at `apps/website/`
+- GitHub Release Action (build + publish + changelog + website deploy)
+- Documentation site (Fumadocs at `apps/website/`)
 - Logo + visual identity via Claude Design
-- Migration scripts for author's existing content (my-intelligence, ratko-mvp)
+- Landing page + releases auto-generated index
 - **M5:** Daily agenda populated from Google Calendar + scheduled tasks.
-- **M6:** External user can run the recommended install path (e.g., `curl ... | sh` wizard, or `npm install -g gilberto`, etc.) followed by `gilberto install` and obtain a working instance. v1.0 public release.
+- **M6:** External user can run the recommended install path (e.g., `npm install -g gilberto && gilberto install`) and obtain a working v1.0 instance.
 
 ### Dependencies
 
