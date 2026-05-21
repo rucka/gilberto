@@ -40,6 +40,7 @@
     "pair:update": "pair-cli update"
   },
   "devDependencies": {
-    "@foomakers/pair-cli": "catalog:"
+    "@foomakers/pair-cli": "catalog:",
+    "turbo": "catalog:"
   }
 }
