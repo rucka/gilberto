@@ -1,0 +1,20 @@
+{
+  "name": "@gilberto/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared ESLint flat-config for the gilberto monorepo",
+  "license": "MIT",
+  "main": "eslint.config.cjs",
+  "bin": {
+    "lint": "./bin/lint.sh",
+    "lint-fix": "./bin/lint-fix.sh",
+    "eslint": "./bin/eslint.sh"
+  },
+  "devDependencies": {
+    "eslint": "catalog:",
+    "@eslint/js": "catalog:",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "globals": "catalog:"
+  }
+}
