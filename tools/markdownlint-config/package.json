@@ -1,0 +1,18 @@
+{
+  "name": "@gilberto/markdownlint-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared markdownlint configuration for the gilberto monorepo",
+  "license": "MIT",
+  "main": ".markdownlint.jsonc",
+  "bin": {
+    "markdownlint-check": "./bin/markdownlint-check.sh",
+    "markdownlint-fix": "./bin/markdownlint-fix.sh"
+  },
+  "scripts": {
+    "ts:check": "markdownlint --config ./.markdownlint.jsonc ./README.md"
+  },
+  "devDependencies": {
+    "markdownlint-cli": "catalog:"
+  }
+}

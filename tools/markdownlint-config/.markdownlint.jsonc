@@ -1,0 +1,40 @@
+{
+  // Base: all rules enabled
+  "default": true,
+
+  // MD003: Heading style — ATX only (# not underline)
+  "MD003": { "style": "atx" },
+
+  // MD004: Unordered list style — consistent within file
+  "MD004": { "style": "consistent" },
+
+  // MD013: Line length — disabled (prose wraps naturally)
+  "MD013": false,
+
+  // MD033: Allow inline HTML (needed for some KB content)
+  "MD033": false,
+
+  // MD036: Emphasis as heading — disabled (used intentionally in skill files)
+  "MD036": false,
+
+  // MD041: First line should be heading — disabled (YAML frontmatter files)
+  "MD041": false,
+
+  // MD026: Trailing punctuation in heading — disabled (KB uses "Step 1:", "Prerequisites:" etc.)
+  "MD026": false,
+
+  // MD060: Table column style — disabled (non-aligned tables are the norm in KB)
+  "MD060": false,
+
+  // MD001: Heading increment — disabled (KB guidelines intentionally skip levels, e.g. ## → ####)
+  "MD001": false,
+
+  // MD024: Duplicate headings — disabled (KB uses repeated section names across guideline files)
+  "MD024": false,
+
+  // MD025: Multiple top-level headings — disabled (some docs use multiple # headings for structure)
+  "MD025": false,
+
+  // MD046: Code block style — disabled (KB mixes fenced and indented intentionally)
+  "MD046": false
+}
