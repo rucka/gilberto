@@ -43,22 +43,44 @@ Runtime mutations (new topic / template / type / playbook) happen via `mechanic-
 ```
 gilberto/
 ├── apps/{cli,website}/
+├── packages/vault-bootstrap/   npm: @gilberto/vault-bootstrap (anatomy + vault skeleton + hooks + plists)
+├── plugins/                    Claude marketplace plugin sources (NOT pnpm workspaces)
+│   ├── gilberto-core/          core: 11 processes + mechanic + core utility + core capability
+│   ├── pulse-health-tracking/  P1
+│   ├── pulse-ratko/            P1
+│   ├── projects-venture/       P1
+│   └── projects-editorial/     P1
 ├── tools/{eslint-config,markdownlint-config,prettier-config,ts-config}/
-├── dataset/                Skill / plugin / template source — layout TBD
 └── .changeset/ .github/ .pair/
 ```
 
-`pnpm-workspace.yaml`: `apps/*`, `packages/*`, `tools/*`. No `packages/*` content in v1. Authoritative reference: [`../product/PRD.md`](../product/PRD.md) §8.
+`pnpm-workspace.yaml`: `apps/*`, `packages/*`, `tools/*`. `plugins/*` ospita le sorgenti Claude marketplace e non è workspace pnpm. Vedi [`adr/0002-distribution-and-dual-entry-bootstrap.md`](adr/0002-distribution-and-dual-entry-bootstrap.md). Authoritative reference: [`../product/PRD.md`](../product/PRD.md) §8.
 
-## Skill / Plugin Source Layout (TBD)
+## Distribution Surface
 
-Deferred to Initiative 1 + Initiative 4. Hard constraints:
+| Artifact                          | Channel               | Name                                                                              |
+| --------------------------------- | --------------------- | --------------------------------------------------------------------------------- |
+| Core skills                       | Claude marketplace    | `gilberto-core`                                                                   |
+| First-party domain plugins        | Claude marketplace    | `pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`  |
+| Non-skill vault content           | npm                   | `@gilberto/vault-bootstrap`                                                       |
+| CLI installer/updater             | npm                   | `gilberto`                                                                        |
+
+Dual entry-point (vedi ADR-0002):
+
+- **Path A — skill-led**: install `gilberto-core` plugin → launch `/gilberto-process-vault-bootstrap` → skill verifica/installa CLI → invoca `gilberto install`
+- **Path B — CLI-direct**: `npm i -g gilberto && gilberto install`
+
+Entrambi convergono su `gilberto install`. ADR-0001 (vault self-sufficiency at runtime) invariata.
+
+## Skill / Plugin Source Layout
+
+Hard constraints:
 
 - Anthropic plugin marketplace compatibility (`.claude-plugin/plugin.json` + `marketplace.json`)
 - Codex compatibility (frontmatter superset: `name` + `description`)
 - Generic drop-in (`<skill-name>/SKILL.md`)
 
-Adapters: `apps/cli/src/distribution/adapters/{claude-code,codex,generic}/`.
+Adapters: `apps/cli/src/distribution/adapters/{claude-code,codex,generic}/` materializzano il sorgente canonico in `plugins/*` per assistant.
 
 ## Vault Layout
 

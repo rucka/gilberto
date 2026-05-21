@@ -82,7 +82,17 @@ User reads/hears about gilberto → installs CLI via npm → runs `gilberto inst
 
 ### Core Solution
 
-A monorepo (`rucka/gilberto`) that ships a CLI npm package (`gilberto`) plus a dataset of skills, plugins, and templates. The CLI bootstraps and updates a user-owned vault (an "instance" of Gilberto). The vault is a markdown + JSON filesystem structured into 5 pillars (`me/`, `pulse/`, `projects/`, `intelligence/`, `journey/`), a transversal `network/` (people + companies), and an `anatomy/` system layer. Skills installed into the vault are **AI-assistant-agnostic** (Claude Code, Codex, Cowork, etc.) and **model-agnostic** — they read/write/classify/recall/connect, orchestrated by 11 process skills and extended via opt-in plugins.
+A monorepo (`rucka/gilberto`) that ships two distribution surfaces (vedi [ADR-0002](../tech/adr/0002-distribution-and-dual-entry-bootstrap.md)):
+
+- **Claude marketplace plugins** for skills: `gilberto-core` (11 processes + mechanic + core utility + core capability) plus first-party domain plugins (`pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`).
+- **npm packages** for code and vault content: the CLI installer `gilberto`, and the vault content package `@gilberto/vault-bootstrap` (anatomy + 5-pillar skeleton + network + `_ingest/` + `.claude/hooks/` + launchd plist templates).
+
+The user reaches a working vault through **two equivalent entry-points**, both first-class:
+
+- **Path A — skill-led**: install `gilberto-core` plugin in the AI assistant → launch `/gilberto-process-vault-bootstrap` → the skill ensures the CLI is present (downloads via `npx`/`pnpm dlx` if needed) and invokes `gilberto install`.
+- **Path B — CLI-direct**: `npm i -g gilberto && gilberto install` (or `npx gilberto install`) from the terminal.
+
+Both converge on the same `gilberto install` execution; the CLI is the single filesystem-mutation engine. The vault is a markdown + JSON filesystem structured into 5 pillars (`me/`, `pulse/`, `projects/`, `intelligence/`, `journey/`), a transversal `network/` (people + companies), and an `anatomy/` system layer. Skills installed into the vault are **AI-assistant-agnostic** (Claude Code, Codex, Cowork, etc.) and **model-agnostic** — they read/write/classify/recall/connect, orchestrated by 11 process skills and extended via opt-in plugins.
 
 ### Key Features
 
@@ -172,7 +182,7 @@ A monorepo (`rucka/gilberto`) that ships a CLI npm package (`gilberto`) plus a d
 
 ### Architecture Overview
 
-Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspaces: `apps/cli/` (the CLI), `apps/website/` (Fumadocs documentation site), `tools/{eslint-config, markdownlint-config, prettier-config, ts-config}/` (shared linting/formatting/TS configs), and `dataset/` (skill, plugin, template sources). The dataset follows **standard skill/plugin formats compatible with AI assistants' native plugin systems** (e.g., Anthropic skills marketplace conventions); the CLI orchestrates installation rather than reinventing distribution mechanics. Skills run inside the **user's AI assistant of choice** (Claude Code, OpenAI Codex, Cowork, or any other AI assistant supporting markdown-driven skills) with **any underlying model** — they are written as portable markdown + scripts, not tied to a specific runtime. Deterministic operations are Python/Bash scripts orchestrated by skills. Anatomy (`anatomy/`) is a data-driven configuration layer that governs all process behavior.
+Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspaces (pnpm): `apps/cli/` (the CLI, npm-distribuita come `gilberto`), `apps/website/` (Fumadocs documentation site), `packages/vault-bootstrap/` (npm-distribuita come `@gilberto/vault-bootstrap` — anatomy + vault skeleton + hooks + plists), `tools/{eslint-config, markdownlint-config, prettier-config, ts-config}/` (shared linting/formatting/TS configs). Le sorgenti dei plugin marketplace vivono in `plugins/` (`gilberto-core/`, `pulse-health-tracking/`, `pulse-ratko/`, `projects-venture/`, `projects-editorial/`) — **non** workspace pnpm, ma sorgenti consumate dalla pipeline di publish su Claude marketplace. Vedi [ADR-0002](../tech/adr/0002-distribution-and-dual-entry-bootstrap.md). Le skill seguono formati compatibili con i sistemi di plugin nativi degli assistant (Anthropic marketplace convention; per-assistant adapter per Codex/generic in `apps/cli/src/distribution/adapters/`); il marketplace gestisce install/update/discovery — la CLI si limita a invocare l'installazione del contenuto non-skill (`@gilberto/vault-bootstrap`) e a orchestrare il flusso CLI-direct. Skills run inside the **user's AI assistant of choice** (Claude Code, OpenAI Codex, Cowork, or any other AI assistant supporting markdown-driven skills) with **any underlying model** — they are written as portable markdown + scripts, not tied to a specific runtime. Deterministic operations are Python/Bash scripts orchestrated by skills. Anatomy (`anatomy/`) is a data-driven configuration layer that governs all process behavior.
 
 ### Key Technical Requirements
 
