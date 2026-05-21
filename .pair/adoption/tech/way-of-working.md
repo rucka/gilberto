@@ -126,8 +126,12 @@ No `Effort` field — story points live in story body.
 - Conventional Commits enforced via commitlint (Husky `commit-msg`)
 - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `build`, `ci`, `perf`, `style`
 - Scope: aligned to area labels — `cli`, `dataset`, `website`, `plugin`, `docs`, `infra`
-- Style: terse (CLAUDE.md)
+- Subject: ≤72 chars; imperative mood; lowercase after `:`; no final period; terse (CLAUDE.md)
+- Body: optional; soft-wrap at 72 chars; explain _what_ and _why_, not _how_; bullets for multi-change
+- Footer: `Closes #<number>` (auto-closes issue on merge to default branch) or `Refs: #<number>`
 - Issue reference inline in subject when useful: `feat(infra): bootstrap monorepo skeleton (#31)`
+- TDD sequence on branch: `test:` (red) → `feat:`/`fix:` (green) → `refactor:`
+- `[US-NNN]` / `[EP]` / `[INIT]` code prefixes forbidden in commit subjects (mirrors title rule)
 
 ## Pull Requests
 
@@ -141,7 +145,8 @@ No `Effort` field — story points live in story body.
 ## Merge Strategy
 
 - Method: `squash`
-- Commit format: see [commit template](../../knowledge/guidelines/collaboration/templates/commit-template.md)
+- Squash commit subject: PR title with inline issue ref — `feat(infra): bootstrap monorepo skeleton (#31)` (story number, not PR number)
+- Squash commit body: bulleted summary of shipped changes + `Tasks: T-1, …, T-N` + `Closes #<story-number>` for auto-close
 - Branch deleted post-merge
 - Confirmation: `prompt` (`/pair-process-review` asks; switch to `silent` via decision)
 
