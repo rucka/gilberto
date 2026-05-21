@@ -13,6 +13,5 @@ catalog:
   markdownlint-cli: 0.47.0
   prettier: 3.6.2
   turbo: "^2.3.3"
-  typescript: 5.4.5
 
 cleanupUnusedCatalogs: true
