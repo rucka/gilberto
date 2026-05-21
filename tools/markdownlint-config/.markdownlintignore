@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+**/node_modules/
+**/.cache/
+CHANGELOG.md
+TODO.md
