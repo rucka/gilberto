@@ -10,6 +10,9 @@
     "lint-fix": "./bin/lint-fix.sh",
     "eslint": "./bin/eslint.sh"
   },
+  "scripts": {
+    "ts:check": "node -e \"require('./eslint.config.cjs'); console.log('ok')\""
+  },
   "devDependencies": {
     "eslint": "catalog:",
     "@eslint/js": "catalog:",

@@ -35,3 +35,7 @@ module.exports = {
 - `.prettierrc.json` — formatting rules
 - `bin/` — wrapper scripts (`prettier-check`, `prettier-fix`)
 - `.prettierignore` — ignored patterns
+
+## Scope
+
+The bin wrappers glob `{**/*,*}.{ts,tsx,js,jsx,json,html}` only. Markdown is handled by `@gilberto/markdownlint-config` (avoids the well-known Prettier ↔ markdownlint stylistic overlap). YAML files (`pnpm-workspace.yaml`, GitHub Actions, etc.) are intentionally out of scope of the bin wrappers — invoke `prettier --check '**/*.{yml,yaml}'` directly from a workspace if you need to gate them.

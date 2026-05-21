@@ -11,9 +11,6 @@
   // MD013: Line length — disabled (prose wraps naturally)
   "MD013": false,
 
-  // MD024: Allow duplicate headings in different sections (sibling_only)
-  "MD024": { "siblings_only": true },
-
   // MD033: Allow inline HTML (needed for some KB content)
   "MD033": false,
 

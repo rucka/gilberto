@@ -9,6 +9,9 @@
     "markdownlint-check": "./bin/markdownlint-check.sh",
     "markdownlint-fix": "./bin/markdownlint-fix.sh"
   },
+  "scripts": {
+    "ts:check": "markdownlint --config ./.markdownlint.jsonc ./README.md"
+  },
   "devDependencies": {
     "markdownlint-cli": "catalog:"
   }

@@ -1,4 +1,3 @@
-// eslint.config.js
 const js = require('@eslint/js')
 const typescript = require('@typescript-eslint/eslint-plugin')
 const typescriptParser = require('@typescript-eslint/parser')
@@ -36,13 +35,13 @@ module.exports = [
       '@typescript-eslint': typescript,
     },
     rules: {
-      // Regole base di ESLint
+      // Base ESLint recommended rules
       ...js.configs.recommended.rules,
 
-      // Regole TypeScript raccomandate (solo quelle che non richiedono type info)
+      // TypeScript recommended rules (type-info-free only)
       ...typescript.configs.recommended.rules,
 
-      // Configurazioni custom
+      // Custom configuration
       'no-console': 'off',
       'no-process-env': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
@@ -63,16 +62,16 @@ module.exports = [
       // Prevent runtime errors that should be compile-time
       'no-throw-literal': 'error',
 
-      // Disable no-undef for TypeScript files - TypeScript handles this better
+      // Disable no-undef for TypeScript files — TypeScript handles this better
       'no-undef': 'off',
     },
   },
   {
-    // Configurazione specifica per i file di test
+    // Test-file specific configuration
     files: ['**/*.test.{js,ts,tsx}', '**/*.spec.{js,ts,tsx}'],
     languageOptions: {
       globals: {
-        // Include tutte le globals di sopra
+        // Inherit all base globals
         __dirname: 'readonly',
         __filename: 'readonly',
         process: 'readonly',
@@ -88,7 +87,7 @@ module.exports = [
         clearInterval: 'readonly',
         setImmediate: 'readonly',
         clearImmediate: 'readonly',
-        // Globals per Vitest
+        // Vitest globals
         describe: 'readonly',
         it: 'readonly',
         test: 'readonly',

@@ -1,6 +1,6 @@
 # @gilberto/markdownlint-config
 
-Shared markdownlint configuration for the pair monorepo.
+Shared markdownlint configuration for the gilberto monorepo.
 
 ## Usage
 
