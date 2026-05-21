@@ -1,0 +1,14 @@
+# Build/cache outputs
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+coverage/
+
+# Generated content
+_docs/
+release/
+
+# Package locks
+pnpm-lock.yaml

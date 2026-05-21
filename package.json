@@ -1,21 +1,46 @@
 {
   "name": "gilberto",
-  "version": "0.0.0",
   "private": true,
-  "description": "gilberto — your personal work/life (secure) assistant",
+  "version": "0.0.0",
+  "description": "Personal AI-native second brain — vault + CLI",
   "license": "MIT",
   "author": "Gianluca Carucci",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rucka/gilberto.git"
   },
+  "homepage": "https://github.com/rucka/gilberto#readme",
+  "bugs": {
+    "url": "https://github.com/rucka/gilberto/issues"
+  },
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=20"
+  },
+  "prettier": "@gilberto/prettier-config",
   "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --fix",
+    "prettier:check": "turbo run prettier:check",
+    "prettier:fix": "turbo run prettier:fix",
+    "mdlint:check": "turbo run mdlint:check",
+    "mdlint:fix": "turbo run mdlint:fix",
+    "ts:check": "turbo run ts:check",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev",
+    "deps:outdated": "pnpm -r outdated",
+    "prepare": "echo 'prepare placeholder — wired to husky install in #33'",
+    "quality-gate": "echo 'quality-gate placeholder — populated in #34' && exit 0",
+    "hygiene:check": "echo 'hygiene:check placeholder — populated in #34' && exit 0",
+    "docs:staleness": "echo 'docs:staleness placeholder — populated in #34' && exit 0",
+    "sync-deps": "echo 'sync-deps placeholder'",
     "pair:install": "pair-cli install",
-    "pair:update": "pair-cli update",
-    "quality-gate": "echo 'quality-gate placeholder — workspace tooling not configured yet (see Initiative 1, Epic 1.1-1.2)' && exit 0"
+    "pair:update": "pair-cli update"
   },
   "devDependencies": {
-    "@foomakers/pair-cli": "catalog:"
-  },
-  "packageManager": "pnpm@10.33.2"
+    "@foomakers/pair-cli": "catalog:",
+    "turbo": "catalog:"
+  }
 }

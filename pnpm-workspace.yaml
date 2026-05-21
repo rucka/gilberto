@@ -4,4 +4,7 @@ packages:
   - "tools/*"
 
 catalog:
-  "@foomakers/pair-cli": ^0.4.3
+  "@foomakers/pair-cli": "^0.4.3"
+  turbo: "^2.3.3"
+
+cleanupUnusedCatalogs: true
