@@ -125,7 +125,7 @@ Strata: `anatomy.md` (structure) · `playbooks/` (per-event) · `preferences.md`
 
 - Claude Code hooks: SessionStart (optional `next`) · PreCompact (snapshot) · SessionEnd (`reflect day`)
 - launchd / cron / systemd: 07:00 morning-briefing · 22:00 reflect-day · Sun 22:00 reflect-week · 1st-of-month · Jan 1 · periodic `fetch`
-- Override: `anatomy/preferences.md > ## Cadenze`
+- Override: `anatomy/preferences.md > ## Cadences`
 
 ## Cycles
 

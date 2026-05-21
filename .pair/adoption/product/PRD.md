@@ -143,12 +143,12 @@ Both converge on the same `gilberto install` execution; the CLI is the single fi
 
 - **AC1:** launchd job triggers `gilberto-process-surface` with `morning-briefing` playbook at 07:00.
 - **AC2:** Output written into the daily journey file under `## Agenda` (planned events + scheduled tasks) and a curated narrative summary.
-- **AC3:** User can override the time in `anatomy/preferences.md > ## Cadenze`.
+- **AC3:** User can override the time in `anatomy/preferences.md > ## Cadences`.
 
 **User Story 2.2:** As a user, I want a daily consolidation at 22:00 so my day is summarized in narrative form.
 
 - **AC1:** `gilberto-process-reflect` with cadence=day runs at 22:00 (configurable).
-- **AC2:** `## Sunto` section of the daily journey is populated with cross-pillar summary.
+- **AC2:** `## Summary` section of the daily journey is populated with cross-pillar summary.
 - **AC3:** Optionally proposes evolutions to anatomy (new topics, new sources) when patterns are detected (`evolution-check`).
 
 ### Epic 3: Plugin System
@@ -169,14 +169,14 @@ Both converge on the same `gilberto install` execution; the CLI is the single fi
 **User Story 4.1:** As a user, I want my Google Calendar events to populate today's agenda automatically.
 
 - **AC1:** `utility-calendar-gcalcli` fetches events for the next N days (configurable) at the cadence defined in preferences.
-- **AC2:** Events are written into the `## Agenda > Eventi` section of the corresponding daily journey files.
+- **AC2:** Events are written into the `## Agenda > Events` section of the corresponding daily journey files.
 - **AC3:** When the user explicitly schedules an event via `gilberto-process-act`, it is pushed to Google Calendar.
 
 **User Story 4.2:** As a user, I want gilberto to surface action-required emails from Gmail at reflection time.
 
 - **AC1:** `utility-fetch-gmail` is invoked on demand by `gilberto-process-reflect` (day) or `gilberto-process-next`.
 - **AC2:** Action-required emails become tasks in `journey/tasks.md` with reference to the sender ([[network/people/...]]).
-- **AC3:** Informational emails are summarized in the `## Sunto` of the day; no individual files stored.
+- **AC3:** Informational emails are summarized in the `## Summary` of the day; no individual files stored.
 
 ## 8. Technical Considerations
 

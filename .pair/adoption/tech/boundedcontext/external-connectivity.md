@@ -22,7 +22,7 @@ Strategic stance (PRD §6 P0#4 + D-37 §3.3): *no cloud backend; the AI assistan
 ## Integration Patterns
 
 - **Synchronous in-process** with Vault Runtime — utilities are invoked as direct skill calls within a single capability execution. No service boundary; the result returns to the caller and is then routed to the appropriate pillar by Cognitive Operations.
-- **Asynchronous trigger** to Vault Runtime — launchd / cron / systemd fires skill invocations at the cadences declared in `anatomy/preferences.md > ## Cadenze`. Hooks (Claude Code SessionStart / PreCompact / SessionEnd) provide an additional event source.
+- **Asynchronous trigger** to Vault Runtime — launchd / cron / systemd fires skill invocations at the cadences declared in `anatomy/preferences.md > ## Cadences`. Hooks (Claude Code SessionStart / PreCompact / SessionEnd) provide an additional event source.
 - **Anti-corruption layer per provider** — each utility isolates a single provider's surface (Oura v2, Withings, Gmail, Google Calendar). Schema mapping happens inside the utility; capabilities downstream never see provider payloads. Replacing a utility (e.g., another wearable provider) does not touch capabilities.
 - **OAuth tokens user-managed** — tokens live in `anatomy/preferences.md > ## Integrations`, never in code or external storage. Utilities read tokens at invocation; refresh logic is per-utility, with retry+backoff.
 - **Outbound rate-limit + backoff** at the utility level; failures bubble up to capabilities as typed errors that the orchestrator can route into `_ingest/` `.error.md` sidecars or surface to the user.
@@ -49,7 +49,7 @@ Future split: this is the easiest context to delegate to a contributor unfamilia
 | Provider          | An external service exposing data or accepting actions (Google Calendar, Gmail, Oura, Withings, Slack, RSS endpoint).   |
 | Source            | A registered data origin in `anatomy/playbooks/<pillar>/sources/` that uses one or more utilities to keep itself synced. |
 | State sidecar     | A `_state.json` file that stores per-source incremental sync state (cursors, last-fetch timestamps, pagination tokens). |
-| Cadence           | A scheduled trigger declared in `anatomy/preferences.md > ## Cadenze` (cron-like); user-overridable.                    |
+| Cadence           | A scheduled trigger declared in `anatomy/preferences.md > ## Cadences` (cron-like); user-overridable.                    |
 | Plist             | A macOS `launchd` user-agent definition under `~/Library/LaunchAgents/com.gilberto.*` generated at bootstrap.            |
 | Hook              | An AI-assistant lifecycle event handler (Claude Code SessionStart / PreCompact / SessionEnd).                            |
 | Manual fallback   | The user dropping a file into `_ingest/` when an automated utility is unavailable; ingest pipeline treats it identically. |

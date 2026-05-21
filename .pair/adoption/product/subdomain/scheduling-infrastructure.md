@@ -10,7 +10,7 @@ Trigger periodic executions (07:00 briefing, 22:00 reflect, weekly/monthly/yearl
 - launchd plists generated at bootstrap (macOS primary, PRD §8)
 - cron / systemd user timers as Linux fallback
 - Claude Code hooks SessionStart (optional `next`) / PreCompact (snapshot) / SessionEnd (`reflect day`)
-- Cadence overrides via `anatomy/preferences.md > ## Cadenze` (user-managed)
+- Cadence overrides via `anatomy/preferences.md > ## Cadences` (user-managed)
 - Optional lightweight cron for `next` (user choice at bootstrap)
 
 **Strategic Importance:**
@@ -20,7 +20,7 @@ Pure commodity. OS-level scheduling is a well-understood facility. The strategic
 Low — declarative plist/cron generation at bootstrap + reading preferences for overrides. Tested on macOS/Linux. Windows out of scope for v1.
 
 **Data Ownership:**
-Plist files under `~/Library/LaunchAgents/com.gilberto.*` (macOS), cron entries / systemd units (Linux). Generated and managed by `gilberto-process-vault-bootstrap` + `gilberto-process-vault-upgrade`. `anatomy/preferences.md > ## Cadenze` is the authoritative source.
+Plist files under `~/Library/LaunchAgents/com.gilberto.*` (macOS), cron entries / systemd units (Linux). Generated and managed by `gilberto-process-vault-bootstrap` + `gilberto-process-vault-upgrade`. `anatomy/preferences.md > ## Cadences` is the authoritative source.
 
 **Dependencies:**
 

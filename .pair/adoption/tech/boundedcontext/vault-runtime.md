@@ -27,7 +27,7 @@ The architectural commitment "vault self-sufficient at runtime" (ADR-0001) makes
 
 - **Filesystem-as-contract (ACL) inbound** — Distribution & Lifecycle never calls runtime code; it writes skills, anatomy templates, and plugin contents to disk. Runtime reads them at execution time. The contract is the on-disk layout + manifest schema, versioned via Adaptive Anatomy.
 - **Synchronous in-process outbound** — Cognitive Operations invokes External Connectivity utilities directly inside skill execution (e.g., `gilberto-capability-fetch` calls `utility-fetch-rss`). No service boundary, no RPC.
-- **Asynchronous trigger inbound** — Scheduling Infrastructure fires skill executions at cadences declared in `anatomy/preferences.md > ## Cadenze` (07:00 briefing, 22:00 reflect). The trigger is OS-level (launchd/cron); the runtime sees it as a fresh skill invocation.
+- **Asynchronous trigger inbound** — Scheduling Infrastructure fires skill executions at cadences declared in `anatomy/preferences.md > ## Cadences` (07:00 briefing, 22:00 reflect). The trigger is OS-level (launchd/cron); the runtime sees it as a fresh skill invocation.
 - **No outbound calls to other contexts** — runtime never imports from `apps/cli/`, never invokes the `gilberto` binary, never reads files outside `$GILBERTO_ROOT`. Strict isolation.
 
 ## Data Ownership
@@ -65,4 +65,4 @@ Single-contributor in v1 (Gianluca). All four subdomains co-evolve at the same p
 
 - **Performance:** in-vault skill executions complete within 2 s for read paths and within 5 s for typical write paths (PRD §8). Background processes (ingest, reflect) are async and non-blocking from the user's point of view.
 - **Scalability:** single-user, single-vault. Schema and indexes must remain navigable up to ~10 K markdown files (PRD §8). No multi-tenant requirements.
-- **Reliability:** every skill is idempotent (safe re-run). Last-write-wins on sidecars; append-only on log/sunto sections. No data leaves the filesystem unless explicitly user-initiated. The runtime has no cloud dependency and must operate fully offline once external integrations have been pulled.
+- **Reliability:** every skill is idempotent (safe re-run). Last-write-wins on sidecars; append-only on log/summary sections. No data leaves the filesystem unless explicitly user-initiated. The runtime has no cloud dependency and must operate fully offline once external integrations have been pulled.
