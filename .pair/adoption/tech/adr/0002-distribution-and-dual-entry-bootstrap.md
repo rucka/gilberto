@@ -102,9 +102,9 @@ Both terminate at the same `gilberto install <target> --topics=… --plugins=…
 
 ## Adoption Impact
 
-- [`../architecture.md`](../architecture.md) — Monorepo Layout describes `apps/`, `packages/`, `plugins/`, `tools/` con `plugins/*` non workspace.
-- [`../../product/PRD.md`](../../product/PRD.md) — §6 (Solution Overview) e §8 (Technical Considerations / Architecture Overview) descrivono dual-entry, split marketplace + npm, plugin `gilberto-core`, content package `@gilberto/vault-bootstrap`.
-- [`../tech-stack.md`](../tech-stack.md) — Workspace section dichiara `apps/*`, `packages/*`, `tools/*` con `plugins/*` come sorgenti non-workspace; Distribution Packages section elenca i quattro nomi distribuiti.
-- Epic #10 (Bootstrap process) — descrive il dual-entry; **US-018** copre il path A (skill-led entry): "Skill-led bootstrap entry: CLI presence check + invoke from `gilberto-core`".
-- US-001 (#31) — refinement cattura il layout (`pnpm-workspace.yaml: apps/*, packages/*, tools/*`).
-- Plugin manifest schema (Epic Plugin protocol, #15) — supporta sia gli adapter per-assistant sia il formato sorgente canonico di `plugins/*`.
+- [`../architecture.md`](../architecture.md) — Monorepo Layout describes `apps/`, `packages/`, `plugins/`, `tools/` with `plugins/*` as a non-workspace source tree.
+- [`../../product/PRD.md`](../../product/PRD.md) — §6 (Solution Overview) and §8 (Technical Considerations / Architecture Overview) describe dual-entry, marketplace + npm split, `gilberto-core` plugin, and `@gilberto/vault-bootstrap` content package.
+- [`../tech-stack.md`](../tech-stack.md) — Workspace section declares `apps/*`, `packages/*`, `tools/*` with `plugins/*` as non-workspace sources; Distribution Packages section lists the four distributed names.
+- Epic #10 (Bootstrap process) — describes the dual-entry pattern; **issue #48** covers path A (skill-led entry): "Skill-led bootstrap entry from gilberto-core (CLI presence check + invoke)".
+- Issue #31 — refinement captures the layout (`pnpm-workspace.yaml: apps/*, packages/*, tools/*`).
+- Plugin manifest schema (Epic Plugin protocol, #15) — supports both per-assistant adapters and the canonical plugin source format used by `plugins/*`.

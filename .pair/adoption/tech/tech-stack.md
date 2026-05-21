@@ -11,7 +11,7 @@
 
 - pnpm 10.33.2+ (pinned via `packageManager`)
 - Workspaces: `apps/*`, `packages/*`, `tools/*`
-- `plugins/*` **non** è workspace pnpm — sorgenti Claude marketplace (vedi [ADR-0002](adr/0002-distribution-and-dual-entry-bootstrap.md))
+- `plugins/*` is **not** a pnpm workspace — Claude marketplace plugin sources (see [ADR-0002](adr/0002-distribution-and-dual-entry-bootstrap.md))
 - Versions via `pnpm-workspace.yaml > catalog`
 - Turborepo (task graph + caching)
 

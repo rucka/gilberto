@@ -54,7 +54,7 @@ gilberto/
 └── .changeset/ .github/ .pair/
 ```
 
-`pnpm-workspace.yaml`: `apps/*`, `packages/*`, `tools/*`. `plugins/*` ospita le sorgenti Claude marketplace e non è workspace pnpm. Vedi [`adr/0002-distribution-and-dual-entry-bootstrap.md`](adr/0002-distribution-and-dual-entry-bootstrap.md). Authoritative reference: [`../product/PRD.md`](../product/PRD.md) §8.
+`pnpm-workspace.yaml`: `apps/*`, `packages/*`, `tools/*`. `plugins/*` holds Claude marketplace plugin sources and is **not** a pnpm workspace. See [`adr/0002-distribution-and-dual-entry-bootstrap.md`](adr/0002-distribution-and-dual-entry-bootstrap.md). Authoritative reference: [`../product/PRD.md`](../product/PRD.md) §8.
 
 ## Distribution Surface
 
@@ -65,12 +65,12 @@ gilberto/
 | Non-skill vault content           | npm                   | `@gilberto/vault-bootstrap`                                                       |
 | CLI installer/updater             | npm                   | `gilberto`                                                                        |
 
-Dual entry-point (vedi ADR-0002):
+Dual entry-point (see ADR-0002):
 
-- **Path A — skill-led**: install `gilberto-core` plugin → launch `/gilberto-process-vault-bootstrap` → skill verifica/installa CLI → invoca `gilberto install`
+- **Path A — skill-led**: install `gilberto-core` plugin → launch `/gilberto-process-vault-bootstrap` → skill checks/installs CLI → invokes `gilberto install`
 - **Path B — CLI-direct**: `npm i -g gilberto && gilberto install`
 
-Entrambi convergono su `gilberto install`. ADR-0001 (vault self-sufficiency at runtime) invariata.
+Both converge on `gilberto install`. ADR-0001 (vault self-sufficiency at runtime) is unchanged.
 
 ## Skill / Plugin Source Layout
 
@@ -80,7 +80,7 @@ Hard constraints:
 - Codex compatibility (frontmatter superset: `name` + `description`)
 - Generic drop-in (`<skill-name>/SKILL.md`)
 
-Adapters: `apps/cli/src/distribution/adapters/{claude-code,codex,generic}/` materializzano il sorgente canonico in `plugins/*` per assistant.
+Adapters at `apps/cli/src/distribution/adapters/{claude-code,codex,generic}/` materialize the canonical source from `plugins/*` per assistant.
 
 ## Vault Layout
 
