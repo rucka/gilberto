@@ -29,7 +29,7 @@
 - Wikilinks: bare basename when unique; path otherwise
 - Frontmatter: `type`, `topics`, `created`, `updated` mandatory
 - `topics` constrained (`anatomy/topics.md`); `tags` free kebab-case (Obsidian nesting OK)
-- Daily journey sections: `## Journal`, `## Sunto`, `## Agenda`, `## Link del giorno`, `## Sparks`
+- Daily journey sections: `## Journal`, `## Summary`, `## Agenda`, `## Daily Links`, `## Sparks`
 - No required Obsidian plugins
 
 ## Website

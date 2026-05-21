@@ -41,7 +41,7 @@
 - macOS: launchd plists (user-scope LaunchAgents)
 - Linux: cron / systemd user-units
 - Cadences: 07:00 morning-briefing · 22:00 reflect-day · Sun 22:00 · 1st-of-month · Jan 1 · periodic `fetch`
-- Override via `anatomy/preferences.md > ## Cadenze`
+- Override via `anatomy/preferences.md > ## Cadences`
 
 ## Backup & Recovery
 

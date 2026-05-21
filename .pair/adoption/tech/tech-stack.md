@@ -11,8 +11,16 @@
 
 - pnpm 10.33.2+ (pinned via `packageManager`)
 - Workspaces: `apps/*`, `packages/*`, `tools/*`
+- `plugins/*` is **not** a pnpm workspace — Claude marketplace plugin sources (see [ADR-0002](adr/0002-distribution-and-dual-entry-bootstrap.md))
 - Versions via `pnpm-workspace.yaml > catalog`
 - Turborepo (task graph + caching)
+
+## Distribution Packages
+
+- `gilberto` (npm) — CLI installer/updater
+- `@gilberto/vault-bootstrap` (npm) — vault content package (anatomy + 5-pillar skeleton + network/ + `_ingest/` + `.claude/hooks/` + launchd plist templates)
+- `gilberto-core` (Claude marketplace plugin) — core skills (11 processes + mechanic + core utility + core capability)
+- `pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial` (Claude marketplace plugins) — first-party domain plugins (P1)
 
 ## CLI (`apps/cli/`)
 

@@ -82,7 +82,17 @@ User reads/hears about gilberto → installs CLI via npm → runs `gilberto inst
 
 ### Core Solution
 
-A monorepo (`rucka/gilberto`) that ships a CLI npm package (`gilberto`) plus a dataset of skills, plugins, and templates. The CLI bootstraps and updates a user-owned vault (an "instance" of Gilberto). The vault is a markdown + JSON filesystem structured into 5 pillars (`me/`, `pulse/`, `projects/`, `intelligence/`, `journey/`), a transversal `network/` (people + companies), and an `anatomy/` system layer. Skills installed into the vault are **AI-assistant-agnostic** (Claude Code, Codex, Cowork, etc.) and **model-agnostic** — they read/write/classify/recall/connect, orchestrated by 11 process skills and extended via opt-in plugins.
+A monorepo (`rucka/gilberto`) that ships two distribution surfaces (see [ADR-0002](../tech/adr/0002-distribution-and-dual-entry-bootstrap.md)):
+
+- **Claude marketplace plugins** for skills: `gilberto-core` (11 processes + mechanic + core utility + core capability) plus first-party domain plugins (`pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`).
+- **npm packages** for code and vault content: the CLI installer `gilberto`, and the vault content package `@gilberto/vault-bootstrap` (anatomy + 5-pillar skeleton + network + `_ingest/` + `.claude/hooks/` + launchd plist templates).
+
+The user reaches a working vault through **two equivalent entry-points**, both first-class:
+
+- **Path A — skill-led**: install `gilberto-core` plugin in the AI assistant → launch `/gilberto-process-vault-bootstrap` → the skill ensures the CLI is present (downloads via `npx`/`pnpm dlx` if needed) and invokes `gilberto install`.
+- **Path B — CLI-direct**: `npm i -g gilberto && gilberto install` (or `npx gilberto install`) from the terminal.
+
+Both converge on the same `gilberto install` execution; the CLI is the single filesystem-mutation engine. The vault is a markdown + JSON filesystem structured into 5 pillars (`me/`, `pulse/`, `projects/`, `intelligence/`, `journey/`), a transversal `network/` (people + companies), and an `anatomy/` system layer. Skills installed into the vault are **AI-assistant-agnostic** (Claude Code, Codex, Cowork, etc.) and **model-agnostic** — they read/write/classify/recall/connect, orchestrated by 11 process skills and extended via opt-in plugins.
 
 ### Key Features
 
@@ -133,12 +143,12 @@ A monorepo (`rucka/gilberto`) that ships a CLI npm package (`gilberto`) plus a d
 
 - **AC1:** launchd job triggers `gilberto-process-surface` with `morning-briefing` playbook at 07:00.
 - **AC2:** Output written into the daily journey file under `## Agenda` (planned events + scheduled tasks) and a curated narrative summary.
-- **AC3:** User can override the time in `anatomy/preferences.md > ## Cadenze`.
+- **AC3:** User can override the time in `anatomy/preferences.md > ## Cadences`.
 
 **User Story 2.2:** As a user, I want a daily consolidation at 22:00 so my day is summarized in narrative form.
 
 - **AC1:** `gilberto-process-reflect` with cadence=day runs at 22:00 (configurable).
-- **AC2:** `## Sunto` section of the daily journey is populated with cross-pillar summary.
+- **AC2:** `## Summary` section of the daily journey is populated with cross-pillar summary.
 - **AC3:** Optionally proposes evolutions to anatomy (new topics, new sources) when patterns are detected (`evolution-check`).
 
 ### Epic 3: Plugin System
@@ -159,20 +169,20 @@ A monorepo (`rucka/gilberto`) that ships a CLI npm package (`gilberto`) plus a d
 **User Story 4.1:** As a user, I want my Google Calendar events to populate today's agenda automatically.
 
 - **AC1:** `utility-calendar-gcalcli` fetches events for the next N days (configurable) at the cadence defined in preferences.
-- **AC2:** Events are written into the `## Agenda > Eventi` section of the corresponding daily journey files.
+- **AC2:** Events are written into the `## Agenda > Events` section of the corresponding daily journey files.
 - **AC3:** When the user explicitly schedules an event via `gilberto-process-act`, it is pushed to Google Calendar.
 
 **User Story 4.2:** As a user, I want gilberto to surface action-required emails from Gmail at reflection time.
 
 - **AC1:** `utility-fetch-gmail` is invoked on demand by `gilberto-process-reflect` (day) or `gilberto-process-next`.
 - **AC2:** Action-required emails become tasks in `journey/tasks.md` with reference to the sender ([[network/people/...]]).
-- **AC3:** Informational emails are summarized in the `## Sunto` of the day; no individual files stored.
+- **AC3:** Informational emails are summarized in the `## Summary` of the day; no individual files stored.
 
 ## 8. Technical Considerations
 
 ### Architecture Overview
 
-Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspaces: `apps/cli/` (the CLI), `apps/website/` (Fumadocs documentation site), `tools/{eslint-config, markdownlint-config, prettier-config, ts-config}/` (shared linting/formatting/TS configs), and `dataset/` (skill, plugin, template sources). The dataset follows **standard skill/plugin formats compatible with AI assistants' native plugin systems** (e.g., Anthropic skills marketplace conventions); the CLI orchestrates installation rather than reinventing distribution mechanics. Skills run inside the **user's AI assistant of choice** (Claude Code, OpenAI Codex, Cowork, or any other AI assistant supporting markdown-driven skills) with **any underlying model** — they are written as portable markdown + scripts, not tied to a specific runtime. Deterministic operations are Python/Bash scripts orchestrated by skills. Anatomy (`anatomy/`) is a data-driven configuration layer that governs all process behavior.
+Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspaces (pnpm): `apps/cli/` (the CLI, npm-distributed as `gilberto`), `apps/website/` (Fumadocs documentation site), `packages/vault-bootstrap/` (npm-distributed as `@gilberto/vault-bootstrap` — anatomy + vault skeleton + hooks + plists), `tools/{eslint-config, markdownlint-config, prettier-config, ts-config}/` (shared linting/formatting/TS configs). Marketplace plugin sources live in `plugins/` (`gilberto-core/`, `pulse-health-tracking/`, `pulse-ratko/`, `projects-venture/`, `projects-editorial/`) — **not** pnpm workspaces, but sources consumed by the Claude marketplace publish pipeline. See [ADR-0002](../tech/adr/0002-distribution-and-dual-entry-bootstrap.md). Skills follow formats compatible with assistants' native plugin systems (Anthropic marketplace convention; per-assistant adapters for Codex/generic in `apps/cli/src/distribution/adapters/`); the marketplace handles install/update/discovery — the CLI only invokes installation of non-skill content (`@gilberto/vault-bootstrap`) and orchestrates the CLI-direct flow. Skills run inside the **user's AI assistant of choice** (Claude Code, OpenAI Codex, Cowork, or any other AI assistant supporting markdown-driven skills) with **any underlying model** — they are written as portable markdown + scripts, not tied to a specific runtime. Deterministic operations are Python/Bash scripts orchestrated by skills. Anatomy (`anatomy/`) is a data-driven configuration layer that governs all process behavior.
 
 ### Key Technical Requirements
 
