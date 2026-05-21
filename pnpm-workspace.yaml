@@ -4,7 +4,15 @@ packages:
   - "tools/*"
 
 catalog:
+  "@eslint/js": 9.34.0
   "@foomakers/pair-cli": "^0.4.3"
+  "@typescript-eslint/eslint-plugin": 8.41.0
+  "@typescript-eslint/parser": 8.41.0
+  eslint: 9.34.0
+  globals: 15.0.0
+  markdownlint-cli: 0.47.0
+  prettier: 3.6.2
   turbo: "^2.3.3"
+  typescript: 5.4.5
 
 cleanupUnusedCatalogs: true
