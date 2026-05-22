@@ -9,7 +9,10 @@
     "prettier-check": "./bin/prettier-check.sh",
     "prettier-fix": "./bin/prettier-fix.sh"
   },
-  "keywords": ["prettier", "prettier-config"],
+  "keywords": [
+    "prettier",
+    "prettier-config"
+  ],
   "scripts": {
     "ts:check": "node -e \"JSON.parse(require('fs').readFileSync('./.prettierrc.json','utf8')); console.log('ok')\""
   },

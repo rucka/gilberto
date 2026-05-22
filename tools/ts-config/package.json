@@ -4,8 +4,15 @@
   "private": true,
   "description": "Shared TypeScript configuration presets for the gilberto monorepo",
   "license": "MIT",
-  "files": ["base.json", "node.json"],
-  "keywords": ["typescript", "tsconfig", "config"],
+  "files": [
+    "base.json",
+    "node.json"
+  ],
+  "keywords": [
+    "typescript",
+    "tsconfig",
+    "config"
+  ],
   "scripts": {
     "ts:check": "node -e \"JSON.parse(require('fs').readFileSync('./base.json','utf8')); JSON.parse(require('fs').readFileSync('./node.json','utf8')); console.log('ok')\""
   }

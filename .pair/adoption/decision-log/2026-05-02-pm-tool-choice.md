@@ -9,7 +9,7 @@
 
 **GitHub Projects v2** is adopted as the project management tool, with **Kanban** methodology.
 
-- **Project**: `gilberto roadmap` — https://github.com/users/rucka/projects/2
+- **Project**: `gilberto roadmap` — <https://github.com/users/rucka/projects/2>
 - **Owner scope**: user (`rucka`)
 - **Linked repository**: `rucka/gilberto`
 - **Methodology**: Kanban — continuous flow, no fixed sprints

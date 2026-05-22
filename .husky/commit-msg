@@ -1,0 +1,1 @@
+./tools/commitlint-config/bin/commitlint-check.sh --edit "$1"
