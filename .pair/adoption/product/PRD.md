@@ -297,7 +297,7 @@ Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspa
 | Self-development drag (gilberto used to develop gilberto, dogfooding)   | Medium | Medium      | Maintain a stable working branch separate from experimental; ensure CLI install always works for own use. |
 | Plugin protocol design proves too rigid for community plugins           | Medium | Low         | Plugin manifest is YAML, easy to extend; document protocol versioning; keep protocol additive.       |
 | User data corruption during vault-upgrade or fork-on-write              | High   | Low         | Snapshot pre-upgrade; rollback mechanism in `gilberto-process-vault-migrate`; explicit confirmation on destructive ops. |
-| Distribution friction (CLI fails on common Node setups)                 | High   | Medium      | Test matrix (macOS/Linux × Node 20/22); ship pre-built binaries as fallback; clear error messages.  |
+| Distribution friction (CLI fails on common Node setups)                 | High   | Medium      | Test matrix (macOS/Linux × Node 22/24); ship pre-built binaries as fallback; clear error messages.  |
 | Naming/architecture decisions made today don't survive v2 needs         | Medium | Medium      | Decision log already records the "why"; ADR/ADL adoption pattern (via pair) for new decisions.       |
 
 ## 12. Launch & Go-to-Market

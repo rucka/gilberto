@@ -3,7 +3,7 @@
 ## Languages
 
 - TypeScript 5.x — strict mode (full strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`)
-- Node.js ≥20 LTS
+- Node.js ≥22 LTS
 - Python 3.11+ — deterministic skill scripts (optional `script.py`)
 - Bash POSIX — skill scripts where lighter than Python
 
@@ -100,7 +100,7 @@
 | Component | Version |
 |---|---|
 | pnpm | 10.33.2 |
-| Node | ≥20 LTS |
+| Node | ≥22 LTS |
 | TypeScript | 5.x |
 | Vitest | 1.x |
 | Turborepo | 2.x |
