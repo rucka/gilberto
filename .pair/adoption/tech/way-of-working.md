@@ -105,8 +105,7 @@ No `Effort` field — story points live in story body.
 ## Quality Gates
 
 - `pnpm quality-gate` — dev mode, auto-fixes formatting
-- `pnpm quality-gate:ci` — CI mode (equivalent to `CI=true pnpm quality-gate`), no auto-fix
-- Implementation: `scripts/quality-gate.sh` dispatches on `CI` env var
+- `pnpm quality-gate:ci` — CI mode, verify-only (used by CI workflow + pre-push if installed)
 - Chain: `turbo run ts:check test lint` → `prettier:{fix,check}` → `mdlint:{fix,check}` → `hygiene:check`
 
 ### Custom Gate Registry
