@@ -46,3 +46,17 @@ jobs:
 
       - name: Quality gate (verify-only)
         run: pnpm quality-gate:ci
+
+  ci-success:
+    name: ci-success
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: always()
+    steps:
+      - name: Verify matrix outcome
+        run: |
+          if [ "${{ needs.quality-gate.result }}" != "success" ]; then
+            echo "::error::quality-gate matrix did not succeed (result: ${{ needs.quality-gate.result }})"
+            exit 1
+          fi
+          echo "All quality-gate matrix jobs succeeded."
