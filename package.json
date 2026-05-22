@@ -31,7 +31,7 @@
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "deps:outdated": "pnpm -r outdated",
-    "prepare": "echo 'prepare placeholder — wired to husky install in #33'",
+    "prepare": "husky",
     "quality-gate": "echo 'quality-gate placeholder — populated in #34' && exit 0",
     "hygiene:check": "echo 'hygiene:check placeholder — populated in #34' && exit 0",
     "docs:staleness": "echo 'docs:staleness placeholder — populated in #34' && exit 0",
@@ -40,7 +40,10 @@
     "pair:update": "pair-cli update"
   },
   "devDependencies": {
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
     "@foomakers/pair-cli": "catalog:",
+    "husky": "catalog:",
     "turbo": "catalog:"
   }
 }
