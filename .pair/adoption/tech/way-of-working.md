@@ -104,14 +104,21 @@ No `Effort` field — story points live in story body.
 
 ## Quality Gates
 
-- `pnpm quality-gate` is the project-level command
-- Standard: type-check · test · lint · format
+- `pnpm quality-gate` — dev mode, auto-fixes formatting
+- `pnpm quality-gate:ci` — CI mode (equivalent to `CI=true pnpm quality-gate`), no auto-fix
+- Implementation: `scripts/quality-gate.sh` dispatches on `CI` env var
+- Chain: `turbo run ts:check test lint` → `prettier:{fix,check}` → `mdlint:{fix,check}` → `hygiene:check`
 
 ### Custom Gate Registry
 
 | Order | Gate | Command | Scope Key | Required | Description |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Formatting | `pnpm prettier:fix` | formatting | No | Prettier auto-fix and verify |
+| 1 | Type-check | `pnpm ts:check` | ts | Yes | Turbo runs `ts:check` across workspaces |
+| 2 | Test | `pnpm test` | test | Yes | Turbo runs `test` across workspaces (vitest) |
+| 3 | Lint | `pnpm lint` | lint | Yes | Turbo runs `lint` across workspaces (eslint) |
+| 4 | Formatting | `pnpm prettier:fix` / `pnpm prettier:check` | format | Yes | Prettier auto-fix (dev) or verify (CI) |
+| 5 | Markdown | `pnpm mdlint:fix` / `pnpm mdlint:check` | mdlint | Yes | markdownlint auto-fix (dev) or verify (CI) |
+| 6 | Hygiene | `pnpm hygiene:check` | hygiene | Yes | Workspace naming, no cross-ws path imports, required scripts |
 
 ## Branching
 
