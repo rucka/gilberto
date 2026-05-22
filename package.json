@@ -40,6 +40,8 @@
     "pair:update": "pair-cli update"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "catalog:",
+    "@changesets/cli": "catalog:",
     "@foomakers/pair-cli": "catalog:",
     "@gilberto/commitlint-config": "workspace:*",
     "husky": "catalog:",
