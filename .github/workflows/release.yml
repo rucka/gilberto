@@ -75,8 +75,10 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+          TARGET_SHA: ${{ github.sha }}
         run: |
-          gh release create "${{ inputs.version }}" \
-            --title "${{ inputs.version }}" \
+          gh release create "$VERSION" \
+            --title "$VERSION" \
             --generate-notes \
-            --target "${{ github.sha }}"
+            --target "$TARGET_SHA"
