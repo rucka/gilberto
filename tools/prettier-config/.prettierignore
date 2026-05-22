@@ -4,6 +4,15 @@ coverage/
 dist/
 .next/
 out/
+.turbo/
 
 **/node_modules/
 **/.cache/
+
+# Auto-generated — never format
+pnpm-lock.yaml
+CHANGELOG.md
+
+# markdownlint-cli config: its config parser uses strict JSON.parse (rejects trailing commas);
+# leave hand-formatted to keep mdlint runnable.
+.markdownlint.jsonc
