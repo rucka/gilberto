@@ -32,9 +32,8 @@
     "dev": "turbo run dev",
     "deps:outdated": "pnpm -r outdated",
     "prepare": "husky",
-    "quality-gate": "pnpm ts:check && pnpm prettier:check && pnpm mdlint:check",
-    "hygiene:check": "echo 'hygiene:check placeholder — populated in #34' && exit 0",
-    "docs:staleness": "echo 'docs:staleness placeholder — populated in #34' && exit 0",
+    "quality-gate": "turbo run ts:check test lint && pnpm prettier:fix && pnpm mdlint:fix && pnpm hygiene:check",
+    "hygiene:check": "node scripts/code-hygiene-check.js",
     "sync-deps": "echo 'sync-deps placeholder'",
     "pair:install": "pair-cli install",
     "pair:update": "pair-cli update"
