@@ -15,7 +15,7 @@
   },
   "packageManager": "pnpm@10.33.2",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12.0"
   },
   "prettier": "@gilberto/prettier-config",
   "scripts": {
@@ -23,8 +23,8 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
-    "prettier:check": "./tools/prettier-config/bin/prettier-check.sh '**/*.yaml' '**/*.jsonc'",
-    "prettier:fix": "./tools/prettier-config/bin/prettier-fix.sh '**/*.yaml' '**/*.jsonc'",
+    "prettier:check": "./tools/prettier-config/bin/prettier-check.sh '**/*.yaml' '**/*.yml' '**/*.jsonc'",
+    "prettier:fix": "./tools/prettier-config/bin/prettier-fix.sh '**/*.yaml' '**/*.yml' '**/*.jsonc'",
     "mdlint:check": "./tools/markdownlint-config/bin/markdownlint-check.sh '.pair/adoption/**/*.md' '*.md'",
     "mdlint:fix": "./tools/markdownlint-config/bin/markdownlint-fix.sh '.pair/adoption/**/*.md' '*.md'",
     "ts:check": "turbo run ts:check",
@@ -40,6 +40,8 @@
     "pair:update": "pair-cli update"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "catalog:",
+    "@changesets/cli": "catalog:",
     "@foomakers/pair-cli": "catalog:",
     "@gilberto/commitlint-config": "workspace:*",
     "husky": "catalog:",

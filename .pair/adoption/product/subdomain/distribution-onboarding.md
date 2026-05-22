@@ -19,7 +19,7 @@ Get gilberto from the monorepo to the user's filesystem in <5 minutes, with cohe
 Required for the public launch (PRD §6 P0#7+P0#8 + §10 Phase 4 M6). Without a public surface and coherent identity there is no credibility. Yet it is not what brings users back: it is a one-shot adoption enabler.
 
 **Complexity Assessment:**
-Medium — custom Fumadocs theming, brand consistency across surfaces (site + CLI + GitHub), multi-target release pipeline (npm + Pages/Vercel + release notes), CLI test matrix (macOS/Linux × Node 20/22), per-assistant adapter with surface compatibility.
+Medium — custom Fumadocs theming, brand consistency across surfaces (site + CLI + GitHub), multi-target release pipeline (npm + Pages/Vercel + release notes), CLI test matrix (macOS/Linux × Node 22/24), per-assistant adapter with surface compatibility.
 
 **Data Ownership:**
 `apps/cli/` (CLI source + adapters), `apps/website/` (Fumadocs site + MDX content), `.github/workflows/release.yml`, `.changeset/`, brand assets (logo + design tokens), `tools/{eslint,prettier,markdownlint,ts}-config/` shared linting/formatting.

@@ -145,7 +145,7 @@ No `Effort` field — story points live in story body.
 - Body: `Closes #<number>` + summary + test plan
 - Required check: CI green
 - Reviewers non-blocking (single-contributor)
-- Template: `.github/pull_request_template.md`
+- Template: [`.pair/knowledge/guidelines/collaboration/templates/pr-template.md`](../../knowledge/guidelines/collaboration/templates/pr-template.md) — read before every `gh pr create`; fill applicable sections, omit non-applicable ones
 - Self-review per code-review checklist before merge
 
 ## Merge Strategy
