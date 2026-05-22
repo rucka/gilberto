@@ -36,11 +36,11 @@ Merge commits (`Merge branch …`) bypass commitlint via the `ignores` rule.
 
 Installed by Husky on `pnpm install` (`prepare` script):
 
-| Hook         | Command                       | Purpose                                             |
-| ------------ | ----------------------------- | --------------------------------------------------- |
-| `commit-msg` | `pnpm commitlint --edit "$1"` | Reject non-conventional messages                    |
-| `pre-commit` | `pnpm ts:check`               | Fast type-check before commit                       |
-| `pre-push`   | `pnpm quality-gate`           | Full gate (type + test + lint + format) before push |
+| Hook         | Command                                                         | Purpose                                             |
+| ------------ | --------------------------------------------------------------- | --------------------------------------------------- |
+| `commit-msg` | `./tools/commitlint-config/bin/commitlint-check.sh --edit "$1"` | Reject non-conventional messages                    |
+| `pre-commit` | `pnpm ts:check`                                                 | Fast type-check before commit                       |
+| `pre-push`   | `pnpm quality-gate`                                             | Full gate (type + test + lint + format) before push |
 
 ### `--no-verify` bypass
 

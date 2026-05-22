@@ -50,7 +50,7 @@ gilberto/
 │   ├── pulse-ratko/            P1
 │   ├── projects-venture/       P1
 │   └── projects-editorial/     P1
-├── tools/{eslint-config,markdownlint-config,prettier-config,ts-config}/
+├── tools/{commitlint-config,eslint-config,markdownlint-config,prettier-config,ts-config}/
 └── .changeset/ .github/ .pair/
 ```
 
