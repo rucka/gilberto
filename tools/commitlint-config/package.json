@@ -1,0 +1,18 @@
+{
+  "name": "@gilberto/commitlint-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared commitlint configuration for the gilberto monorepo",
+  "license": "MIT",
+  "main": "commitlint.config.cjs",
+  "bin": {
+    "commitlint-check": "./bin/commitlint-check.sh"
+  },
+  "scripts": {
+    "ts:check": "node -e \"require('./commitlint.config.cjs'); console.log('ok')\""
+  },
+  "devDependencies": {
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:"
+  }
+}

@@ -40,9 +40,8 @@
     "pair:update": "pair-cli update"
   },
   "devDependencies": {
-    "@commitlint/cli": "catalog:",
-    "@commitlint/config-conventional": "catalog:",
     "@foomakers/pair-cli": "catalog:",
+    "@gilberto/commitlint-config": "workspace:*",
     "husky": "catalog:",
     "turbo": "catalog:"
   }

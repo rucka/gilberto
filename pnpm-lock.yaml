@@ -47,21 +47,27 @@ importers:
 
   .:
     devDependencies:
-      '@commitlint/cli':
-        specifier: 'catalog:'
-        version: 21.0.1(@types/node@25.9.1)(conventional-commits-parser@6.4.0)(typescript@5.9.3)
-      '@commitlint/config-conventional':
-        specifier: 'catalog:'
-        version: 21.0.1
       '@foomakers/pair-cli':
         specifier: 'catalog:'
         version: 0.4.3
+      '@gilberto/commitlint-config':
+        specifier: workspace:*
+        version: link:tools/commitlint-config
       husky:
         specifier: 'catalog:'
         version: 9.1.7
       turbo:
         specifier: 'catalog:'
         version: 2.9.14
+
+  tools/commitlint-config:
+    devDependencies:
+      '@commitlint/cli':
+        specifier: 'catalog:'
+        version: 21.0.1(@types/node@25.9.1)(conventional-commits-parser@6.4.0)(typescript@5.9.3)
+      '@commitlint/config-conventional':
+        specifier: 'catalog:'
+        version: 21.0.1
 
   tools/eslint-config:
     devDependencies:
