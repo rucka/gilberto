@@ -32,7 +32,7 @@
     "dev": "turbo run dev",
     "deps:outdated": "pnpm -r outdated",
     "prepare": "husky",
-    "quality-gate": "echo 'quality-gate placeholder — populated in #34' && exit 0",
+    "quality-gate": "pnpm ts:check && pnpm prettier:check && pnpm mdlint:check",
     "hygiene:check": "echo 'hygiene:check placeholder — populated in #34' && exit 0",
     "docs:staleness": "echo 'docs:staleness placeholder — populated in #34' && exit 0",
     "sync-deps": "echo 'sync-deps placeholder'",
