@@ -17,6 +17,7 @@ coverage/
 # Temporary
 .tmp/
 *.tsbuildinfo
+.markdownlintcache
 
 # Release artifacts
 release/
@@ -36,6 +37,7 @@ _secrets/
 Thumbs.db
 .idea/
 .vscode/
+.claude/worktrees
 
 # Logs
 *.log

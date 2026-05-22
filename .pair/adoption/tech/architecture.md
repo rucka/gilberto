@@ -40,7 +40,7 @@ Runtime mutations (new topic / template / type / playbook) happen via `mechanic-
 
 ## Monorepo Layout
 
-```
+```text
 gilberto/
 ├── apps/{cli,website}/
 ├── packages/vault-bootstrap/   npm: @gilberto/vault-bootstrap (anatomy + vault skeleton + hooks + plists)
