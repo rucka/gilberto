@@ -54,13 +54,17 @@ The process is designed to:
 
 ## Operational Flow
 
+### 🔍 Discovery (optional entry point, before any level)
+
+- **🤖🤝👨‍💻 Structured Discovery** (`/pair-process-brainstorm`) → Turn a rough theme, or an existing epic/story `$root`, into an integrated **Draft** epic/story tree (interview → domain → triage). Human-initiated and optional: it feeds the levels below and never modifies the PRD. It is not one of the nine numbered steps and has no numbered how-to guide — see the ADL on `/pair-process-brainstorm`'s catalog exceptions.
+
 ### 📘 Induction
 
 1. **🤖🤝👨‍💻 PRD Creation** (`/pair-process-specify-prd`) → Generate Product Requirements Document from user needs & market insights
 2. **🤖🤝👨‍💻 Bootstrap Checklist Completion** (`/pair-process-bootstrap`) → Define technical context and operational framework through comprehensive project assessment
 3. **🤖🤝👨‍💻 Initiative Prioritization** (`/pair-process-plan-initiatives`) → Identify and rank initiatives by impact
-4. **🤖🤝👨‍💻 Subdomain Analysis** (`/pair-process-map-subdomains`) → Map relevant functional subdomains
-5. **🤖🤝👨‍💻 Bounded Context Definition** (`/pair-process-map-contexts`) → Define boundaries to prevent ambiguity
+
+> **Domain modeling (optional DDD)**: `/pair-capability-map-subdomains` and `/pair-capability-map-contexts` are scoped capabilities, not standalone induction steps — invoked with `$scope` by `/pair-process-plan-initiatives`, `/pair-process-plan-epics`, `/pair-process-refine-story`, `/pair-process-plan-tasks`, or with full scope by `/pair-process-bootstrap`. No DDD prerequisite: projects without subdomain/bounded-context artifacts fall back to "system areas".
 
 ### 🚀 Strategic Initiatives
 
@@ -78,4 +82,4 @@ The process is designed to:
 2. **🤖🤝👨‍💻 Code Review** (`/pair-process-review`) → Structured review with adoption compliance, merge flow, and parent cascade
 3. **🤖⚡ Status Update** → Automatic story/epic/initiative tracking update (handled by `/pair-process-implement` and `/pair-process-review`)
 
-> **Skill-enabled workflow**: Run `/pair-next` at session start to determine the most relevant skill. See [skills-guide.md](skills-guide.md) for the full catalog of 30 skills.
+> **Skill-enabled workflow**: Run `/pair-next` at session start to determine the most relevant skill. See [skills-guide.md](skills-guide.md) for the full catalog of 51 skills.

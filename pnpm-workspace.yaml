@@ -9,7 +9,7 @@ catalog:
   '@commitlint/cli': 21.0.1
   '@commitlint/config-conventional': 21.0.1
   '@eslint/js': 9.34.0
-  '@foomakers/pair-cli': '^0.4.3'
+  '@foomakers/pair-cli': '^0.5.2'
   '@typescript-eslint/eslint-plugin': 8.41.0
   '@typescript-eslint/parser': 8.41.0
   eslint: 9.34.0

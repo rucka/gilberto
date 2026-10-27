@@ -13,7 +13,7 @@ This framework covers:
 - Priority and severity classification systems and escalation procedures
 - Issue resolution coordination and communication strategies
 - Quality assurance and issue prevention approaches
-- Tool-specific implementations for GitHub and filesystem-based workflows
+- Tool-specific implementations for GitHub, Azure DevOps, Linear, and filesystem-based workflows
 
 ## Out of Scope
 
@@ -29,6 +29,10 @@ This framework does not cover:
 **[filesystem-issues.md](filesystem-issues.md)** - Issue management strategies for filesystem-based workflows
 
 **[github-issues.md](github-issues.md)** - Issue management strategies for GitHub-based workflows
+
+**[azure-devops-issues.md](azure-devops-issues.md)** - Work item management strategies for Azure DevOps (Boards) workflows
+
+**[linear-issues.md](linear-issues.md)** - Issue management strategies for Linear workflows (labels-as-types, estimates, per-team workflow states)
 
 ## Introduction to Issue Management Excellence
 

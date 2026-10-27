@@ -70,8 +70,8 @@ Follow [project management tool guidelines](../guidelines/collaboration/project-
 
 **HALT ALL WORK** if this phase is not successfully completed.
 
-1. **Set PR status** to "pending" in GitHub
-2. **Load PR** from PM tool — details, changes, metadata, files changed
+1. **Set PR status** to "pending" on the code host (a PR write routes to `code-host`; absent ⇒ the same tool as the PM tool)
+2. **Load PR** from the code host — details, changes, metadata, files changed (a PR read routes to `code-host`; absent ⇒ the same tool as the PM tool)
 3. **Load story context** — acceptance criteria, task completion claims, business context
 4. **Classify review type** — feature, bug, refactor, docs, or config
 5. **Confirm with developer** before proceeding
@@ -88,20 +88,30 @@ Follow [project management tool guidelines](../guidelines/collaboration/project-
 2. **Task completion** — confirm all tasks delivered as claimed
 3. **Business value** — implementation delivers expected value
 4. **Testing coverage** — adequate per [testing strategy](../guidelines/testing/test-strategy/README.md)
+5. **Bug-fix red test** — on a **bug fix**, verify the test that reproduces the bug exists and lands with or before the fix: name it (`file::test name`) and how the diff shows failing-before / passing-after. A **feature** PR is exempt (no test-first obligation); a genuinely untestable fix (doc typo, pure formatting) needs an explicit recorded rationale instead. Reviewer judgment aided by the checklist prompt — no automated commit-order analysis. See the **Bug fix — Red test before fix** section of the [code review template](../guidelines/collaboration/templates/code-review-template.md)
 
 ### Phase 3: Review Report & Decision
 
-1. **Generate review report** using [code-review-template.md](../guidelines/collaboration/templates/code-review-template.md)
-2. **Post report as PR comment** with all findings by severity
+1. **Generate a verdict-first review report** using [code-review-template.md](../guidelines/collaboration/templates/code-review-template.md) — classification tags + 1-line verdict at the top (~30-second reading budget, D22), assessment sections (security / cost / architecture) collapsed
+2. **Submit the report as the native review body** (verdict = the review action: Approve / Request Changes / Comment) — no separate PR comment (Q5)
 3. **Set PR status** based on findings:
 
 #### Review Decisions:
 
-| Decision              | Condition                                               | Next Step                                                                |
-| --------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ |
-| **APPROVED**          | All requirements met, quality gates pass                | Squash merge, mark story "Done"                                          |
-| **CHANGES REQUESTED** | Critical issues, missing ADR, failing tests, AC not met | Return to [10-how-to-implement-a-task.md](10-how-to-implement-a-task.md) |
-| **TECH DEBT**         | Only minor issues, tracked as debt                      | Approve PR, create debt items                                            |
+| Decision              | Condition                                                                    | Next Step                                                                |
+| --------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **APPROVED**          | 0 open Critical, Major, or Minor findings; requirements met; quality gates pass | Squash merge **only when the PR state is `ready-to-merge`** (`merge_allowed`: required checks green — `pair-review` + `pair-explicit-approval` at 🔴 — see [pr-states.md](../guidelines/collaboration/project-management-tool/pr-states.md)), then mark story "Done" |
+| **CHANGES REQUESTED** | Any open Critical, Major, or Minor finding; missing ADR; failing tests; AC not met | Return to [10-how-to-implement-a-task.md](10-how-to-implement-a-task.md) |
+
+**Default: Minor findings block merge too, exactly like Major** — a review does not converge by downgrading real findings to tracked debt. What keeps this from looping forever is classifying correctly at find-time, not relaxing what happens after (see Convergence below). There is no `TECH DEBT` verdict: a finding that would once have been waved through as "only minor" either meets the Minor bar and gets fixed, or it doesn't meet the bar at all and is a Question (informational, never blocking) — see the severity criteria in [code-review-template.md](../guidelines/collaboration/templates/code-review-template.md#findings-by-severity).
+
+### Convergence — why fixing every Minor does not mean fixing forever
+
+A review-fix loop (one author round, one fresh independent reviewer round, repeat) can fail to converge if severity is assigned loosely: a helper that guards a test can always be hardened against one more hypothetical edit nobody is making, and each round's fix becomes the next round's review surface. Convergence is enforced by classifying strictly, not by tolerating open findings:
+
+- **A finding's severity is capped by how it is reached, not just by what it would do.** If reproducing it requires a contrived edit no one has a reason to make (reordering unrelated blocks, wrapping something in a construct that does not exist in the code, an attacker-shaped input to a script no one runs unsupervised) — file it as a **Question**, never Critical/Major/Minor, regardless of how bad the consequence would be if it happened.
+- **Distinguish the deliverable from its own test infrastructure.** A bug in the shipped code/docs/config is Critical/Major/Minor per the normal bar. A robustness gap in a helper that exists only to scope a test assertion (e.g., a string-boundary function) is Minor only if it is reachable by a realistic edit to the file it reads; otherwise it is a Question.
+- **A reviewer confirms severity against these two rules before filing**, not after — this is a find-time discipline, not a merge-time relaxation. A round that returns 0 Critical/Major/Minor is APPROVED even if its Questions list is long.
 
 ### Phase 4: Completion & Integration
 
@@ -120,7 +130,7 @@ Follow [project management tool guidelines](../guidelines/collaboration/project-
 - [ ] ADR and adoption compliance validated for all new technical decisions
 - [ ] All technical standards verified against adoption guidelines
 - [ ] Review report generated using [code-review-template.md](../guidelines/collaboration/templates/code-review-template.md)
-- [ ] Report posted as PR comment
+- [ ] Report submitted as the native review body (verdict-first, no separate comment)
 - [ ] PR status updated (pending/changes-requested/approved)
 - [ ] Review decision made
 

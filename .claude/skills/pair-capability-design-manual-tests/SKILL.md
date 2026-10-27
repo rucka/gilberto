@@ -1,6 +1,6 @@
 ---
 name: pair-capability-design-manual-tests
-description: "Designs a manual test suite for post-release validation by analyzing the project's artifacts, architecture, and deployment targets. Generates critical path files (CP*.md) and a suite README following manual-testing guidelines and the manual-test-case-template. Invocable independently or as a prerequisite of /pair-capability-execute-manual-tests."
+description: "Designs a manual test suite — critical path files + suite README — for post-release validation, by analyzing released artifacts, architecture, and deployment targets. Not for planning the automated-testing approach (use /pair-capability-assess-testing). Prerequisite for /pair-capability-execute-manual-tests."
 version: 0.4.1
 author: Foomakers
 ---
@@ -9,7 +9,7 @@ author: Foomakers
 
 Analyze a project's released artifacts, deployment targets, and user-facing surfaces to generate a complete manual test suite. Produces critical path files (`CP*.md`) and a suite `README.md` in the test suite directory.
 
-Each test case follows the [manual-test-case-template](../../../.pair/knowledge/guidelines/collaboration/templates/manual-test-case-template.md). For design principles, see [manual-testing.md](../../../.pair/knowledge/guidelines/quality-assurance/manual-testing.md). For the organizational context, see [manual-verification.md](../../../.pair/knowledge/guidelines/quality-assurance/manual-verification.md).
+Each test case follows the [manual-test-case-template](../../../.pair/knowledge/guidelines/collaboration/templates/manual-test-case-template.md) (resolve override-first — [template resolution](../../../.pair/knowledge/guidelines/technical-standards/ai-development/skill-conventions/template-resolution.md)). Design principles: [manual-testing.md](../../../.pair/knowledge/guidelines/quality-assurance/manual-testing.md); organizational context: [manual-verification.md](../../../.pair/knowledge/guidelines/quality-assurance/manual-verification.md).
 
 ## Arguments
 
@@ -96,7 +96,7 @@ For each category, design critical paths ordered by release risk.
    | CP3 | CLI Functional | P0-P1 | Core commands, error handling, idempotency |
    | CP4 | Registry Publish | P1 | Package visibility, install from registry |
 
-   Adapt the number, naming, and content of CPs to match the actual project — do not use this example as a fixed template.
+   Adapt CP number, naming, and content to the actual project — this example is not a fixed template.
 
 1. **Verify**: CP plan built. Present CP outline with estimated test counts before generating files.
 
@@ -146,7 +146,7 @@ MANUAL TEST SUITE GENERATED:
 ├── Files:   [N critical path files + README]
 ├── Tests:   [N total (N P0, N P1, N P2)]
 ├── Categories: [list]
-└── Ready for: /pair-capability-execute-manual-tests
+└── Ready for: /execute-manual-tests
 ```
 
 ## Composition Interface
@@ -165,6 +165,6 @@ When invoked **independently**:
 
 - This skill **generates test definitions** — it does not execute tests or modify application code.
 - Test case IDs are stable across regenerations if the same surfaces are discovered.
-- The skill is idempotent: re-running on an existing suite offers regenerate/extend/abort.
+- **Idempotent** — see [idempotency convention](../../../.pair/knowledge/guidelines/technical-standards/ai-development/skill-conventions/idempotency.md). This skill's check: re-running on an existing suite offers regenerate/extend/abort.
 - Generated test cases are version-agnostic by design — they work across releases without modification.
 - Suite maintenance (adding tests for new features) should re-invoke this skill with `extend` mode.

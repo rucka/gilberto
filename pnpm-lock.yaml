@@ -22,8 +22,8 @@ catalogs:
       specifier: 9.34.0
       version: 9.34.0
     '@foomakers/pair-cli':
-      specifier: ^0.4.3
-      version: 0.4.3
+      specifier: ^0.5.2
+      version: 0.5.2
     '@typescript-eslint/eslint-plugin':
       specifier: 8.41.0
       version: 8.41.0
@@ -61,7 +61,7 @@ importers:
         version: 2.31.0(@types/node@25.9.1)
       '@foomakers/pair-cli':
         specifier: 'catalog:'
-        version: 0.4.3
+        version: 0.5.2
       '@gilberto/commitlint-config':
         specifier: workspace:*
         version: link:tools/commitlint-config
@@ -307,8 +307,8 @@ packages:
     resolution: {integrity: sha512-Z5kJ+wU3oA7MMIqVR9tyZRtjYPr4OC004Q4Rw7pgOKUOKkJfZ3O24nz3WYfGRpMDNmcOi3TwQOmgm7B7Tpii0w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@foomakers/pair-cli@0.4.3':
-    resolution: {integrity: sha512-gCe2L99TWYolsQfYczd8zeBk6MSq8qm1lN7M+h7wLPlzjqmPkDIUhAukPzhZDQTG/xvziPdNX9PXcdicD/rIeg==}
+  '@foomakers/pair-cli@0.5.2':
+    resolution: {integrity: sha512-MwpyDiB8zB8Nymz8NSkdAq+vviJcRYqVQoqqKuWX4Ovcu4MBnEILZYU+WayyvSiIcZmxqnznOY4J4pQjT8z/xg==}
     hasBin: true
 
   '@humanfs/core@0.19.2':
@@ -1761,7 +1761,7 @@ snapshots:
       '@eslint/core': 0.15.2
       levn: 0.4.1
 
-  '@foomakers/pair-cli@0.4.3': {}
+  '@foomakers/pair-cli@0.5.2': {}
 
   '@humanfs/core@0.19.2':
     dependencies:

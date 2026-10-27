@@ -4,6 +4,10 @@ This repository uses a structured approach for AI agents. **Always start by read
 
 In all interactions and commit messages, be extremely coincise and sacrify grammar for the sake of coincision.
 
+Default style: terse, no recap, no preamble.
+
+Minimal code: the least code that solves the task, no speculative abstractions.
+
 ## Skill-Enabled Assistants
 
 If your agent supports **Agent Skills** (agentskills.io), start every session by running:
@@ -18,62 +22,36 @@ The `/pair-next` skill reads project adoption files and PM tool state to recomme
 
 ## 🎯 Quick Start Process
 
-**With skills**: Run `/pair-next` — it handles steps 1-3 automatically.
+**With skills**: Run `/pair-next` — it handles steps 1-4 automatically (the profile included: it never proposes a disabled step).
 
 **Without skills** (manual flow):
 
 1. **Establish session context** (see Session Context above - maintain for entire conversation)
 2. **Understand the project**: Read `.pair/adoption/product/PRD.md` for project overview
-3. **Identify your task**: Match your request to a how-to in `.pair/knowledge/how-to/`
-4. **Follow the guidance**: Use the selected how-to file for specific instructions
-5. **Apply constraints**: Check `.pair/adoption/tech/` for technical requirements
+3. **Check the process profile**: Read `.pair/adoption/tech/way-of-working.md` → `## Process Profile`. It declares which process **steps** this project runs. No section = `default` = every step. A step disabled there is one the project does not run — **do not run its how-to guide**; the [step catalogue](.pair/knowledge/guidelines/technical-standards/ai-development/step-catalogue.md) (`step-catalogue.md`) maps every step id to its guide, and the [profile schema](.pair/knowledge/guidelines/technical-standards/ai-development/process-profiles.md) says what an unreadable or unknown declaration does (HALT, never a quiet fallback)
+4. **Identify your task**: Match your request to a task category using `.pair/knowledge/how-to/`
+5. **Follow the guidance**: Use the selected how-to file for specific instructions
+6. **Apply constraints**: Check `.pair/adoption/tech/` for technical requirements
 
 ## 📋 Available Tasks
 
 **Task index**: `.pair/knowledge/how-to` - consult this for precise task matching
 
-### Induction (Getting Started)
-
-| - **Create PRD** → `01-how-to-create-PRD.md`                      | Tags: prd, requirements, planning  |
-| - **Setup project** → `02-how-to-complete-bootstrap-checklist.md` | Tags: bootstrap, setup, onboarding |
-| - **Define subdomains** → `04-how-to-define-subdomains.md`        | Tags: subdomain, domain, model     |
-
-### Strategic (High-level Planning)
-
-| - **Plan initiatives** → `03-how-to-create-and-prioritize-initiatives.md` | Tags: initiative, roadmap            |
-| - **Define architecture** → `05-how-to-define-bounded-contexts.md`        | Tags: bounded, context, architecture |
-| - **Break down epics** → `06-how-to-breakdown-epics.md`                   | Tags: epic, breakdown                |
-
-### Iteration (Sprint Planning)
-
-| - **Create user stories** → `07-how-to-breakdown-user-stories.md` | Tags: story, requirements          |
-| - **Refine stories** → `08-how-to-refine-a-user-story.md`         | Tags: refine, acceptance, criteria |
-| - **Create tasks** → `09-how-to-create-tasks.md`                  | Tags: task, breakdown, assign      |
-
-### Execution (Development)
-
-- **Implement feature** → `10-how-to-implement-a-task.md` | Tags: implement, feature, code
-
-### Review (Quality Assurance)
-
-- **Code review** → `11-how-to-code-review.md` | Tags: review, code, approve
+- **Induction**: Create PRD → `01-how-to-create-PRD.md` (prd, requirements, planning); Setup project → `02-how-to-complete-bootstrap-checklist.md` (bootstrap, setup, onboarding, subdomain, bounded-context, domain-model)
+- **Strategic**: Plan initiatives → `03-how-to-create-and-prioritize-initiatives.md` (initiative, roadmap, subdomain); Break down epics → `06-how-to-breakdown-epics.md` (epic, breakdown, subdomain)
+- **Iteration**: Create user stories → `07-how-to-breakdown-user-stories.md` (story, requirements); Refine stories → `08-how-to-refine-a-user-story.md` (refine, acceptance, criteria); Create tasks → `09-how-to-create-tasks.md` (task, breakdown, assign, bounded-context)
+- **Execution**: Implement feature → `10-how-to-implement-a-task.md` (implement, feature, code)
+- **Review**: Code review → `11-how-to-code-review.md` (review, code, approve)
 
 ## 🛠️ Essential Commands
 
 ```bash
-# Setup
-pnpm install
-
-# Development
-pnpm dlx turbo run --filter <package_name> <task>
+pnpm install                                           # setup
+pnpm dlx turbo run --filter <package_name> <task>      # development
 pnpm --filter <package_name> dev
-
-# Testing
-pnpm --filter <package_name> test
+pnpm --filter <package_name> test                      # testing
 pnpm vitest run -t "<test name>"
-
-# Quality checks
-pnpm lint --filter <package_name>
+pnpm lint --filter <package_name>                      # quality checks
 ```
 
 ## 📚 Key References
@@ -97,14 +75,13 @@ pnpm lint --filter <package_name>
 - **No secrets in code** - ask for secure access instructions if needed
 - **Context consistency** - if switching how-to mid-session, explicitly update your session context
 - **Bug fix workflow** - NEVER modify code to fix a bug before creating a test that reproduces it. Test-first debugging ensures the fix actually addresses the problem.
+- **`.pair/working/` is not ambient context** - Content under `.pair/working/` (checkpoints, reports, handoffs) is never loaded as context unless explicitly specified. The skills that use it decide if and how.
 - **Record decisions** - architectural/project decisions MUST be recorded as ADR or ADL. Use `/pair-capability-record-decision` skill or write to `.pair/adoption/tech/adr/` (architectural) / `.pair/adoption/decision-log/` (non-architectural).
 - **Follow templates** - PRs, code reviews, commits, branches, tasks, user stories MUST follow templates in `.pair/knowledge/guidelines/collaboration/templates/` unless adoption files specify otherwise. Key templates: `pr-template.md`, `code-review-template.md`, `commit-template.md`, `branch-template.md`, `task-template.md`, `user-story-template.md`.
 
 ## 🐛 Bug Resolution Workflow
 
-**Critical principle**: Test-first debugging prevents code changes that don't fix the actual problem.
-
-### Process
+**Critical principle**: Test-first debugging proves the fix, prevents regressions, documents behavior. Confidence: lint + tests pass before committing.
 
 1. **Understand the bug** - Read error messages, logs, and problem descriptions thoroughly
 2. **Create a failing test** - Write a test that reproduces the bug (test should FAIL)
@@ -113,35 +90,4 @@ pnpm lint --filter <package_name>
 5. **Verify fix** - Run all tests to ensure fix doesn't break anything else
 6. **Clean up** - Refactor and optimize once the test passes
 
-### Example Bug Fix
-
-```typescript
-// ❌ WRONG: modifying code before understanding the bug
-// Just changing things hoping it works
-
-// ✅ RIGHT: create test first, then fix
-// Step 1: Write failing test
-test('should handle local path in --url parameter', () => {
-  const result = isLocalPath('/absolute/path')
-  expect(result).toBe(true) // This FAILS first
-})
-
-// Step 2: Verify it fails
-// $ pnpm test  →  FAIL: expected false to equal true
-
-// Step 3: Fix the code
-function isLocalPath(str: string): boolean {
-  return str.startsWith('/') || str.startsWith('./')
-  // was missing slash check
-}
-
-// Step 4: Verify test passes
-// $ pnpm test  →  PASS
-```
-
-### Key Benefits
-
-- **Evidence-based**: Proves the fix actually works
-- **Regression prevention**: Test stays in codebase to catch future breaks
-- **Clarity**: Test documents expected behavior
-- **Confidence**: Linting + tests pass before committing
+Example: `isLocalPath('/absolute/path')` expected `true`, returns `false` → write that failing test first, then fix `str.startsWith('/') || str.startsWith('./')`, then re-run.
