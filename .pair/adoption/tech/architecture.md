@@ -49,8 +49,9 @@ gilberto/
 │   ├── pulse-health-tracking/  P1
 │   ├── pulse-ratko/            P1
 │   ├── projects-venture/       P1
-│   └── projects-editorial/     P1
-├── tools/{commitlint-config,eslint-config,markdownlint-config,prettier-config,ts-config}/
+│   ├── projects-editorial/     P1
+│   └── connector-<family>/     google · media · slack (v1), see ADR-0003
+├── tools/{commitlint-config,eslint-config,markdownlint-config,prettier-config,ts-config,skill-tests,migrations}/
 └── .changeset/ .github/ .pair/
 ```
 
@@ -84,15 +85,16 @@ Adapters at `apps/cli/src/distribution/adapters/{claude-code,codex,generic}/` ma
 
 ## Vault Layout
 
-5 pillars + transversal `network/` + system `anatomy/`:
+Scopes ([ADR-0004](adr/0004-scopes.md)): person-level at root (`me/`, `network/`, `pulse/`, `journey/`); `projects/`, `intelligence/`, `journal/` in root by default; scopes optional, per scope `layout: folder` (`scopes/<scope>/...`) or `tag` (root + frontmatter `scope`); topics global and horizontal. Paths (root or `scopes/<scope>/` via resolver):
 
 - `me/me.md`
 - `pulse/<topic>/<topic>.md` + `history/`
-- `projects/<slug>/<slug>.md` (flat; `status` in frontmatter)
-- `intelligence/<topic>/<source>/<source>.md`
+- `[scopes/<scope>/]projects/<slug>/<slug>.md` (`status` in frontmatter)
+- `[scopes/<scope>/]intelligence/<topic>/<source>/<source>.md`
+- `[scopes/<scope>/]journal/` · `[scopes/<scope>/]_ingest/`
 - `journey/YYYY/MM/YYYY-MM-DD.md` + `journey/tasks.md`
 - `network/{people,companies}/<slug>.md`
-- `anatomy/{anatomy,gilberto,topics,plugins,preferences}.md` + `playbooks/<domain>/<event>.md` + `templates/<pillar>/<name>/`
+- `anatomy/{anatomy,gilberto,topics,plugins,preferences,scopes}.md` + `integrations/<provider>.md` + `playbooks/<domain>/<event>.md` + `templates/<pillar>/<name>/` — see [anatomy file map](../decision-log/2026-10-27-anatomy-file-map.md)
 - `_ingest/`, `.claude/{settings.json,skills/}`
 
 ## Skill Taxonomy
@@ -112,10 +114,15 @@ Process skills are thin dispatchers: read `anatomy/playbooks/<domain>/<event>.md
 
 Strata: `anatomy.md` (structure) · `playbooks/` (per-event) · `preferences.md` (silence/thresholds/cadences/integrations).
 
+## Connectors
+
+See [`adr/0003-connector-plugins.md`](adr/0003-connector-plugins.md): plugins per provider family, `utility-<provider>-<op>` contract, API-first scripts with MCP fallback, config `anatomy/integrations/<provider>.md`, secrets in OS keychain (outside vault), no external writes in unattended runs.
+
 ## Plugin Protocol
 
 - 4 first-party: `projects-venture`, `projects-editorial`, `pulse-health-tracking`, `pulse-ratko`
 - External: `gilberto plugin install <repo-url>` (single + multi-plugin)
+- CLI `plugin *` manages anatomy contributions + `anatomy/plugins.md`; skills via marketplace
 - Manifest: Anthropic convention (`.claude-plugin/plugin.json`); per-runtime via adapters
 - Contents: `skills/`, `templates/`, `playbooks/`
 - File-per-contributor merge in same dir
@@ -126,6 +133,7 @@ Strata: `anatomy.md` (structure) · `playbooks/` (per-event) · `preferences.md`
 - Claude Code hooks: SessionStart (optional `next`) · PreCompact (snapshot) · SessionEnd (`reflect day`)
 - launchd / cron / systemd: 07:00 morning-briefing · 22:00 reflect-day · Sun 22:00 reflect-week · 1st-of-month · Jan 1 · periodic `fetch`
 - Override: `anatomy/preferences.md > ## Cadences`
+- Bootstrap writes plists without loading them; each process skill activates its job on install; hook dispatcher exits 0 if target skill missing
 
 ## Cycles
 

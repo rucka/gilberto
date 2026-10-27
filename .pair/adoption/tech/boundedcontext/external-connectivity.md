@@ -24,12 +24,12 @@ Strategic stance (PRD §6 P0#4 + D-37 §3.3): *no cloud backend; the AI assistan
 - **Synchronous in-process** with Vault Runtime — utilities are invoked as direct skill calls within a single capability execution. No service boundary; the result returns to the caller and is then routed to the appropriate pillar by Cognitive Operations.
 - **Asynchronous trigger** to Vault Runtime — launchd / cron / systemd fires skill invocations at the cadences declared in `anatomy/preferences.md > ## Cadences`. Hooks (Claude Code SessionStart / PreCompact / SessionEnd) provide an additional event source.
 - **Anti-corruption layer per provider** — each utility isolates a single provider's surface (Oura v2, Withings, Gmail, Google Calendar). Schema mapping happens inside the utility; capabilities downstream never see provider payloads. Replacing a utility (e.g., another wearable provider) does not touch capabilities.
-- **OAuth tokens user-managed** — tokens live in `anatomy/preferences.md > ## Integrations`, never in code or external storage. Utilities read tokens at invocation; refresh logic is per-utility, with retry+backoff.
+- **Secrets user-managed** — OS keychain (fallback `~/.config/gilberto/secrets/`), never in the vault or code ([ADR-0003](../adr/0003-connector-plugins.md)). Unattended runs never write externally. Utilities read secrets at invocation; refresh logic is per-utility, with retry+backoff.
 - **Outbound rate-limit + backoff** at the utility level; failures bubble up to capabilities as typed errors that the orchestrator can route into `_ingest/` `.error.md` sidecars or surface to the user.
 
 ## Data Ownership
 
-- `dataset/skills/utility/utility-fetch-*` and `dataset/skills/utility/utility-{email,slack,calendar}-*` skill source
+- `plugins/gilberto-core/skills/` (provider-free utilities) and `plugins/connector-<family>/skills/utility-<provider>-<op>` skill source
 - Provider state-machine sidecars (`_state.json`) co-located with the synced source
 - Generated launchd plists under `~/Library/LaunchAgents/com.gilberto.*` and equivalent Linux units (cron tab entries / `systemd/user/` units)
 - AI-assistant lifecycle hook scripts (Claude Code `SessionStart` / `PreCompact` / `SessionEnd`)

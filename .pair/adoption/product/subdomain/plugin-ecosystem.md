@@ -22,7 +22,7 @@ Extensibility for community growth and vertical coverage (fitness, editorial, bu
 Medium — versioned manifest schema, conflict detection during enable/disable (vault entities depending on the plugin), file-per-contributor merge, routing dispatch, plugin discovery (Anthropic marketplace + self-hosted + GitHub URL).
 
 **Data Ownership:**
-Skills `gilberto-process-projects-{venture,editorial}-*` (plugin processes), plugin capabilities under `dataset/plugins/<plugin-name>/skills/`. `anatomy/plugins.md` registry. CLI `apps/cli/src/plugin/` commands. Plugin manifest schema (Zod).
+Skills `gilberto-process-projects-{venture,editorial}-*` (plugin processes), plugin sources under `plugins/<plugin-name>/skills/` (marketplace, ADR-0002). `anatomy/plugins.md` registry. CLI `apps/cli/src/plugin/` commands manage anatomy contributions only; skills installed via marketplace. Plugin manifest schema (Zod).
 
 **Dependencies:**
 

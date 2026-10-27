@@ -45,6 +45,7 @@
 ## Testing
 
 - Vitest (unit + integration; co-located `*.test.ts`)
+- pytest for skill scripts (co-located `plugins/*/skills/*/tests/`), run via `tools/skill-tests` turbo `test` task
 - Playwright (website E2E, only if/when complexity warrants)
 - Coverage threshold deferred to first measurement
 
@@ -80,6 +81,9 @@
 - Withings (OAuth2 + API)
 - Ratko-app (HTTP)
 - RSS / Atom
+- YouTube via `yt-dlp` + captions/Whisper (`connector-media`)
+- Slack Web API (`connector-slack`)
+- Connector contract + secrets (OS keychain, `age` for export bundles): [ADR-0003](adr/0003-connector-plugins.md)
 
 ## Scheduling
 

@@ -187,7 +187,7 @@ Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspa
 ### Key Technical Requirements
 
 - **Performance:** CLI commands complete within 2 seconds for in-vault operations; bootstrap completes in under 5 minutes including download. Background processes (ingest, reflect) are async and non-blocking.
-- **Security:** No data leaves the user's filesystem unless explicitly initiated by the user (e.g., `gilberto-process-act` pushes to calendar). OAuth tokens stored in vault `anatomy/preferences.md > ## Integrations` (user-managed). No cloud backend.
+- **Security:** No data leaves the user's filesystem unless explicitly initiated by the user (e.g., `gilberto-process-act` pushes to calendar). Secrets in OS keychain, never in the vault; non-secret config in `anatomy/integrations/<provider>.md`; unattended runs never write externally ([ADR-0003](../tech/adr/0003-connector-plugins.md)). No cloud backend.
 - **Scalability:** Single-user, single-vault. Vault should remain navigable up to ~10K markdown files. No multi-tenant requirements.
 - **Integration:** AI assistants as skill runtime (Claude Code, OpenAI Codex, Cowork, and others — assistant-agnostic), Obsidian (visual layer, optional), Dropbox or iCloud (sync), OAuth providers (Google, Oura, Withings, Microsoft Graph), launchd (scheduling on macOS), pair-cli (knowledge base companion).
 - **Reliability:** Every skill is idempotent (safe re-run). Vault upgrades preserve user customizations via fork-on-write pattern.

@@ -32,7 +32,7 @@
 ## Secrets
 
 - No central secret store
-- OAuth tokens in user vault `anatomy/preferences.md > ## Integrations`
+- OAuth tokens/secrets in OS keychain (fallback `~/.config/gilberto/secrets/`, outside the vault) — see [ADR-0003](adr/0003-connector-plugins.md)
 - CI: `NPM_TOKEN`, `VERCEL_TOKEN` as repo secrets
 - No telemetry by default (opt-in only post-v1)
 

@@ -35,8 +35,8 @@ This context is what makes adoption possible. Without a coherent install path, b
 - `apps/cli/` — CLI source, commands (`install`, `update`, `status`, `plugin {...}`), distribution adapters, install wizard
 - `apps/website/` — Fumadocs site (Next.js + MDX), content, brand-aware theming
 - `.github/workflows/release.yml` and `.changeset/`
-- `dataset/skills/process/gilberto-process-vault-*` (skill source for the five lifecycle processes)
-- `dataset/skills/mechanic/mechanic-vault-*` (skill source for vault-shape primitives)
+- `plugins/gilberto-core/skills/gilberto-process-vault-*` (skill source for the five lifecycle processes)
+- `plugins/gilberto-core/skills/mechanic-vault-*` (skill source for vault-shape primitives)
 - Brand assets (logo system, palette, typography, hero, OG card)
 - `tools/{eslint,prettier,markdownlint,ts}-config/` (shared linting + formatting)
 - Public surfaces: GitHub repo metadata, README, CONTRIBUTING, npm package metadata

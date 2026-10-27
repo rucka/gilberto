@@ -8,13 +8,13 @@ Pull data from external providers (calendar, mail, wearables, RSS, content feeds
 **Key Capabilities:**
 
 - Single cross-pillar dispatcher `gilberto-capability-fetch` (D-40), with default RSS plus utility-overrides registered in anatomy
-- `utility-calendar-gcalcli` (Google Calendar via `gcalcli`)
-- `utility-fetch-gmail` (Gmail API, lightweight on-demand pull)
+- Connector plugins per provider family ([ADR-0003](../../tech/adr/0003-connector-plugins.md)): `connector-google` (Gmail, Calendar via `gcalcli`, Drive), `connector-media` (YouTube + transcript), `connector-slack` in v1; Notion, GitHub, messaging, social post-v1
+- Uniform utility contract `utility-<provider>-<op>`, API-first deterministic scripts, MCP fallback
 - `utility-fetch-oura` (Oura Ring OAuth2 + API v2) — first-party plugin
 - `utility-fetch-withings` (Withings OAuth2 + API) — first-party plugin
 - `utility-fetch-rss` (generic Atom/RSS)
 - External I/O utilities for ACT (`utility-email-send`, `utility-slack-send`, `utility-calendar-create-event`)
-- OAuth token management in `anatomy/preferences.md > ## Integrations` (user-managed, no backend)
+- Secrets in OS keychain (fallback `~/.config/gilberto/secrets/`, outside vault); `utility-secrets-{export,import}`; non-secret config `anatomy/integrations/<provider>.md`
 
 **Strategic Importance:**
 Commodity. Standard OAuth+pull/push pattern, already implemented by dozens of tools. Not differentiating; the value lies in routing+context (Cognitive Operations), not in the fetch itself. Isolated in utilities so manual fallback (drop into `_ingest/`) remains possible if a provider revokes.
@@ -23,7 +23,7 @@ Commodity. Standard OAuth+pull/push pattern, already implemented by dozens of to
 Medium — per-provider OAuth flow, rate-limiting, schema mapping, error handling with retry+backoff, upstream breaking changes. Rigidity is external (provider APIs), not architectural.
 
 **Data Ownership:**
-Skills `utility-{fetch,calendar,email,slack}-*` under `dataset/skills/utility/`. State-machine sidecars (`_state.json` for providers that need them). OAuth tokens in the vault (user-managed). **Not** ingested data (which lives in Personal Knowledge Graph).
+Skills under `plugins/gilberto-core/skills/` (provider-free: fetch dispatcher, RSS, HTML) and `plugins/connector-<family>/skills/`. State-machine sidecars (`_state.json`). Secrets outside the vault. **Not** ingested data (which lives in Personal Knowledge Graph).
 
 **Dependencies:**
 
