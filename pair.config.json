@@ -1,0 +1,6 @@
+{
+  "workflowProfiles": {
+    "default": "economico",
+    "files": ".pair/adoption/tech/workflow-profiles/*.json"
+  }
+}

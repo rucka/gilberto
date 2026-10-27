@@ -1,0 +1,15 @@
+{
+  "name": "economico",
+  "description": "sonnet su prepare/validate/implement/green/merge, opus medium solo su verify",
+  "defaults": { "engine": "claude", "model": "balanced", "effort": "medium", "context": "fresh" },
+  "modelClasses": { "cheap": "claude-haiku-5-5", "balanced": "claude-sonnet-5-5", "frontier": "claude-opus-5-5" },
+  "stages": {
+    "contract": { "model": "cheap", "effort": "low" },
+    "prepare": { "model": "balanced", "effort": "medium", "context": "reuse" },
+    "validate": { "model": "balanced", "effort": "high" },
+    "implement": { "model": "balanced", "effort": "medium" },
+    "green": { "model": "balanced", "effort": "medium", "context": "reuse" },
+    "verify": { "model": "frontier", "effort": "medium" },
+    "merge": { "model": "balanced", "effort": "low" }
+  }
+}
