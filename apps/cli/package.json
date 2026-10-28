@@ -1,0 +1,49 @@
+{
+  "name": "gilberto",
+  "version": "0.0.0",
+  "description": "Personal AI-native second brain — vault + CLI",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "gilberto": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -b tsconfig.build.json",
+    "postbuild": "node scripts/postbuild.js",
+    "dev": "ts-node src/cli.ts",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "ts:check": "tsc --noEmit",
+    "lint": "lint",
+    "lint:fix": "lint-fix",
+    "prettier:fix": "prettier-fix",
+    "prettier:check": "prettier-check",
+    "mdlint:check": "markdownlint-check",
+    "mdlint:fix": "markdownlint-fix"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "catalog:",
+    "chalk": "catalog:",
+    "commander": "catalog:",
+    "dotenv": "catalog:"
+  },
+  "devDependencies": {
+    "@gilberto/eslint-config": "workspace:*",
+    "@gilberto/markdownlint-config": "workspace:*",
+    "@gilberto/prettier-config": "workspace:*",
+    "@gilberto/ts-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "ts-node": "catalog:",
+    "typescript": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
+  },
+  "prettier": "@gilberto/prettier-config"
+}

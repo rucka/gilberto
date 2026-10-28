@@ -1,0 +1,22 @@
+{
+  "extends": "@gilberto/ts-config/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "paths": {
+      "#config": ["src/config/index.ts"],
+      "#config/*": ["src/config/*"],
+      "#registry": ["src/registry/index.ts"],
+      "#registry/*": ["src/registry/*"],
+      "#commands": ["src/commands/index.ts"],
+      "#commands/*": ["src/commands/*"],
+      "#diagnostics": ["src/diagnostics.ts"],
+      "#test-utils": ["src/test-utils/index.ts"],
+      "#test-utils/*": ["src/test-utils/*"],
+      "#ui": ["src/ui/index.ts"],
+      "#ui/*": ["src/ui/*"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

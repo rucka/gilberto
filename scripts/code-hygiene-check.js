@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Validates: (1) workspace `name` ∈ `@gilberto/*`; (2) no cross-workspace
+// Validates: (1) workspace `name` ∈ `@gilberto/*` or `gilberto` (published bin); (2) no cross-workspace
 // path imports under `src/`; (3) non-tool workspaces declare ts:check + lint + test.
 // Output: `<file>:<line>:<col>  <rule>  <message>`. Exit 0 OK / 1 violations / 2 config.
 
@@ -117,7 +117,10 @@ function main() {
     }
     const relPkg = path.relative(ROOT, pkgPath)
 
-    if (typeof pkg.name !== 'string' || !pkg.name.startsWith('@gilberto/')) {
+    if (
+      typeof pkg.name !== 'string' ||
+      (!pkg.name.startsWith('@gilberto/') && pkg.name !== 'gilberto')
+    ) {
       violations.push({
         file: relPkg,
         line: 1,
