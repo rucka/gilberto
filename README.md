@@ -100,7 +100,7 @@ Composition: process → capability → utility; mechanic orthogonal. Target v1.
 
   ```text
   /plugin marketplace add rucka/gilberto
-  /plugin install gilberto-core --marketplace rucka/gilberto
+  /plugin install gilberto-core@gilberto
   ```
 
 - Manifest `.claude-plugin/plugin.json`; contents `skills/`, `templates/`, `playbooks/`; registry `anatomy/plugins.md`.
