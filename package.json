@@ -37,7 +37,11 @@
     "hygiene:check": "node scripts/code-hygiene-check.js",
     "sync-deps": "echo 'sync-deps placeholder'",
     "pair:install": "pair-cli install",
-    "pair:update": "pair-cli update"
+    "pair:update": "pair-cli update",
+    "pair-run:refine": "pair-cli run --engine claude --autonomous --until ready --prepare hold-never",
+    "pair-run:dev": "pair-cli run --engine claude --autonomous --until merged --prepare hold-always",
+    "pair-run:full": "pair-cli run --engine claude --autonomous --until merged --prepare hold-never",
+    "pair-run:watch": "pair-cli run --engine claude --autonomous --until merged --prepare hold-never --watch --interval 10m"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",

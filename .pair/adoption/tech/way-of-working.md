@@ -102,6 +102,17 @@ No `Effort` field — story points live in story body.
 | Refined → In Progress | `/pair-process-implement` start |
 | In Progress → Done | PR merged + issue closed |
 
+## State Mapping
+
+| Board State | Macrostate  |
+| ----------- | ----------- |
+| Todo        | Draft       |
+| Refined     | Ready       |
+| In Progress | In Progress |
+| Done        | Done        |
+
+No Review column: review lives on the PR (minimal board).
+
 ## Quality Gates
 
 - `pnpm quality-gate` — dev mode, auto-fixes formatting
