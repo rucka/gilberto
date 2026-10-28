@@ -20,6 +20,7 @@
     "build": "tsc -p tsconfig.build.json",
     "ts:check": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --config ./eslint.config.cjs",
+    "pretest": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "clean": "rm -rf dist .tsbuildinfo"
   },
