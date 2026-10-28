@@ -1,3 +1,4 @@
+import argparse
 import json
 import signal
 import sys
@@ -11,6 +12,11 @@ class MechanicError(Exception):
 
     def as_dict(self):
         return {"code": self.code, **self.extra}
+
+
+class ArgParser(argparse.ArgumentParser):
+    def error(self, message):
+        raise MechanicError("INVALID_ARGS", detail=message)
 
 
 def log(msg):

@@ -1,4 +1,3 @@
-import argparse
 import datetime
 import json
 import os
@@ -11,13 +10,8 @@ from _lib.atomic_write import Transaction  # noqa: E402
 from _lib.result import MechanicError  # noqa: E402
 
 
-class _Parser(argparse.ArgumentParser):
-    def error(self, message):
-        raise MechanicError("INVALID_ARGS", detail=message)
-
-
 def _parse(argv):
-    p = _Parser(prog="mechanic-vault-new")
+    p = result.ArgParser(prog="mechanic-vault-new")
     p.add_argument("--pillar", required=True)
     p.add_argument("--template", required=True)
     p.add_argument("--slug", required=True)
