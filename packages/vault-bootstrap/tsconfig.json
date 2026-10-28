@@ -1,0 +1,9 @@
+{
+  "extends": "@gilberto/ts-config/node.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo"
+  },
+  "include": ["src", "vitest.config.ts"]
+}

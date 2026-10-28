@@ -1,0 +1,36 @@
+{
+  "name": "@gilberto/vault-bootstrap",
+  "version": "0.0.0",
+  "description": "Seed content and root-only path resolver for the gilberto vault bootstrap",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "seed"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "ts:check": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint . --config ./eslint.config.cjs",
+    "pretest": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .tsbuildinfo"
+  },
+  "devDependencies": {
+    "@gilberto/eslint-config": "workspace:*",
+    "@gilberto/ts-config": "workspace:*",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "yaml": "catalog:"
+  }
+}
