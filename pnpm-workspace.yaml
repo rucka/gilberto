@@ -10,6 +10,7 @@ catalog:
   '@commitlint/config-conventional': 21.0.1
   '@eslint/js': 9.34.0
   '@foomakers/pair-cli': '^0.5.2'
+  '@types/node': ^22.0.0
   '@typescript-eslint/eslint-plugin': 8.41.0
   '@typescript-eslint/parser': 8.41.0
   eslint: 9.34.0
@@ -18,5 +19,8 @@ catalog:
   markdownlint-cli: 0.47.0
   prettier: 3.6.2
   turbo: '^2.3.3'
+  typescript: ^5.9.0
+  vitest: ^3.2.0
+  yaml: ^2.8.0
 
 cleanupUnusedCatalogs: true
