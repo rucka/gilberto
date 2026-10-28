@@ -3,6 +3,8 @@ from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "run-tests.sh"
 
+_PASS = "def test_ok():\n    pass\n"
+
 
 def test_synthetic_vault_shape(synthetic_vault):
     assert synthetic_vault.is_dir()
@@ -32,3 +34,15 @@ def test_runner_missing_uv_hints(tmp_path):
     r = subprocess.run([bash, str(SCRIPT)], env={"PATH": str(tmp_path)}, capture_output=True, text=True)
     assert r.returncode != 0
     assert "uv" in r.stderr and "Install" in r.stderr
+
+
+def test_plugins_skill_tests_discovered(tmp_path, run_harness):
+    r = run_harness(tmp_path, [("a", "s1", {"tests/test_skill.py": _PASS})])
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "1 passed" in r.stdout
+
+
+def test_coverage_xml_written_under_coverage_dir(tmp_path, run_harness):
+    r = run_harness(tmp_path, [("a", "s1", {"tests/test_skill.py": _PASS})])
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert (tmp_path / "tools" / "skill-tests" / "coverage" / "coverage.xml").is_file()
