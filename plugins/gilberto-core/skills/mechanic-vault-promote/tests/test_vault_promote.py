@@ -54,6 +54,13 @@ def test_promote_into_existing_folder(mechanic, vault, entity):
     assert code == 0 and (vault / "projects/alpha/other.md").read_text() == "o"
 
 
+def test_ac6_trailing_newline_slug(mechanic, vault, entity, tree):
+    before = tree(vault)
+    code, out, _ = mechanic("promote", "--path=projects/alpha\n.md")
+    assert code == 1 and out["errors"] == [{"code": "INVALID_SLUG", "input": "projects/alpha\n.md"}]
+    assert tree(vault) == before
+
+
 @pytest.mark.parametrize("bad", ["../x.md", "..\\x.md", "/projects/a.md", "projects/Alpha.md", "projects/a b.md", "projects/é.md", "projects/alpha"])
 def test_ac6_invalid_slug(mechanic, vault, entity, tree, bad):
     before = tree(vault)

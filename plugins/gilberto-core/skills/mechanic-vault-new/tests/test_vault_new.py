@@ -51,6 +51,29 @@ def test_force_rewrites_frontmatter_only(mechanic, vault):
     assert 'topics: ["new"]' in new and "EDITED body" in new and 'created: "2000-01-01"' in new
 
 
+def test_ac6_trailing_newline_slug(mechanic, vault, tree):
+    before = tree(vault)
+    code, out, _ = mechanic("new", *args(slug="alpha\n"))
+    assert code == 1 and out["errors"] == [{"code": "INVALID_SLUG", "input": "alpha\n"}]
+    assert tree(vault) == before
+
+
+def test_ac6_trailing_newline_template(mechanic, vault, tree):
+    before = tree(vault)
+    code, out, _ = mechanic("new", *args(template="generic\n"))
+    assert code == 1 and out["errors"] == [{"code": "INVALID_SLUG", "input": "generic\n"}]
+    assert tree(vault) == before
+
+
+def test_trailing_newline_frontmatter_type(mechanic, vault, tree):
+    before = tree(vault)
+    code, out, _ = mechanic("new", *args(frontmatter=json.dumps(dict(FM, type="projects-index\n"))))
+    assert code == 1 and out["errors"] == [
+        {"code": "INVALID_FRONTMATTER", "type": "projects-index\n", "reason": "unknown type scope"}
+    ]
+    assert tree(vault) == before
+
+
 def test_ac6_invalid_slug(mechanic, vault, tree):
     before = tree(vault)
     for bad in ("../x", "..\\x", "/abs", "Upper", "a b", "é", "-x", "a" * 65):

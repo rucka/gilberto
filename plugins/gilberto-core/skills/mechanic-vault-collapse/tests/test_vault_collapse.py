@@ -113,6 +113,86 @@ def test_note_restored_when_rmdir_fails(mechanic, vault, folder, tree, monkeypat
     assert tree(vault) == before
 
 
+def test_note_preserved_when_rmdir_interrupted(mechanic, vault, folder, tree, monkeypatch):
+    before = tree(vault)
+    note = (folder / "alpha.md").read_bytes()
+
+    def boom(p):
+        raise KeyboardInterrupt()
+
+    monkeypatch.setattr(os, "rmdir", boom)
+    with pytest.raises(KeyboardInterrupt):
+        mechanic("collapse", "--path=projects/alpha")
+    assert tree(vault) == before
+    assert (folder / "alpha.md").read_bytes() == note and not (vault / "projects/alpha.md").exists()
+
+
+@pytest.mark.parametrize("sidecar", [False, True])
+def test_note_preserved_when_interrupted_after_rmdir_completed(mechanic, vault, folder, tree, monkeypatch, sidecar):
+    if sidecar:
+        (folder / ".alpha.json").write_text('{"slug": "alpha"}')
+    before = tree(vault)
+    real = os.rmdir
+
+    def late(p):
+        real(p)
+        raise KeyboardInterrupt()
+
+    monkeypatch.setattr(os, "rmdir", late)
+    with pytest.raises(KeyboardInterrupt):
+        mechanic("collapse", "--path=projects/alpha")
+    assert tree(vault) == before
+    assert (folder / "alpha.md").read_text() == NOTE and not (vault / "projects/alpha.md").exists()
+    assert (folder / ".alpha.json").exists() == sidecar
+
+
+@pytest.mark.parametrize("exc", [OSError(5, "EIO"), KeyboardInterrupt()])
+def test_sidecar_and_note_restored_when_rmdir_fails(mechanic, vault, folder, tree, monkeypatch, exc):
+    (folder / ".alpha.json").write_text('{"slug": "alpha"}')
+    before = tree(vault)
+
+    def boom(p):
+        raise exc
+
+    monkeypatch.setattr(os, "rmdir", boom)
+    try:
+        code, out, _ = mechanic("collapse", "--path=projects/alpha")
+        assert code == 1 and out["errors"][0]["code"] == "WRITE_FAILED"
+    except KeyboardInterrupt:
+        assert isinstance(exc, KeyboardInterrupt)
+    assert tree(vault) == before
+    assert (folder / "alpha.md").read_text() == NOTE and not (vault / "projects/alpha.md").exists()
+
+
+@pytest.mark.parametrize("exc", [OSError(5, "EIO"), KeyboardInterrupt()])
+def test_note_restored_when_sidecar_unlink_fails(mechanic, vault, folder, tree, monkeypatch, exc):
+    (folder / ".alpha.json").write_text('{"slug": "alpha"}')
+    before = tree(vault)
+    real = os.unlink
+
+    def flaky(p, *a, **k):
+        if os.path.basename(os.fspath(p)) == ".alpha.json":
+            raise exc
+        return real(p, *a, **k)
+
+    monkeypatch.setattr(os, "unlink", flaky)
+    try:
+        code, out, _ = mechanic("collapse", "--path=projects/alpha")
+        assert code == 1 and out["errors"][0]["code"] == "WRITE_FAILED"
+    except KeyboardInterrupt:
+        assert isinstance(exc, KeyboardInterrupt)
+    assert tree(vault) == before
+    assert (folder / "alpha.md").read_text() == NOTE and (folder / ".alpha.json").exists()
+    assert not (vault / "projects/alpha.md").exists()
+
+
+def test_ac6_trailing_newline_slug(mechanic, vault, folder, tree):
+    before = tree(vault)
+    code, out, _ = mechanic("collapse", "--path=projects/alpha\n")
+    assert code == 1 and out["errors"] == [{"code": "INVALID_SLUG", "input": "projects/alpha\n"}]
+    assert tree(vault) == before
+
+
 def test_subprocess_smoke(vault, folder):
     env = {**os.environ, "GILBERTO_ROOT": str(vault)}
     p = subprocess.run([sys.executable, str(SCRIPT), "--path=projects/alpha"], capture_output=True, text=True, env=env)

@@ -11,6 +11,26 @@ def test_slug_rejects(bad):
     assert e.value.as_dict() == {"code": "INVALID_SLUG", "input": bad}
 
 
+def test_slug_rejects_trailing_newline():
+    with pytest.raises(MechanicError) as e:
+        validate.slug("alpha\n")
+    assert e.value.as_dict() == {"code": "INVALID_SLUG", "input": "alpha\n"}
+
+
+def test_rel_path_rejects_trailing_newline(vault):
+    for raw, suffix in (("projects/alpha\n", ""), ("projects/alpha\n.md", ".md"), ("projects\n/alpha", "")):
+        with pytest.raises(MechanicError) as e:
+            validate.rel_path(str(vault), raw, suffix)
+        assert e.value.as_dict() == {"code": "INVALID_SLUG", "input": raw}
+
+
+def test_frontmatter_rejects_trailing_newline_type(vault):
+    fm = {"type": "projects-index\n", "topics": [], "created": "2020-01-01", "updated": "2020-01-01"}
+    with pytest.raises(MechanicError) as e:
+        validate.frontmatter(str(vault), fm)
+    assert e.value.as_dict() == {"code": "INVALID_FRONTMATTER", "type": "projects-index\n", "reason": "unknown type scope"}
+
+
 def test_slug_accepts():
     assert validate.slug("a" * 64) == "a" * 64
     assert validate.slug("alpha-1") == "alpha-1"
