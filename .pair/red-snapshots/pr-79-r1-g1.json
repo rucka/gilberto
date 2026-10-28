@@ -1,0 +1,112 @@
+{
+  "$meta": {
+    "pr": "79",
+    "phase": "r1-g1",
+    "base": "3dc40c700e85ff127541e605ee1a97c4fdb6c2aa",
+    "trailer": "Pair-RED-Snapshot: pr=79; phase=r1-g1; base=3dc40c700e85ff127541e605ee1a97c4fdb6c2aa; manifest=.pair/red-snapshots/pr-79-r1-g1.json",
+    "artifacts": [
+      "packages/vault-bootstrap/src/seed.test.ts"
+    ]
+  },
+  "mode": "remediation",
+  "phase": "r1-g1",
+  "inputHead": "3dc40c700e85ff127541e605ee1a97c4fdb6c2aa",
+  "sourceOfTruth": "packages/vault-bootstrap/seed/hooks/dispatch.sh",
+  "inventory": [
+    {
+      "id": "r0-1",
+      "producer": "packages/vault-bootstrap/seed/hooks/dispatch.sh line 8 (skill-presence guard)",
+      "inputs": [
+        "GILBERTO_SKILLS_DIR",
+        "skill arg",
+        "find result"
+      ],
+      "representations": [
+        "seed/hooks/dispatch.sh"
+      ],
+      "consumers": [
+        "launchd plists",
+        "claude -p"
+      ],
+      "classes": [
+        "dir missing",
+        "dir exists, skill absent",
+        "dir exists, skill present"
+      ],
+      "interactions": [
+        "PATH claude stub vs exec claude"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "seed.test.ts",
+    "mode": "test",
+    "allowedPaths": []
+  },
+  "matrix": [
+    {
+      "id": "r0-1-w1",
+      "kind": "witness",
+      "baseline": "pass",
+      "condition": "skills dir exists, skill absent; mutant -z→-n",
+      "oracle": "packages/vault-bootstrap/src/seed.test.ts > hooks > with an existing skills dir > exits 0 printing \"skill not installed\" when dir exists but skill absent",
+      "expected": "passes on real script; fails on injected mutant (exec claude stub, stdout claude-stub)",
+      "covers": [
+        "r0-1"
+      ],
+      "file": "packages/vault-bootstrap/src/seed.test.ts"
+    },
+    {
+      "id": "r0-1-c1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "skill present runs claude stub",
+      "oracle": "packages/vault-bootstrap/src/seed.test.ts > hooks > with an existing skills dir > runs claude when the skill is installed",
+      "expected": "exit 0, stdout claude-stub; fails on mutant",
+      "covers": [
+        "r0-1"
+      ],
+      "file": "packages/vault-bootstrap/src/seed.test.ts"
+    }
+  ],
+  "redTests": [
+    {
+      "file": "packages/vault-bootstrap/src/seed.test.ts",
+      "kind": "test",
+      "baseline": "pass",
+      "sha256": "sha256:b080a7279f351b16a0d25791f50e6519c14727d6074de398d7b8ff952a01c49e",
+      "command": "pnpm --dir packages/vault-bootstrap exec vitest run src/seed.test.ts",
+      "observed": "26 passed (26) at base head 3dc40c7"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "findings": [
+          "r0-1"
+        ],
+        "owner": "seed.test.ts",
+        "mode": "test",
+        "allowedPaths": [],
+        "oracle": "vitest seed.test.ts + mutant",
+        "dependsOn": []
+      },
+      {
+        "groupId": "r1-g2",
+        "findings": [
+          "r0-2"
+        ],
+        "owner": "packages/vault-bootstrap/package.json",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "packages/vault-bootstrap/package.json"
+        ],
+        "oracle": "rm -rf dist; pnpm --filter @gilberto/vault-bootstrap test exit 0",
+        "dependsOn": []
+      }
+    ],
+    "carried": []
+  }
+}

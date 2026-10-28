@@ -1,5 +1,14 @@
 import { execFileSync, spawnSync } from 'node:child_process'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
@@ -113,6 +122,41 @@ describe('hooks', () => {
     })
     expect(r.status).toBe(0)
     expect(r.stdout.trim()).toBe('skill not installed')
+  })
+
+  describe('with an existing skills dir', () => {
+    const run = (skillsLayout: string[], skill: string) => {
+      const root = mkdtempSync(join(tmpdir(), 'dispatch-'))
+      const bin = join(root, 'bin')
+      mkdirSync(bin)
+      writeFileSync(join(bin, 'claude'), '#!/bin/sh\necho claude-stub\n', { mode: 0o755 })
+      for (const s of skillsLayout) mkdirSync(join(root, 'plugins', s), { recursive: true })
+      mkdirSync(join(root, 'plugins'), { recursive: true })
+      try {
+        return spawnSync(hook, [skill], {
+          encoding: 'utf8',
+          env: {
+            ...process.env,
+            PATH: `${bin}:/usr/bin:/bin`,
+            GILBERTO_SKILLS_DIR: join(root, 'plugins'),
+          },
+        })
+      } finally {
+        rmSync(root, { recursive: true, force: true })
+      }
+    }
+
+    it('exits 0 printing "skill not installed" when dir exists but skill absent', () => {
+      const r = run(['p/skills/other'], 'no-such-skill')
+      expect(r.status).toBe(0)
+      expect(r.stdout.trim()).toBe('skill not installed')
+    })
+
+    it('runs claude when the skill is installed', () => {
+      const r = run(['p/skills/wanted'], 'wanted')
+      expect(r.status).toBe(0)
+      expect(r.stdout.trim()).toBe('claude-stub')
+    })
   })
 })
 
