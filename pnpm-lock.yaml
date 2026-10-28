@@ -111,6 +111,8 @@ importers:
         specifier: 'catalog:'
         version: 3.6.2
 
+  tools/skill-tests: {}
+
   tools/ts-config: {}
 
 packages:
