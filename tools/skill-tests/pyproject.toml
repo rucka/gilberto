@@ -14,8 +14,8 @@ package = false
 [tool.pytest.ini_options]
 testpaths = ["tests", "../../plugins"]
 python_files = ["test_*.py"]
-addopts = "--cov --cov-report=html:coverage/html --cov-report=xml:coverage/coverage.xml"
+addopts = "--import-mode=importlib --cov --cov-report=html:coverage/html --cov-report=xml:coverage/coverage.xml"
 
 [tool.coverage.run]
-source = ["."]
+source = [".", "../../plugins"]
 omit = ["tests/*", "*/tests/*", ".venv/*"]
