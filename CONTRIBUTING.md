@@ -56,6 +56,17 @@ If you bypass, fix the underlying issue in the next commit. Repeated bypasses de
 
 Use [`.github/pull_request_template.md`](.github/pull_request_template.md). Body includes `Closes #<issue>` for auto-close.
 
+## Skill tests
+
+Skill tests run with pytest via workspace `tools/skill-tests` (part of `pnpm quality-gate`).
+
+- Prerequisite: [uv](https://docs.astral.sh/uv/getting-started/installation/) (`brew install uv`); it provisions Python >=3.11 and pinned deps (`uv.lock`).
+- Location: `plugins/<p>/skills/<s>/tests/test_*.py` (colocated; excluded from the marketplace package).
+- Fixture `synthetic_vault`: tmp-dir vault skeleton (`inbox/`, `notes/`, `projects/`, `journal/`, `README.md`) from `tools/skill-tests/conftest.py`.
+- Run: `pnpm --filter @gilberto/skill-tests test` or `pnpm test`.
+- Coverage report: `tools/skill-tests/coverage/` (no threshold).
+- No skill tests present: passes (pytest exit 5 mapped to 0).
+
 ## Code of Conduct
 
 TBD — until then, follow common sense: be kind, technical, specific.

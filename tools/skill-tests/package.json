@@ -1,0 +1,9 @@
+{
+  "name": "@gilberto/skill-tests",
+  "private": true,
+  "version": "0.0.0",
+  "description": "pytest harness for skill tests under plugins/*/skills/*/tests",
+  "scripts": {
+    "test": "bash scripts/run-tests.sh"
+  }
+}
