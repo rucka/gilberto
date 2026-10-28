@@ -96,6 +96,13 @@ Composition: process → capability → utility; mechanic orthogonal. Target v1.
 - First-party: `pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`.
 - Connectors ([ADR-0003](.pair/adoption/tech/adr/0003-connector-plugins.md)): `connector-{google,media,slack}` (v1), more post-v1. API-first deterministic scripts, MCP fallback; secrets in OS keychain, never in the vault; unattended runs never write externally.
 - External: `gilberto plugin install <repo-url>`.
+- Install `gilberto-core` in Claude Code:
+
+  ```text
+  /plugin marketplace add rucka/gilberto
+  /plugin install gilberto-core --marketplace rucka/gilberto
+  ```
+
 - Manifest `.claude-plugin/plugin.json`; contents `skills/`, `templates/`, `playbooks/`; registry `anatomy/plugins.md`.
 - Per-assistant adapters (`claude-code`, `codex`, `generic`) materialize skills from `plugins/*`.
 
