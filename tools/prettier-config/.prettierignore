@@ -16,3 +16,7 @@ CHANGELOG.md
 # markdownlint-cli config: its config parser uses strict JSON.parse (rejects trailing commas);
 # leave hand-formatted to keep mdlint runnable.
 .markdownlint.jsonc
+
+# pair-managed — never format
+.claude/
+.pair/

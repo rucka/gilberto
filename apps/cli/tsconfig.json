@@ -2,6 +2,7 @@
   "extends": "@gilberto/ts-config/node.json",
   "compilerOptions": {
     "noEmit": true,
+    "baseUrl": ".",
     "skipLibCheck": true,
     "paths": {
       "#config": ["src/config/index.ts"],
