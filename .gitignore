@@ -12,6 +12,8 @@ out/
 
 # Test/coverage
 coverage/
+__pycache__/
+*.pyc
 *.lcov
 
 # Temporary
