@@ -3,7 +3,7 @@ import re
 
 from .result import MechanicError
 
-SLUG = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
+SLUG = re.compile(r"[a-z0-9][a-z0-9-]{0,63}")
 PILLARS = ("me", "pulse", "projects", "intelligence", "journey", "network")
 # "project": AC1 example uses `project-index` next to the seeded `projects-index`; both accepted (ADL)
 SCOPES = ("anatomy", "pillar", "me", "pulse", "projects", "project", "intelligence", "journey", "network")
@@ -12,7 +12,7 @@ MANDATORY = ("type", "topics", "created", "updated")
 
 
 def slug(value):
-    if not isinstance(value, str) or not SLUG.match(value):
+    if not isinstance(value, str) or not SLUG.fullmatch(value):
         raise MechanicError("INVALID_SLUG", input=value)
     return value
 
@@ -31,7 +31,7 @@ def rel_path(root, raw, suffix=""):
     if len(parts) < 2:
         raise MechanicError("INVALID_SLUG", input=raw)
     for p in parts:
-        if not SLUG.match(p):
+        if not SLUG.fullmatch(p):
             raise MechanicError("INVALID_SLUG", input=raw)
     pillar(root, parts[0])
     return parts
@@ -66,7 +66,7 @@ def frontmatter(root, fm):
         raise MechanicError("INVALID_FRONTMATTER", missing=missing)
     t = fm["type"]
     scope, _, role = str(t).partition("-")
-    if not (t in DIRECT_TYPES or (scope in SCOPES and SLUG.match(role or ""))):
+    if not (t in DIRECT_TYPES or (scope in SCOPES and SLUG.fullmatch(role or ""))):
         raise MechanicError("INVALID_FRONTMATTER", type=t, reason="unknown type scope")
     if not isinstance(fm["topics"], list):
         raise MechanicError("INVALID_FRONTMATTER", reason="topics must be a list")

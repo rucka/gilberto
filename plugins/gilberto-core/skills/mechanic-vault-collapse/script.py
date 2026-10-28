@@ -35,18 +35,25 @@ def _run(argv, env):
 
     with open(note, encoding="utf-8") as f:
         original = f.read()
+    side = None
+    if os.path.exists(sidecar):
+        with open(sidecar, encoding="utf-8") as f:
+            side = f.read()
     text = frontmatter.set_key(original, "updated", datetime.date.today().isoformat())
     try:
         with Transaction() as t:
             t.write(dst, text)
             try:
                 os.unlink(note)
-                if os.path.exists(sidecar):
+                if side is not None:
                     os.unlink(sidecar)
                 os.rmdir(folder)
-            except OSError:
+            except BaseException:
+                os.makedirs(folder, exist_ok=True)
                 if not os.path.exists(note):
                     atomic_write(note, original)
+                if side is not None and not os.path.exists(sidecar):
+                    atomic_write(sidecar, side)
                 raise
     except OSError as e:
         result.log(f"write failed ({e}); rolled back")
