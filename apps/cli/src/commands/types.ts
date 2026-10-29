@@ -19,11 +19,19 @@ export type CommandOption = {
   required?: boolean
 }
 
+export type CommandSubcommand = {
+  name: string
+  description: string
+  usage: string
+  options: readonly CommandOption[]
+}
+
 export type CommandMetadata = {
   name: string
   description: string
   usage: string
   options: readonly CommandOption[]
+  subcommands?: readonly CommandSubcommand[]
   examples: readonly string[]
   notes: readonly string[]
 }

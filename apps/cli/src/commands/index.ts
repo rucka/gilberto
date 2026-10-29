@@ -3,9 +3,19 @@ import * as logger from '../ui/logger.js'
 import { helloCommand } from './_hello/index.js'
 import { dispatchCommand } from './dispatcher.js'
 import { registerCommandFromMetadata } from './helpers.js'
+import { installCommand } from './install/index.js'
+import { pluginCommand } from './plugin/index.js'
+import { statusCommand } from './status/index.js'
+import { updateCommand } from './update/index.js'
 import type { CommandDeps, CommandRegistryEntry } from './types.js'
 
-export const commandRegistry = [helloCommand] as const
+export const commandRegistry = [
+  helloCommand,
+  installCommand,
+  pluginCommand,
+  statusCommand,
+  updateCommand,
+] as const
 
 export type AnyCommandConfig = ReturnType<(typeof commandRegistry)[number]['parse']>
 
