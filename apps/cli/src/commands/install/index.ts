@@ -1,6 +1,6 @@
 import { withOrigin } from '../helpers.js'
 import type { CommandRegistryEntry } from '../types.js'
-import { handleInstallCommand, INSTALL_PLACEHOLDER_MESSAGE } from './handler.js'
+import { handleInstallCommand } from './handler.js'
 import { installMetadata } from './metadata.js'
 import { parseInstallCommand, type InstallCommandConfig } from './parser.js'
 
@@ -14,5 +14,5 @@ export const installCommand: CommandRegistryEntry<InstallCommandConfig> = withOr
   },
 )
 
-export { handleInstallCommand, INSTALL_PLACEHOLDER_MESSAGE, installMetadata, parseInstallCommand }
+export { handleInstallCommand, installMetadata, parseInstallCommand }
 export type { InstallCommandConfig }

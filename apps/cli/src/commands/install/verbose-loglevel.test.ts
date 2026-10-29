@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createProgram } from '../../cli.js'
+import { installCommand } from './index.js'
 import { getLogLevel, setLogLevel } from '../../ui/logger.js'
 
 beforeEach(() => setLogLevel('info'))
@@ -9,6 +10,7 @@ afterEach(() => {
 })
 
 const levelAfter = async (...args: string[]) => {
+  vi.spyOn(installCommand, 'handle').mockResolvedValue(undefined)
   vi.spyOn(console, 'error').mockImplementation(() => undefined)
   await createProgram().parseAsync(['node', 'g', '--no-banner', ...args])
   return getLogLevel()

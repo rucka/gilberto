@@ -6,6 +6,7 @@ afterEach(() => vi.restoreAllMocks())
 
 const parsed = async (...args: string[]) => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined)
+  vi.spyOn(installCommand, 'handle').mockResolvedValue(undefined)
   const parse = vi.spyOn(installCommand, 'parse')
   await createProgram().parseAsync(['node', 'g', '--no-banner', ...args])
   return parse.mock.results[0]?.value

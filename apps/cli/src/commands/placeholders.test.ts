@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
 import { createProgram, main } from '../cli.js'
-import {
-  handleInstallCommand,
-  INSTALL_PLACEHOLDER_MESSAGE,
-  parseInstallCommand,
-} from './install/index.js'
+import { parseInstallCommand } from './install/index.js'
 import {
   handlePluginCommand,
   parsePluginCommand,
@@ -50,7 +46,6 @@ afterEach(() => vi.restoreAllMocks())
 const run = (...args: string[]) => main(['node', 'gilberto', '--no-banner', ...args])
 
 const MESSAGES = {
-  install: 'install not yet implemented — Initiative #1 EP Bootstrap process (issue #10)',
   update: 'update not yet implemented — Initiative #5 EP Lifecycle (issue #25)',
   status: 'status not yet implemented — Initiative #5 EP Lifecycle (issue #25)',
 }
@@ -72,12 +67,14 @@ describe('AC-2: install --help', () => {
     await run('install', '--help')
     for (const s of [
       '[target]',
-      '--seed-topics',
+      '--seed-topics <list>',
+      '--non-interactive',
       '--no-hooks',
       '--no-launchd',
       '-v, --verbose',
       'Examples:',
       'gilberto install ~/vault --seed-topics',
+      'wizard steps:',
     ])
       expect(out).toContain(s)
     expect(out).not.toContain('--source')
@@ -86,9 +83,8 @@ describe('AC-2: install --help', () => {
   })
 })
 
-describe('AC-3/4/5: placeholder message on stderr, exit 0', () => {
+describe('placeholder message on stderr, exit 0', () => {
   it.each([
-    ['install', ['install', '/tmp/some-vault'], INSTALL_PLACEHOLDER_MESSAGE, MESSAGES.install],
     ['update', ['update'], UPDATE_PLACEHOLDER_MESSAGE, MESSAGES.update],
     ['status', ['status'], STATUS_PLACEHOLDER_MESSAGE, MESSAGES.status],
   ])('%s', async (_n, argv, constant, literal) => {
@@ -98,31 +94,34 @@ describe('AC-3/4/5: placeholder message on stderr, exit 0', () => {
     expect(out).toBe('')
     expect(exit).toHaveBeenCalledWith(0)
   })
-
-  it('install does not validate conflicting options and ignores unicode target', async () => {
-    await run('install', '/tmp/véault', '--no-hooks', '--no-launchd', '-v')
-    expect(err).toContain(MESSAGES.install)
-    expect(exit).toHaveBeenCalledWith(0)
-  })
 })
 
 describe('parsers', () => {
   it('install: target + flags, negated flags default true', () => {
     expect(parseInstallCommand({}, [])).toEqual({
       command: 'install',
-      seedTopics: false,
+      seedTopics: {},
+      nonInteractive: false,
       hooks: true,
       launchd: true,
       verbose: false,
     })
     expect(
-      parseInstallCommand({ seedTopics: true, hooks: false, launchd: false, verbose: true }, [
-        '/x',
-      ]),
+      parseInstallCommand(
+        {
+          seedTopics: 'pulse=health',
+          nonInteractive: true,
+          hooks: false,
+          launchd: false,
+          verbose: true,
+        },
+        ['/x'],
+      ),
     ).toEqual({
       command: 'install',
       target: '/x',
-      seedTopics: true,
+      seedTopics: { pulse: ['health'] },
+      nonInteractive: true,
       hooks: false,
       launchd: false,
       verbose: true,
@@ -139,10 +138,9 @@ describe('parsers', () => {
   })
 
   it('handlers resolve and emit only to stderr', async () => {
-    await handleInstallCommand(parseInstallCommand({}, []), deps)
     await handleUpdateCommand(parseUpdateCommand({}, []), deps)
     await handleStatusCommand(parseStatusCommand({}, []), deps)
-    expect(err).toBe(`${MESSAGES.install}\n${MESSAGES.update}\n${MESSAGES.status}\n`)
+    expect(err).toBe(`${MESSAGES.update}\n${MESSAGES.status}\n`)
     expect(out).toBe('')
   })
 })

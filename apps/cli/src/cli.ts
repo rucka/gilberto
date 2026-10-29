@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import chalk from 'chalk'
 import { Command, CommanderError, Option } from 'commander'
 import { registerCommandsOnProgram } from './commands/index.js'
+import { WizardExit } from './commands/install/wizard/exit.js'
 import {
   getLogLevel,
   logger,
@@ -98,6 +99,12 @@ export const main = async (argv: string[] = process.argv, program?: Command): Pr
   } catch (err) {
     if (err instanceof CommanderError) {
       process.exit(EXPECTED_EXIT_CODES.includes(err.code) ? 0 : err.exitCode)
+      return
+    }
+    if (err instanceof WizardExit) {
+      if (err.code === 0) logger.info(err.message)
+      else logger.error(err.message)
+      process.exit(err.code)
       return
     }
     reportError(err)
