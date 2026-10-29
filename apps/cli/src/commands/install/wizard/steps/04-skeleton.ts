@@ -19,7 +19,8 @@ export const loadBootstrap = async (): Promise<Bootstrap> => {
 }
 
 const assertSafeTopics = (seeds: Record<string, string[]>): void => {
-  for (const topic of Object.values(seeds).flat()) if (!isSafeTopicName(topic)) throw unsafeTopic(topic)
+  for (const topic of Object.values(seeds).flat())
+    if (!isSafeTopicName(topic)) throw unsafeTopic(topic)
 }
 
 export const skeletonStep: TempStep = async (draft, ctx, { root, signal }) => {
@@ -61,5 +62,8 @@ export const skeletonStep: TempStep = async (draft, ctx, { root, signal }) => {
   await dir('.claude')
   await dir('.claude/skills')
   const claudeMd = await readFile(join(bootstrap.getSeedRoot(), 'skeleton', 'CLAUDE.md'), 'utf8')
-  await file('CLAUDE.md', claudeMd.replaceAll('{{VAULT_ROOT}}', () => targetPath))
+  await file(
+    'CLAUDE.md',
+    claudeMd.replaceAll('{{VAULT_ROOT}}', () => targetPath),
+  )
 }

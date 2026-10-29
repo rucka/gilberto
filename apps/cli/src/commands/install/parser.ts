@@ -23,7 +23,10 @@ const invalidSeeds = (reason: string, raw: string): WizardExit =>
 export const isSafeTopicName = (t: string): boolean => !/[/\\]/.test(t) && t !== '.' && t !== '..'
 
 export const unsafeTopic = (topic: string): WizardExit =>
-  new WizardExit(64, `invalid topic name "${topic}": must not contain path separators or be "." or ".."`)
+  new WizardExit(
+    64,
+    `invalid topic name "${topic}": must not contain path separators or be "." or ".."`,
+  )
 
 export const parseSeedTopics = (raw: string): SeedOverrides => {
   const out: SeedOverrides = {}
