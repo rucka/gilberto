@@ -16,7 +16,8 @@ export default defineConfig({
         'coverage/',
         '**/*.test.ts',
         'src/index.ts',
-        'src/cli.ts',
+        'vitest.config.ts',
+        'scripts/',
       ],
       thresholds: {
         lines: 80,
