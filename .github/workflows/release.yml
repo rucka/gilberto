@@ -54,13 +54,8 @@ jobs:
       - name: Pack check
         run: node scripts/pack-check.js
 
-      - name: Assert prerelease tag is next
-        run: |
-          tag="$(node -p "require('./.changeset/pre.json').tag")"
-          if [ "$tag" != "next" ]; then
-            echo "::error::.changeset/pre.json tag is '$tag', expected 'next' — refusing to publish"
-            exit 1
-          fi
+      - name: Release config check (fixed group, pre mode next, engines)
+        run: node scripts/release-check.js
 
       - name: Read published version
         id: version
@@ -79,12 +74,12 @@ jobs:
       - name: Publish to npm
         id: publish
         if: env.HAS_NPM_TOKEN == 'true'
-        uses: changesets/action@v1
-        with:
-          publish: pnpm changeset publish --tag next
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          node scripts/publish-next.js "$VERSION"
+          echo "published=true" >> "$GITHUB_OUTPUT"
 
       - name: Warn — NPM_TOKEN missing
         if: env.HAS_NPM_TOKEN != 'true'

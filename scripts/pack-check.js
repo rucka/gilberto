@@ -2,6 +2,7 @@ const { execFileSync } = require('node:child_process')
 const { mkdtempSync, readdirSync, rmSync } = require('node:fs')
 const { tmpdir } = require('node:os')
 const { join } = require('node:path')
+const { checkEngines } = require('./release-check.js')
 
 const targets = [
   { dir: 'apps/cli', name: 'gilberto', bin: { gilberto: 'dist/cli.js' }, files: ['dist/cli.js'] },
@@ -30,6 +31,7 @@ try {
       execFileSync('tar', ['-xzOf', join(tmp, tgz), 'package/package.json'], { encoding: 'utf8' }),
     )
     if (manifest.name !== t.name) errors.push(`${t.name}: packed name is ${manifest.name}`)
+    errors.push(...checkEngines(manifest))
     if (/workspace:/.test(JSON.stringify(manifest)))
       errors.push(`${t.name}: workspace: in packed manifest`)
     if (JSON.stringify(manifest.bin ?? null) !== JSON.stringify(t.bin ?? null))

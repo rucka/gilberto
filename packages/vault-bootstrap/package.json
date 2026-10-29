@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Seed content and root-only path resolver for the gilberto vault bootstrap",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

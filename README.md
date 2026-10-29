@@ -12,7 +12,7 @@ Markdown + JSON vault on your filesystem, operated by portable skills that run i
 npx gilberto@next --version
 ```
 
-Requires Node ≥ 22.12. Published on npm tag `next` (versions `0.x`); `latest` is not set.
+Requires Node ≥ 22.12. Published on npm tag `next` (versions `0.x`); releases never move an existing `latest` (npm sets it once on first publish).
 
 ## Architecture
 
