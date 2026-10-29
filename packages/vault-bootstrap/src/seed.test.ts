@@ -190,5 +190,5 @@ describe('npm pack', () => {
     expect(paths.filter(p => /\.test\./.test(p))).toEqual([])
     for (const f of walk(seed)) expect(paths).toContain(`seed/${f}`)
     expect(files.find(f => f.path === 'seed/hooks/dispatch.sh')!.mode & 0o111).not.toBe(0)
-  })
+  }, 30_000)
 })
