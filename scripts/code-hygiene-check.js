@@ -119,14 +119,16 @@ function main() {
 
     if (
       typeof pkg.name !== 'string' ||
-      (!pkg.name.startsWith('@gilberto/') && pkg.name !== 'gilberto')
+      (!pkg.name.startsWith('@gilberto/') &&
+        pkg.name !== 'gilberto' &&
+        pkg.name !== '@foomakers/gilberto-vault-bootstrap')
     ) {
       violations.push({
         file: relPkg,
         line: 1,
         col: 1,
         rule: 'workspace-name',
-        message: `expected "@gilberto/*", got "${pkg.name ?? '<missing>'}"`,
+        message: `expected "@gilberto/*", "gilberto" or "@foomakers/gilberto-vault-bootstrap", got "${pkg.name ?? '<missing>'}"`,
       })
     }
 

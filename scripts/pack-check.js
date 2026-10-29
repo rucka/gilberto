@@ -30,7 +30,8 @@ try {
       execFileSync('tar', ['-xzOf', join(tmp, tgz), 'package/package.json'], { encoding: 'utf8' }),
     )
     if (manifest.name !== t.name) errors.push(`${t.name}: packed name is ${manifest.name}`)
-    if (/workspace:/.test(JSON.stringify(manifest))) errors.push(`${t.name}: workspace: in packed manifest`)
+    if (/workspace:/.test(JSON.stringify(manifest)))
+      errors.push(`${t.name}: workspace: in packed manifest`)
     if (JSON.stringify(manifest.bin ?? null) !== JSON.stringify(t.bin ?? null))
       errors.push(`${t.name}: bin is ${JSON.stringify(manifest.bin)}`)
     for (const f of t.files)
