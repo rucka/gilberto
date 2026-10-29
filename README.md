@@ -6,6 +6,14 @@ Personal AI-native second brain — vault + CLI.
 
 Markdown + JSON vault on your filesystem, operated by portable skills that run in any AI assistant (Claude Code, Codex, …) on any model. No cloud backend, no lock-in.
 
+## Install (alpha)
+
+```bash
+npx gilberto@next --version
+```
+
+Requires Node ≥ 22.12. Published on npm tag `next` (versions `0.x`); releases never move an existing `latest` (npm sets it once on first publish).
+
 ## Architecture
 
 ### Two worlds: repo vs vault
@@ -26,7 +34,7 @@ rucka/gilberto (source only)            $GILBERTO_ROOT (user instance)
 Both converge on `gilberto install` ([ADR-0002](.pair/adoption/tech/adr/0002-distribution-and-dual-entry-bootstrap.md)):
 
 - **Path A — skill-led**: install `gilberto-core` plugin → `/gilberto-process-vault-bootstrap` → ensures CLI → `gilberto install`.
-- **Path B — CLI-direct**: `npm i -g gilberto && gilberto install <vault>`.
+- **Path B — CLI-direct**: `npm i -g gilberto@next && gilberto install <vault>`.
 
 ### Vault layout
 

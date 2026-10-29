@@ -1,0 +1,15 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "gilberto": "0.0.0",
+    "@foomakers/gilberto-vault-bootstrap": "0.0.0",
+    "@gilberto/commitlint-config": "0.0.0",
+    "@gilberto/eslint-config": "0.0.0",
+    "@gilberto/markdownlint-config": "0.0.0",
+    "@gilberto/prettier-config": "0.0.0",
+    "@gilberto/skill-tests": "0.0.0",
+    "@gilberto/ts-config": "0.0.0"
+  },
+  "changesets": []
+}

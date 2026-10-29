@@ -52,3 +52,6 @@ jobs:
 
       - name: Quality gate (verify-only)
         run: pnpm quality-gate:ci
+
+      - name: Pack check
+        run: node scripts/release-check.js && pnpm build && node scripts/pack-check.js
