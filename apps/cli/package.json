@@ -34,6 +34,7 @@
     "mdlint:fix": "markdownlint-fix"
   },
   "dependencies": {
+    "@foomakers/gilberto-vault-bootstrap": "workspace:*",
     "@inquirer/prompts": "catalog:",
     "chalk": "catalog:",
     "commander": "catalog:",
