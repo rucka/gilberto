@@ -191,17 +191,20 @@ describe('r0-2 topic seed names as path segments', () => {
     expect(parseSeedTopics('intelligence=ai,v1.2')).toEqual({ intelligence: ['ai', 'v1.2'] })
   })
 
-  it.each(TOPIC_PILLARS)('r0-2-c2 control: step 4 accepts dotted name v1.2 for %s', async pillar => {
-    const root = await tmpRoot()
-    await skeletonStep(
-      { targetPath: '/final/vault', topicSeeds: { ...DEFAULT_TOPIC_SEEDS, [pillar]: ['v1.2'] } },
-      makeCtx().ctx,
-      { root, signal: new AbortController().signal },
-    )
-    const files = await listing(root)
-    expect(files).toContain(`${pillar}/v1.2/v1.2.md`)
-    if (pillar === 'pulse') expect(files).toContain('pulse/v1.2/history')
-  })
+  it.each(TOPIC_PILLARS)(
+    'r0-2-c2 control: step 4 accepts dotted name v1.2 for %s',
+    async pillar => {
+      const root = await tmpRoot()
+      await skeletonStep(
+        { targetPath: '/final/vault', topicSeeds: { ...DEFAULT_TOPIC_SEEDS, [pillar]: ['v1.2'] } },
+        makeCtx().ctx,
+        { root, signal: new AbortController().signal },
+      )
+      const files = await listing(root)
+      expect(files).toContain(`${pillar}/v1.2/v1.2.md`)
+      if (pillar === 'pulse') expect(files).toContain('pulse/v1.2/history')
+    },
+  )
 })
 
 describe('r0-3 CLAUDE.md root is the target verbatim', () => {
