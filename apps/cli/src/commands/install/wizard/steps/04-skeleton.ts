@@ -2,6 +2,7 @@ import { createRequire } from 'node:module'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { isSafeTopicName, unsafeTopic } from '../../parser.js'
 import { WizardExit } from '../exit.js'
 import { isTopicPillar } from '../state.js'
 import { quote, type Bootstrap, type TempStep } from '../types.js'
@@ -17,10 +18,15 @@ export const loadBootstrap = async (): Promise<Bootstrap> => {
   }
 }
 
+const assertSafeTopics = (seeds: Record<string, string[]>): void => {
+  for (const topic of Object.values(seeds).flat()) if (!isSafeTopicName(topic)) throw unsafeTopic(topic)
+}
+
 export const skeletonStep: TempStep = async (draft, ctx, { root, signal }) => {
   const { targetPath, topicSeeds } = draft
   if (targetPath === undefined || topicSeeds === undefined)
     throw new Error('skeleton step requires targetPath and topicSeeds')
+  assertSafeTopics(topicSeeds)
   const bootstrap = await (ctx.loadBootstrap ?? loadBootstrap)()
   const date = (ctx.now ?? (() => new Date()))()
 
@@ -55,5 +61,5 @@ export const skeletonStep: TempStep = async (draft, ctx, { root, signal }) => {
   await dir('.claude')
   await dir('.claude/skills')
   const claudeMd = await readFile(join(bootstrap.getSeedRoot(), 'skeleton', 'CLAUDE.md'), 'utf8')
-  await file('CLAUDE.md', claudeMd.replaceAll('{{VAULT_ROOT}}', targetPath))
+  await file('CLAUDE.md', claudeMd.replaceAll('{{VAULT_ROOT}}', () => targetPath))
 }
