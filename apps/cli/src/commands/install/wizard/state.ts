@@ -12,6 +12,7 @@ const topics = z.array(z.string().min(1))
 export const WizardStateSchema = z.object({
   targetPath: z.string().min(1),
   topicSeeds: z.object({ pulse: topics, intelligence: topics, projects: topics }),
+  materialized: z.boolean(),
 })
 
 export type WizardState = z.infer<typeof WizardStateSchema>

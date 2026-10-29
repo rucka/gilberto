@@ -3,15 +3,26 @@ import { DEFAULT_TOPIC_SEEDS, TOPIC_PILLARS, WizardStateSchema } from './state.j
 
 describe('WizardStateSchema', () => {
   it('accepts a complete state', () => {
-    const s = { targetPath: '/t', topicSeeds: DEFAULT_TOPIC_SEEDS }
+    const s = { targetPath: '/t', topicSeeds: DEFAULT_TOPIC_SEEDS, materialized: false }
     expect(WizardStateSchema.parse(s)).toEqual(s)
   })
 
   it.each([
-    ['empty path', { targetPath: '', topicSeeds: DEFAULT_TOPIC_SEEDS }],
-    ['missing seeds', { targetPath: '/t' }],
-    ['missing pillar', { targetPath: '/t', topicSeeds: { pulse: [], intelligence: [] } }],
-    ['non-string topic', { targetPath: '/t', topicSeeds: { ...DEFAULT_TOPIC_SEEDS, pulse: [1] } }],
+    ['empty path', { targetPath: '', topicSeeds: DEFAULT_TOPIC_SEEDS, materialized: true }],
+    ['missing seeds', { targetPath: '/t', materialized: true }],
+    ['missing materialized', { targetPath: '/t', topicSeeds: DEFAULT_TOPIC_SEEDS }],
+    [
+      'missing pillar',
+      { targetPath: '/t', topicSeeds: { pulse: [], intelligence: [] }, materialized: true },
+    ],
+    [
+      'non-string topic',
+      {
+        targetPath: '/t',
+        topicSeeds: { ...DEFAULT_TOPIC_SEEDS, pulse: [1] },
+        materialized: true,
+      },
+    ],
   ])('rejects %s', (_n, bad) => {
     expect(WizardStateSchema.safeParse(bad).success).toBe(false)
   })
