@@ -1,0 +1,348 @@
+{
+  "$meta": {
+    "pr": "83",
+    "phase": "r1-g1",
+    "base": "3daf7938a491fc154a8636fa5977e4f1f7d592ff",
+    "trailer": "Pair-RED-Snapshot: pr=83; phase=r1-g1; base=3daf7938a491fc154a8636fa5977e4f1f7d592ff; manifest=.pair/red-snapshots/pr-83-r1-g1.json",
+    "artifacts": [
+      "apps/cli/src/cli.log-level.test.ts",
+      "apps/cli/src/cli.entry.test.ts"
+    ]
+  },
+  "mode": "repair",
+  "phase": "r1-g1",
+  "inputHead": "3daf7938a491fc154a8636fa5977e4f1f7d592ff",
+  "sourceOfTruth": "apps/cli/src/cli.ts",
+  "inventory": [
+    {
+      "id": "r0-1",
+      "producer": "createProgram/runCli in apps/cli/src/cli.ts (log-level application)",
+      "inputs": [
+        "--log-level <level>",
+        "-v/--verbose",
+        "no sub-command"
+      ],
+      "representations": [
+        "src/cli.ts",
+        "dist/cli.js"
+      ],
+      "consumers": [
+        "getLogLevel() in ui/logger.ts",
+        "main() stack printing"
+      ],
+      "classes": [
+        "no sub-command + --log-level",
+        "no sub-command + -v",
+        "both flags (log-level wins)",
+        "no flags (info)",
+        "with sub-command (preAction)",
+        "-v with sub-command",
+        "precedence with sub-command (both orders)",
+        "global option after the sub-command"
+      ],
+      "interactions": [
+        "--verbose x --log-level precedence",
+        "--log-level x -v reversed order (no sub-command)"
+      ]
+    },
+    {
+      "id": "r0-2",
+      "producer": "isEntry() in apps/cli/src/cli.ts",
+      "inputs": [
+        "process.argv[1] extensionless/.js"
+      ],
+      "representations": [
+        "dist/cli.js"
+      ],
+      "consumers": [
+        "node entry execution"
+      ],
+      "classes": [
+        "extensionless path (nonexistent file)",
+        "explicit .js path",
+        "symlinked path (bin shim -> dist/cli.js)",
+        "nonexistent non-entry argv[1] (another module importing dist/cli.js, resolved by node extension probing)"
+      ],
+      "interactions": []
+    }
+  ],
+  "fixScope": {
+    "owner": "apps/cli/src/cli.ts",
+    "mode": "behavioral",
+    "allowedPaths": [
+      "apps/cli/src/cli.ts"
+    ]
+  },
+  "matrix": [
+    {
+      "id": "r0-1-W1",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "runCli --log-level debug, no sub-command",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "getLogLevel()==debug",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-W2",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "runCli -v, no sub-command",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "getLogLevel()==debug",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-W3",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "runCli -v --log-level error, no sub-command",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "getLogLevel()==error",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-C1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "no flags",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "info",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-C2",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "--log-level warn with sub-command",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "warn",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-2-W1",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "node dist/cli --version (extensionless)",
+      "oracle": "apps/cli/src/cli.entry.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.entry.test.ts",
+      "file": "apps/cli/src/cli.entry.test.ts",
+      "expected": "status 0, stdout==version, no ENOENT",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "r0-2-W2",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "node dist/cli --help",
+      "oracle": "apps/cli/src/cli.entry.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.entry.test.ts",
+      "file": "apps/cli/src/cli.entry.test.ts",
+      "expected": "status 0, stdout has --no-banner",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "r0-2-C1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "node dist/cli.js --version",
+      "oracle": "apps/cli/src/cli.entry.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.entry.test.ts",
+      "file": "apps/cli/src/cli.entry.test.ts",
+      "expected": "status 0, stdout==version",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "r0-1-W4",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "runCli --log-level error -v, no sub-command (reversed order)",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "getLogLevel()==error",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-C3",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "runCli -v --no-banner noop",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "debug",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-C4",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "runCli --log-level error -v --no-banner noop",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "error",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-C5",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "runCli -v --log-level error --no-banner noop",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "error",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-consumer-main",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "main() throwing noop: --log-level debug and -v print stack; no flag prints none",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "stack iff debug",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-2-C2",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "node <symlink in tmpdir -> dist/cli.js> --version",
+      "oracle": "apps/cli/src/cli.entry.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.entry.test.ts",
+      "file": "apps/cli/src/cli.entry.test.ts",
+      "expected": "status 0, stdout==version",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "r0-1-C6",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "runCli --no-banner noop --log-level debug (option after sub-command)",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "debug",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-C7",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "runCli --no-banner noop -v (option after sub-command)",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "debug",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-1-C8",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "runCli --no-banner noop --log-level error -v (options after sub-command)",
+      "oracle": "apps/cli/src/cli.log-level.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "expected": "error",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "r0-2-C3",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "tmpdir other.js imports dist/cli.js, run as extensionless `node <tmp>/other` (argv[1] nonexistent, not the entry)",
+      "oracle": "apps/cli/src/cli.entry.test.ts :: pnpm --dir apps/cli exec vitest run src/cli.entry.test.ts",
+      "file": "apps/cli/src/cli.entry.test.ts",
+      "expected": "no ENOENT on stderr, status 0, stdout is 'imported-ok' only (main() not run)",
+      "covers": [
+        "r0-2"
+      ]
+    }
+  ],
+  "redTests": [
+    {
+      "file": "apps/cli/src/cli.log-level.test.ts",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:5e598bb101c38acc857457aaa16a9816c4aaae0a2207743bc143a3388ce2925b",
+      "command": "pnpm --dir apps/cli exec vitest run src/cli.log-level.test.ts",
+      "observed": "4 failed (W1,W2,W3,W4): expected info to be debug/error; 11 passed (controls)"
+    },
+    {
+      "file": "apps/cli/src/cli.entry.test.ts",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:6c2af7eb382fe54d91b9390803ab79747a41eafc7233d75dc3a71f3be634d9d1",
+      "command": "pnpm --dir apps/cli exec vitest run src/cli.entry.test.ts",
+      "observed": "3 failed (W1,W2,C3): ENOENT lstat, status 1; 2 passed (C1,C2)"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "owner": "apps/cli/src/cli.ts",
+        "mode": "behavioral",
+        "findings": [
+          "r0-1",
+          "r0-2"
+        ],
+        "allowedPaths": [
+          "apps/cli/src/cli.ts"
+        ],
+        "dependsOn": [],
+        "oracle": "vitest cli.log-level + cli.entry"
+      },
+      {
+        "groupId": "r1-g2",
+        "owner": "apps/cli/src/cli.test.ts",
+        "mode": "test",
+        "findings": [
+          "r0-3"
+        ],
+        "allowedPaths": [],
+        "dependsOn": [],
+        "oracle": "AC-2 test fails under mutation removing .name(chalk.blue(pkg.name))"
+      }
+    ],
+    "carried": []
+  },
+  "remediationBatchId": "r1",
+  "groupId": "r1-g1",
+  "changedRows": [
+    "r0-2-C3"
+  ]
+}
