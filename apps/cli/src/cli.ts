@@ -3,6 +3,7 @@ import { readFileSync, realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import chalk from 'chalk'
 import { Command, CommanderError, Option } from 'commander'
+import { registerCommandsOnProgram } from './commands/index.js'
 import { getLogLevel, LOG_LEVELS, setLogLevel, type LogLevel } from './ui/logger.js'
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
@@ -33,10 +34,17 @@ export const createProgram = (): Command => {
     .configureHelp({ sortSubcommands: true })
     .exitOverride()
 
-  program.hook('preAction', cmd => {
+  program.hook('preAction', (cmd, action) => {
+    if (action === program) return
     const opts = cmd.optsWithGlobals<GlobalOpts>()
     applyLogLevel(opts)
     if (opts.banner && !opts.json) console.error(banner())
+  })
+  registerCommandsOnProgram(program)
+  program.action(() => {
+    const [name] = program.args
+    if (name)
+      program.error(`error: unknown command '${name}'`, { code: 'commander.unknownCommand' })
   })
   return program
 }
