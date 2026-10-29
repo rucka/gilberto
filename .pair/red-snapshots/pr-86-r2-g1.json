@@ -1,0 +1,112 @@
+{
+  "$meta": {
+    "pr": "86",
+    "phase": "r2-g1",
+    "base": "850fdf4d1c73792d54d27812818b6a7be28cec80",
+    "trailer": "Pair-RED-Snapshot: pr=86; phase=r2-g1; base=850fdf4d1c73792d54d27812818b6a7be28cec80; manifest=.pair/red-snapshots/pr-86-r2-g1.json",
+    "artifacts": [
+      "apps/cli/src/cli.format.test.ts",
+      "apps/cli/src/prettier-gate.test.ts"
+    ]
+  },
+  "mode": "remediation",
+  "phase": "r2-g1",
+  "inputHead": "850fdf4d1c73792d54d27812818b6a7be28cec80",
+  "sourceOfTruth": "prettier (tools/prettier-config) over apps/cli/src/cli.ts",
+  "inventory": [
+    {
+      "id": "r1-6",
+      "producer": "prettier --list-different with tools/prettier-config/.prettierignore (the quality-gate:ci prettier:check engine)",
+      "inputs": [
+        "apps/cli/src/cli.ts"
+      ],
+      "representations": [
+        "canonical apps/cli/src/cli.ts",
+        "dist/cli.js build output (not checked)"
+      ],
+      "consumers": [
+        "pnpm prettier:check",
+        "pnpm quality-gate:ci"
+      ],
+      "classes": [
+        "cli.ts unformatted (invalid: listed by prettier, exit 1)",
+        "cli.ts formatted (supported: not listed, exit 0)"
+      ],
+      "interactions": [
+        "cli.ts format x existing prettier-gate.test.ts ignore-list controls (unchanged)"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "apps/cli/src/cli.ts",
+    "mode": "structural",
+    "allowedPaths": [
+      "apps/cli/src/cli.ts"
+    ]
+  },
+  "matrix": [
+    {
+      "id": "R6W1",
+      "kind": "witness",
+      "baseline": "red",
+      "covers": [
+        "r1-6"
+      ],
+      "condition": "prettier --list-different apps/cli/src/cli.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/cli.format.test.ts",
+      "file": "apps/cli/src/cli.format.test.ts",
+      "expected": "no file listed"
+    },
+    {
+      "id": "R6C1",
+      "kind": "control",
+      "baseline": "pass",
+      "covers": [
+        "r1-6"
+      ],
+      "condition": "existing prettier gate: pair-managed files not flagged, unformatted probe still flagged",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/prettier-gate.test.ts",
+      "file": "apps/cli/src/prettier-gate.test.ts",
+      "expected": "2 passed"
+    }
+  ],
+  "redTests": [
+    {
+      "file": "apps/cli/src/cli.format.test.ts",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:5c6cac7bc980acdb5fcedc42e667fd032de9b2bf37025855b96573c3f2b50036",
+      "command": "pnpm --dir apps/cli exec vitest run src/cli.format.test.ts",
+      "observed": "1 failed: expected [ 'apps/cli/src/cli.ts' ] to deeply equal []"
+    },
+    {
+      "file": "apps/cli/src/prettier-gate.test.ts",
+      "kind": "test",
+      "baseline": "pass",
+      "sha256": "sha256:1d70899dbffc1d74405b552a322cc82437df88586f8766f29cb559b17903870b",
+      "command": "pnpm --dir apps/cli exec vitest run src/prettier-gate.test.ts",
+      "observed": "Tests 2 passed (2)"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r2-g1",
+        "owner": "apps/cli/src/cli.ts",
+        "mode": "structural",
+        "allowedPaths": [
+          "apps/cli/src/cli.ts"
+        ],
+        "findings": [
+          "r1-6"
+        ],
+        "dependsOn": [],
+        "oracle": "pnpm quality-gate:ci"
+      }
+    ],
+    "carried": []
+  },
+  "groupId": "r2-g1",
+  "remediationBatchId": "r2"
+}
