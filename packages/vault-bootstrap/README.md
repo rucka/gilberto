@@ -1,11 +1,11 @@
-# @gilberto/vault-bootstrap
+# @foomakers/gilberto-vault-bootstrap
 
 Seed content for a new gilberto vault + two pure functions. Read-only: copy/write logic lives in the CLI (ADR-0001).
 
 ## API
 
 ```ts
-import { PILLARS, getSeedRoot, resolvePillarPath, UnknownPillarError } from '@gilberto/vault-bootstrap'
+import { PILLARS, getSeedRoot, resolvePillarPath, UnknownPillarError } from '@foomakers/gilberto-vault-bootstrap'
 
 getSeedRoot() // absolute path of shipped seed/, resolved from the module file
 resolvePillarPath(vaultRoot, 'me') // join(vaultRoot, 'me')

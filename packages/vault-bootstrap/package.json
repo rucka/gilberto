@@ -1,5 +1,5 @@
 {
-  "name": "@gilberto/vault-bootstrap",
+  "name": "@foomakers/gilberto-vault-bootstrap",
   "version": "0.0.0",
   "description": "Seed content and root-only path resolver for the gilberto vault bootstrap",
   "license": "MIT",
