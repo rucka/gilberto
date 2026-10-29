@@ -27,6 +27,11 @@ export const overwriteStep: WizardStep = async (draft, { flags, prompts, trace }
       2,
       `vault already exists at ${quote(targetPath)}; use \`gilberto update\` (coming Initiative #5)`,
     )
+  const info = await stat(targetPath)
+  if (!info.isDirectory())
+    throw new WizardExit(1, `target path is not a directory: ${quote(targetPath)}`)
+  if ((await readdir(targetPath)).length > 0)
+    throw new WizardExit(1, `target path is not empty: ${quote(targetPath)}`)
   if (flags.nonInteractive) {
     trace('step=overwrite decision=continue reason=non-interactive')
     return draft

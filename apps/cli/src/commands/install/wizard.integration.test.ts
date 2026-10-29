@@ -31,13 +31,16 @@ describe('handler + wizard', () => {
     const target = join(root, 'My Vault')
     const { deps, logs } = makeDeps()
     await handleInstallCommand(baseFlags({ target, verbose: true }), deps, stubPrompts().prompts)
-    expect(logs).toEqual([
+    expect(logs.slice(0, 5)).toEqual([
       `step=path resolved="${target}"`,
       'step=overwrite decision=continue reason=missing',
       'step=topics pillar=pulse selected=health,body,finance',
       'step=topics pillar=intelligence selected=ai,product',
       `step=topics pillar=projects selected=${DEFAULT_TOPIC_SEEDS.projects.join(',')}`,
     ])
+    await expect(logs.slice(5).join('\n') + '\n').toMatchFileSnapshot(
+      '../../../test/__snapshots__/install-verbose-default.txt',
+    )
   })
 
   it('without --verbose prints nothing', async () => {

@@ -47,11 +47,14 @@ describe('step 2 overwrite', () => {
     expect((await run(v, { flags: { nonInteractive: true } })).error?.code).toBe(2)
   })
 
-  it('other .claude/skills entries are not a vault', async () => {
+  it('r1-gap1-w1: other .claude/skills entries are not a vault → non-empty refusal exit 1 before confirm', async () => {
     const root = await tmpRoot()
     const v = join(root, 'v')
     await mkdir(join(v, '.claude', 'skills', 'other'), { recursive: true })
-    expect((await run(v, { script: { confirm: true } })).error).toBeUndefined()
+    const { error, calls } = await run(v, { script: { confirm: true } })
+    expect(error?.code).toBe(1)
+    expect(error?.message).toMatch(/not empty/)
+    expect(calls).toEqual([])
   })
 
   it('AC4: empty dir, confirm Yes → continue', async () => {
@@ -64,12 +67,12 @@ describe('step 2 overwrite', () => {
     expect(lines).toEqual(['step=overwrite decision=continue'])
   })
 
-  it('AC4: default answer is No → exit 0', async () => {
+  it('r1-gap1-c1: AC4 default answer is No on empty dir → exit 0', async () => {
     const root = await tmpRoot()
     const v = join(root, 'v')
     await mkdir(v)
-    await writeFile(join(v, 'unrelated.txt'), 'x')
-    const { error } = await run(v)
+    const { error, calls } = await run(v)
+    expect(calls).toEqual(['confirm:Target path exists. Continue?'])
     expect(error?.code).toBe(0)
   })
 

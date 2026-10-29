@@ -110,6 +110,9 @@ importers:
 
   apps/cli:
     dependencies:
+      '@foomakers/gilberto-vault-bootstrap':
+        specifier: workspace:*
+        version: link:../../packages/vault-bootstrap
       '@inquirer/prompts':
         specifier: 'catalog:'
         version: 7.5.0(@types/node@22.20.5)

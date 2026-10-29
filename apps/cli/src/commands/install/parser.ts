@@ -20,6 +20,14 @@ const invalidSeeds = (reason: string, raw: string): WizardExit =>
     `invalid --seed-topics: ${reason}; expected "pillar=a,b;pillar=c" with pillar in ${TOPIC_PILLARS.join('|')}; got "${raw}"`,
   )
 
+export const isSafeTopicName = (t: string): boolean => !/[/\\]/.test(t) && t !== '.' && t !== '..'
+
+export const unsafeTopic = (topic: string): WizardExit =>
+  new WizardExit(
+    64,
+    `invalid topic name "${topic}": must not contain path separators or be "." or ".."`,
+  )
+
 export const parseSeedTopics = (raw: string): SeedOverrides => {
   const out: SeedOverrides = {}
   for (const entry of raw.split(';').filter(e => e.trim())) {
@@ -29,6 +37,8 @@ export const parseSeedTopics = (raw: string): SeedOverrides => {
       .split(',')
       .map(t => t.trim())
       .filter(Boolean)
+    const bad = topics.find(t => !isSafeTopicName(t))
+    if (bad !== undefined) throw unsafeTopic(bad)
     if (extra.length || !topics.length) throw invalidSeeds(`malformed entry "${entry}"`, raw)
     out[pillar] = topics
   }
