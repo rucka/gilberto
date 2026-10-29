@@ -155,3 +155,49 @@ def merge_type(text, name, schema):
     tail = body[s:e][len(body[s:e].rstrip("\n")) :] or "\n"
     body = body[:s] + f"### {name}\n\n```yaml\n{render_schema(merged)}```{tail}" + body[e:]
     return text[: m.start(1)] + body + text[m.end(1):], added
+
+
+_LEVELS = re.compile(r"^## Relationship levels\n(.*?)(?=^## |\Z)", re.S | re.M)
+_LEVEL_LINE = re.compile(r"(?:[-*]\s+)?([a-z0-9][a-z0-9-]*)\s+—\s")
+
+
+def _levels(text):
+    m = _LEVELS.search(text)
+    if not m:
+        raise MechanicError("REGISTRY_NOT_FOUND", file=ANATOMY, section="## Relationship levels")
+    return m
+
+
+def level_names(text):
+    """Names under `## Relationship levels`: table rows (header+separator skipped) and `name — criteria` lines."""
+    names, row = [], 0
+    for line in _levels(text).group(1).split("\n"):
+        if line.startswith("|"):
+            row += 1
+            if row > 2:
+                names.append(_cell(line))
+            continue
+        row = 0
+        m = _LEVEL_LINE.match(line)
+        if m:
+            names.append(m.group(1))
+    return names
+
+
+def append_level(text, name, criteria):
+    """Append after the last existing entry: a table row when the section holds a table, else a `- name — criteria` line."""
+    m = _levels(text)
+    body = m.group(1)
+    lines = body.split("\n")
+    start = next((i for i, l in enumerate(lines) if l.startswith("|")), None)
+    if start is not None:
+        end = start
+        while end + 1 < len(lines) and lines[end + 1].startswith("|"):
+            end += 1
+        lines.insert(end + 1, f"| {name} | {criteria.replace('|', chr(92) + '|')} |")
+        new = "\n".join(lines)
+    else:
+        entry = f"- {name} — {criteria}"
+        head = body.rstrip("\n")
+        new = f"{head}\n{entry}{body[len(head):] or chr(10)}" if head else f"\n{entry}\n{body}"
+    return text[: m.start(1)] + new + text[m.end(1):]
