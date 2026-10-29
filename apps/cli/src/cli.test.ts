@@ -2,6 +2,7 @@ import { execFileSync, spawnSync } from 'node:child_process'
 import { readFileSync, statSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import chalk from 'chalk'
 import { Command } from 'commander'
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
 import { createProgram, main, runCli } from './cli.js'
@@ -9,6 +10,7 @@ import { getLogLevel, setLogLevel } from './ui/logger.js'
 
 const cliDir = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const pkg = JSON.parse(readFileSync(resolve(cliDir, 'package.json'), 'utf8')) as {
+  name: string
   version: string
   description: string
 }
@@ -52,6 +54,20 @@ describe('cli', () => {
     for (const o of ['--log-level', '-v, --verbose', '--no-banner']) expect(out).toContain(o)
     expect(err).not.toContain('Error:')
     expect(exit).toHaveBeenCalledWith(0)
+  })
+
+  it('AC-2: usage line names pkg.name in blue regardless of argv[1]', async () => {
+    const level = chalk.level
+    chalk.level = 1
+    let blue = ''
+    try {
+      blue = chalk.blue(pkg.name)
+      await main(['node', 'not-the-package-name', '--help'])
+    } finally {
+      chalk.level = level
+    }
+    expect(out).toContain(`Usage: ${blue}`)
+    expect(out).not.toContain('not-the-package-name')
   })
 
   it('AC-3: --log-level debug accepted without subcommands', async () => {
