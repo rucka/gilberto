@@ -41,7 +41,10 @@ export const createProgram = (): Command => {
     if (opts.banner && !opts.json) console.error(banner())
   })
   registerCommandsOnProgram(program)
-  program.action(() => undefined)
+  program.action(() => {
+    const [name] = program.args
+    if (name) program.error(`error: unknown command '${name}'`, { code: 'commander.unknownCommand' })
+  })
   return program
 }
 
