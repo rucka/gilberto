@@ -16,18 +16,20 @@ const exitOf = async (p: Promise<unknown>) => {
 
 describe('step 1 path', () => {
   it('AC1: prompts with the Dropbox default', async () => {
-    const { ctx, calls } = makeCtx({ env: { HOME: '/home/u' } })
+    const home = await tmpRoot()
+    const { ctx, calls } = makeCtx({ env: { HOME: home } })
     const out = await pathStep({}, ctx)
     expect(calls).toEqual(['input:Where should the vault be installed?'])
     expect(DEFAULT_TARGET_PATH).toBe('~/Dropbox/Gilberto/')
-    expect(out.targetPath).toBe('/home/u/Dropbox/Gilberto')
+    expect(out.targetPath).toBe(join(home, 'Dropbox', 'Gilberto'))
   })
 
   it('AC2: positional target skips the prompt, relative resolves from cwd', async () => {
-    const { ctx, calls, lines } = makeCtx({ flags: { target: 'v/' }, cwd: '/work' })
-    expect((await pathStep({}, ctx)).targetPath).toBe('/work/v')
+    const cwd = await tmpRoot()
+    const { ctx, calls, lines } = makeCtx({ flags: { target: 'v/' }, cwd })
+    expect((await pathStep({}, ctx)).targetPath).toBe(join(cwd, 'v'))
     expect(calls).toEqual([])
-    expect(lines).toEqual(['step=path resolved="/work/v"'])
+    expect(lines).toEqual([`step=path resolved="${join(cwd, 'v')}"`])
   })
 
   it('AC9: spaces and unicode kept verbatim and quoted', async () => {
