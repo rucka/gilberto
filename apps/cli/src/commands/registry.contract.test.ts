@@ -68,20 +68,22 @@ const mkDeps = (): CommandDeps & { out: string[] } => {
 const patchIndex = (dir: string): void => {
   const file = join(dir, 'src/commands/index.ts')
   const src = readFileSync(file, 'utf8')
-  if (!src.includes('[helloCommand]')) throw new Error('index.ts no longer lists [helloCommand]')
+  if (!src.includes('[\n  helloCommand,'))
+    throw new Error('index.ts no longer lists helloCommand first')
   writeFileSync(
     file,
-    `import { fooCommand } from './foo/index.js'\n${src.replace('[helloCommand]', '[helloCommand, fooCommand]')}`,
+    `import { fooCommand } from './foo/index.js'\n${src.replace('[\n  helloCommand,', '[\n  helloCommand,\n  fooCommand,')}`,
   )
 }
 
 const patchDuplicateIndex = (dir: string): void => {
   const file = join(dir, 'src/commands/index.ts')
   const src = readFileSync(file, 'utf8')
-  if (!src.includes('[helloCommand]')) throw new Error('index.ts no longer lists [helloCommand]')
+  if (!src.includes('[\n  helloCommand,'))
+    throw new Error('index.ts no longer lists helloCommand first')
   writeFileSync(
     file,
-    `import { helloCommand as copiedCommand } from './foo/index.js'\n${src.replace('[helloCommand]', '[helloCommand, copiedCommand]')}`,
+    `import { helloCommand as copiedCommand } from './foo/index.js'\n${src.replace('[\n  helloCommand,', '[\n  helloCommand,\n  copiedCommand,')}`,
   )
 }
 
@@ -190,7 +192,14 @@ describe('registry contract (r0-1, r0-2, r0-3)', () => {
     const { registerCommandsOnProgram } = await loadEmitted()
     const program = new Command().exitOverride()
     registerCommandsOnProgram(program, mkDeps())
-    expect(program.commands.map(c => c.name()).sort()).toEqual(['_hello', 'foo'])
+    expect(program.commands.map(c => c.name()).sort()).toEqual([
+      '_hello',
+      'foo',
+      'install',
+      'plugin',
+      'status',
+      'update',
+    ])
   })
 
   it('RW4: registered heterogeneous registry runs each command end to end (r0-1 x r0-2)', async () => {

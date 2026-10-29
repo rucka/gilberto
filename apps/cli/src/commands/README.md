@@ -50,3 +50,7 @@ export const fooCommand: CommandRegistryEntry<FooCommandConfig> = withOrigin(imp
   handle: handleFooCommand,
 })
 ```
+
+## Sub-actions
+
+A command may declare `metadata.subcommands` (`name`, `description`, `usage`, `options`); each becomes a Commander sub-command of the entry. `parse` receives `[subName, ...positionals]`. The parent gets no action: bare `<cmd>` prints help. See `plugin/`.
