@@ -1,0 +1,14 @@
+{
+  "name": "gilberto",
+  "description": "Gilberto: AI-native second brain skills",
+  "owner": {
+    "name": "rucka"
+  },
+  "plugins": [
+    {
+      "name": "gilberto-core",
+      "source": "./plugins/gilberto-core",
+      "description": "Gilberto core skills"
+    }
+  ]
+}

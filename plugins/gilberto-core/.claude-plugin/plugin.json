@@ -1,0 +1,8 @@
+{
+  "name": "gilberto-core",
+  "version": "0.0.1",
+  "description": "Gilberto core skills: vault bootstrap, mechanics and lifecycle for the AI-native second brain.",
+  "author": {
+    "name": "rucka"
+  }
+}
