@@ -1,6 +1,10 @@
 import json
 import re
+import shutil
+import subprocess
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 PLUGIN_DIR = ROOT / "plugins" / "gilberto-core"
@@ -38,3 +42,10 @@ def test_marketplace_name_matches_plugin_and_source_exists():
 def test_plugins_not_pnpm_workspace():
     ws = (ROOT / "pnpm-workspace.yaml").read_text()
     assert "plugins" not in ws
+
+
+@pytest.mark.skipif(shutil.which("claude") is None, reason="claude CLI absent")
+@pytest.mark.parametrize("target", [ROOT, PLUGIN_DIR])
+def test_claude_plugin_validate(target):
+    r = subprocess.run(["claude", "plugin", "validate", str(target)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
