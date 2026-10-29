@@ -1,0 +1,115 @@
+{
+  "$meta": {
+    "pr": "91",
+    "phase": "r2-g1",
+    "base": "3e80939d70a078bfb96b27123355b939c9178d0c",
+    "trailer": "Pair-RED-Snapshot: pr=91; phase=r2-g1; base=3e80939d70a078bfb96b27123355b939c9178d0c; manifest=.pair/red-snapshots/pr-91-r2-g1.json",
+    "artifacts": [
+      "apps/cli/src/commands/install/prettier-r2.test.ts"
+    ]
+  },
+  "status": "red",
+  "mode": "remediation",
+  "inputHead": "3e80939d70a078bfb96b27123355b939c9178d0c",
+  "sourceOfTruth": "repo prettier config (tools/prettier-config) over parser.ts and 04-skeleton.ts",
+  "inventory": [
+    {
+      "id": "r1-4",
+      "producer": "prettier (@gilberto/prettier-config) formatting of the r1 fix lines in parser.ts and 04-skeleton.ts",
+      "inputs": [
+        "apps/cli/src/commands/install/parser.ts",
+        "apps/cli/src/commands/install/wizard/steps/04-skeleton.ts"
+      ],
+      "representations": [
+        "canonical source files"
+      ],
+      "consumers": [
+        "pnpm prettier:check",
+        "pnpm quality-gate:ci",
+        "GitHub ci check"
+      ],
+      "classes": [
+        "parser.ts unformatted (red)",
+        "04-skeleton.ts unformatted (red)",
+        "already-clean file in same dir (control)"
+      ],
+      "interactions": []
+    }
+  ],
+  "fixScope": {
+    "owner": "apps/cli install wizard",
+    "mode": "behavioral",
+    "allowedPaths": [
+      "apps/cli/src/commands/install/parser.ts",
+      "apps/cli/src/commands/install/wizard/steps/04-skeleton.ts"
+    ]
+  },
+  "matrix": [
+    {
+      "id": "r1-4-w1",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "prettier --list-different parser.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/prettier-r2.test.ts (rows tagged r1-4-w1)",
+      "file": "apps/cli/src/commands/install/prettier-r2.test.ts",
+      "expected": "empty list",
+      "covers": [
+        "r1-4"
+      ]
+    },
+    {
+      "id": "r1-4-w2",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "prettier --list-different 04-skeleton.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/prettier-r2.test.ts (rows tagged r1-4-w2)",
+      "file": "apps/cli/src/commands/install/prettier-r2.test.ts",
+      "expected": "empty list",
+      "covers": [
+        "r1-4"
+      ]
+    },
+    {
+      "id": "r1-4-c1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "prettier --list-different handler.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/prettier-r2.test.ts (rows tagged r1-4-c1)",
+      "file": "apps/cli/src/commands/install/prettier-r2.test.ts",
+      "expected": "empty list",
+      "covers": [
+        "r1-4"
+      ]
+    }
+  ],
+  "redTests": [
+    {
+      "file": "apps/cli/src/commands/install/prettier-r2.test.ts",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:506ebb3193263842ed94a535c8d570d4a9e2940b76975466836da7688ba37f3e",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/install/prettier-r2.test.ts",
+      "observed": "FAIL: 2 failed | 1 passed (3) — r1-4 parser.ts and 04-skeleton.ts listed as different; control passes"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r2-g1",
+        "findings": [
+          "r1-4"
+        ],
+        "owner": "apps/cli install wizard",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "apps/cli/src/commands/install/parser.ts",
+          "apps/cli/src/commands/install/wizard/steps/04-skeleton.ts"
+        ],
+        "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/prettier-r2.test.ts",
+        "dependsOn": []
+      }
+    ],
+    "carried": []
+  }
+}
