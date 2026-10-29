@@ -47,7 +47,7 @@ const registerSubcommand = (
   addCommandOptions(cmd, sub.options)
   cmd.action(async (...actionArgs: unknown[]) => {
     const self = actionArgs.at(-1) as Command
-    await run(normalizeOptionKeys(self.opts()), [sub.name, ...onlyStrings(self.args)])
+    await run(normalizeOptionKeys(self.optsWithGlobals()), [sub.name, ...onlyStrings(self.args)])
   })
 }
 
@@ -77,6 +77,7 @@ export const registerCommandFromMetadata = <C extends { command: string }>(
   }
   return cmd.action(async (...actionArgs: unknown[]) => {
     const self = actionArgs.at(-1) as Command
-    await dispatch(entry.parse(normalizeOptionKeys(self.opts()), onlyStrings(self.args)), deps)
+    const opts = normalizeOptionKeys(self.optsWithGlobals())
+    await dispatch(entry.parse(opts, onlyStrings(self.args)), deps)
   })
 }
