@@ -15,6 +15,11 @@ const EXPECTED_EXIT_CODES = ['commander.helpDisplayed', 'commander.help', 'comma
 
 const banner = (): string => `${chalk.blue(pkg.name)} v${pkg.version}`
 
+type GlobalOpts = { logLevel?: LogLevel; verbose?: boolean; banner: boolean; json?: boolean }
+
+const applyLogLevel = (opts: GlobalOpts): void =>
+  setLogLevel(opts.logLevel ?? (opts.verbose ? 'debug' : 'info'))
+
 /** Builds the root Commander program: metadata, global options, pre-action hook. */
 export const createProgram = (): Command => {
   const program = new Command()
@@ -29,13 +34,8 @@ export const createProgram = (): Command => {
     .exitOverride()
 
   program.hook('preAction', cmd => {
-    const opts = cmd.optsWithGlobals<{
-      logLevel?: LogLevel
-      verbose?: boolean
-      banner: boolean
-      json?: boolean
-    }>()
-    setLogLevel(opts.logLevel ?? (opts.verbose ? 'debug' : 'info'))
+    const opts = cmd.optsWithGlobals<GlobalOpts>()
+    applyLogLevel(opts)
     if (opts.banner && !opts.json) console.error(banner())
   })
   return program
@@ -50,6 +50,7 @@ export const runCli = async (
   program: Command = createProgram(),
 ): Promise<void> => {
   await program.parseAsync(argv)
+  applyLogLevel(program.opts<GlobalOpts>())
 }
 
 /**
@@ -74,7 +75,15 @@ export const main = async (argv: string[] = process.argv, program?: Command): Pr
 
 const isEntry = (): boolean => {
   const script = process.argv[1]
-  return !!script && realpathSync(script) === fileURLToPath(import.meta.url)
+  if (!script) return false
+  const self = fileURLToPath(import.meta.url)
+  return [script, `${script}.js`].some(p => {
+    try {
+      return realpathSync(p) === self
+    } catch {
+      return false
+    }
+  })
 }
 
 if (isEntry()) void main()
