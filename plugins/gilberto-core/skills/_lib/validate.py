@@ -60,6 +60,17 @@ def _registered_fields(root, type_):
     return None
 
 
+def _type_schema(root, type_):
+    """`### <type>` YAML block (written by mechanic-forge-type) under `## Types`; None = none defined."""
+    from . import anatomy_io
+
+    try:
+        with open(os.path.join(root, "anatomy", "anatomy.md"), encoding="utf-8") as f:
+            return anatomy_io.type_schema(f.read(), type_)
+    except FileNotFoundError:
+        return None
+
+
 def frontmatter(root, fm):
     missing = [k for k in MANDATORY if k not in fm]
     if missing:
@@ -70,11 +81,15 @@ def frontmatter(root, fm):
         raise MechanicError("INVALID_FRONTMATTER", type=t, reason="unknown type scope")
     if not isinstance(fm["topics"], list):
         raise MechanicError("INVALID_FRONTMATTER", reason="topics must be a list")
-    fields = _registered_fields(root, t)
-    if fields is not None:
-        allowed = set(MANDATORY) | set(fields)
+    schema = _type_schema(root, t)
+    if schema is not None:
+        required, allowed = schema["required"], set(MANDATORY) | set(schema["required"]) | set(schema["optional"])
+    else:
+        required = _registered_fields(root, t)
+        allowed = set(MANDATORY) | set(required or [])
+    if required is not None:
         unknown = sorted(set(fm) - allowed)
-        absent = [f for f in fields if f not in fm]
+        absent = [f for f in required if f not in fm]
         if unknown or absent:
             raise MechanicError("INVALID_FRONTMATTER", type=t, diff={"missing": absent, "unknown": unknown})
     return fm

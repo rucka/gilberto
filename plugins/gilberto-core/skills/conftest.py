@@ -37,9 +37,23 @@ body
 """
 
 
+TOPICS = """---
+type: anatomy-topics
+---
+
+# Topics
+
+| Topic | Description |
+| ----- | ----------- |
+| health | body |
+
+trailing prose
+"""
+
+
 @pytest.fixture
 def vault(tmp_path):
-    """Tmp vault: 5 pillars + network/ + anatomy/ (anatomy.md, templates/projects/generic/generic.md)."""
+    """Tmp vault: 5 pillars + network/ + anatomy/ (anatomy.md, topics.md, templates/projects/generic/generic.md)."""
     root = tmp_path / "vault"
     for d in ("me", "pulse", "projects", "intelligence", "journey", "network"):
         (root / d).mkdir(parents=True)
@@ -47,6 +61,7 @@ def vault(tmp_path):
     tpl.mkdir(parents=True)
     (tpl / "generic.md").write_text(TEMPLATE)
     (root / "anatomy" / "anatomy.md").write_text(TYPES_TABLE)
+    (root / "anatomy" / "topics.md").write_text(TOPICS)
     return root
 
 
@@ -64,7 +79,8 @@ def mechanic(capsys, vault):
     """mechanic(name, *argv, root=vault) -> (exit code, parsed stdout JSON); runs script.py in-process."""
 
     def run(name, *argv, root=None):
-        path = SKILLS / f"mechanic-vault-{name}" / "script.py"
+        folder = f"mechanic-{name}" if name.startswith("forge-") else f"mechanic-vault-{name}"
+        path = SKILLS / folder / "script.py"
         spec = importlib.util.spec_from_file_location(f"mechanic_{name}", path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)

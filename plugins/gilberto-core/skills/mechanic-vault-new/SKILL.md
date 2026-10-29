@@ -16,7 +16,7 @@ Vault root: `$GILBERTO_ROOT`. Surface the stdout JSON `{status, written, skipped
 
 - Pillars: `me pulse projects intelligence journey network`.
 - Slug/template: `^[a-z0-9][a-z0-9-]{0,63}$` → else `INVALID_SLUG`.
-- Frontmatter: template keys + `--frontmatter`, plus `created`/`updated` (today, ISO). Mandatory `type`, `topics`; `type` = `<scope>-<role>` or `person`/`company`; types in `anatomy/anatomy.md > ## Types` with a `Fields` column are checked → `INVALID_FRONTMATTER` + diff.
+- Frontmatter: template keys + `--frontmatter`, plus `created`/`updated` (today, ISO). Mandatory `type`, `topics`; `type` = `<scope>-<role>` or `person`/`company`; types with a `### <type>` YAML schema block (`mechanic-forge-type`) or a `Fields` column in `anatomy/anatomy.md > ## Types` are checked → `INVALID_FRONTMATTER` + diff.
 - Re-run with same inputs: `skipped (idempotent)`, no write. `--force`: rewrites frontmatter only (body and `created` kept).
 - Writes are atomic (tmp + fsync + rename); failure rolls back → `WRITE_FAILED`.
 - Errors (exit 1, nothing written): `INVALID_SLUG`, `PILLAR_NOT_FOUND`, `INVALID_PATH`, `INVALID_FRONTMATTER`, `TEMPLATE_NOT_FOUND`, `INVALID_ARGS`.

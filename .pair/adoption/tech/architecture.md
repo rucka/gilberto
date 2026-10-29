@@ -34,7 +34,7 @@ All runtime behavior is sourced from the vault:
 | Preferences | `anatomy/preferences.md` (silence · thresholds · cadences · integrations) |
 | Canonical registries | `anatomy/topics.md` · `anatomy/plugins.md` · `anatomy/gilberto.md` |
 | Templates | `anatomy/templates/<pillar>/<name>/` |
-| Extension primitives | `mechanic-vault-*` + `mechanic-forge-*` skills |
+| Extension primitives | `mechanic-vault-*` + `mechanic-forge-*` skills (`forge-topic` · `forge-template` · `forge-type`) |
 
 Runtime mutations (new topic / template / type / playbook) happen via `mechanic-forge-*` skills that edit `anatomy/` in place — no CLI re-run, no repo access.
 
@@ -105,6 +105,8 @@ Scopes ([ADR-0004](adr/0004-scopes.md)): person-level at root (`me/`, `network/`
 | capability | `gilberto-capability-<pillar>-[<sub-scope>-]<op>` |
 | utility | `utility-<scope>-<op>` |
 | mechanic | `mechanic-<scope>-<op>` |
+
+Mechanics shipped: `mechanic-vault-{new,promote,collapse}`, `mechanic-forge-{topic,template,type}`.
 
 Composition: process → capability → utility; mechanic orthogonal. Target v1.0: 17p + 44c + 20u + 9m = 90.
 
