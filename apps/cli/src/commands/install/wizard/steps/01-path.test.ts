@@ -69,6 +69,49 @@ describe('step 1 path', () => {
     await chmod(d, 0o700)
   })
 
+  it.skipIf(process.getuid?.() === 0)(
+    'missing target under non-writable parent → exit 13',
+    async () => {
+      const root = await tmpRoot()
+      const ro = join(root, 'ro')
+      await mkdir(ro, { mode: 0o500 })
+      await chmod(ro, 0o500)
+      const target = join(ro, 'vault')
+      const before = await listing(root)
+      const { ctx } = makeCtx({ flags: { target } })
+      const e = await exitOf(pathStep({}, ctx))
+      await chmod(ro, 0o700)
+      expect(e.code).toBe(13)
+      expect(e.message).toBe(`target path is not writable: "${target}"`)
+      expect(await listing(root)).toEqual(before)
+    },
+  )
+
+  it.skipIf(process.getuid?.() === 0)(
+    'deep missing target under non-writable ancestor → exit 13',
+    async () => {
+      const root = await tmpRoot()
+      const ro = join(root, 'ro')
+      await mkdir(ro, { mode: 0o500 })
+      await chmod(ro, 0o500)
+      const target = join(ro, 'a', 'b', 'vault')
+      const { ctx } = makeCtx({ flags: { target } })
+      const e = await exitOf(pathStep({}, ctx))
+      await chmod(ro, 0o700)
+      expect(e.code).toBe(13)
+      expect(e.message).toBe(`target path is not writable: "${target}"`)
+    },
+  )
+
+  it('missing target under writable ancestor resolves, no mutation', async () => {
+    const root = await tmpRoot()
+    const target = join(root, 'a', 'vault')
+    const before = await listing(root)
+    const { ctx } = makeCtx({ flags: { target } })
+    expect((await pathStep({}, ctx)).targetPath).toBe(target)
+    expect(await listing(root)).toEqual(before)
+  })
+
   it('non-interactive without path → exit 64, no prompt', async () => {
     const { ctx, calls } = makeCtx({ flags: { nonInteractive: true } })
     const e = await exitOf(pathStep({}, ctx))
