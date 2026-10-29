@@ -37,7 +37,8 @@
     "@inquirer/prompts": "catalog:",
     "chalk": "catalog:",
     "commander": "catalog:",
-    "dotenv": "catalog:"
+    "dotenv": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@gilberto/eslint-config": "workspace:*",

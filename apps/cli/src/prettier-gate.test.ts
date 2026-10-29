@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -38,5 +38,17 @@ describe('prettier gate (r0-2)', () => {
     const f = join(mkdtempSync(join(tmpdir(), 'prettier-gate-')), 'probe.js')
     writeFileSync(f, 'const   a =  1\n')
     expect(listDifferent([f]).map(p => resolve(repoRoot, p))).toEqual([f])
+  })
+})
+
+describe('prettier gate (r1-2)', () => {
+  it('does not flag sealer-written red-snapshot manifests', () => {
+    const dir = '.pair/red-snapshots'
+    const manifests = existsSync(join(repoRoot, dir))
+      ? readdirSync(join(repoRoot, dir))
+          .filter(f => f.endsWith('.json'))
+          .map(f => `${dir}/${f}`)
+      : []
+    expect(listDifferent(manifests)).toEqual([])
   })
 })
