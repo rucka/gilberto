@@ -51,7 +51,7 @@ export const fooCommand: CommandRegistryEntry<FooCommandConfig> = {
 }
 
 type Tsc = { status: number | null; output: string }
-type Variant = 'pristine' | 'withDispatcherCase' | 'indexOnly'
+type Variant = 'pristine' | 'withDispatcherCase' | 'indexOnly' | 'duplicateDir'
 
 const mkDeps = (): CommandDeps & { out: string[] } => {
   const out: string[] = []
@@ -72,6 +72,16 @@ const patchIndex = (dir: string): void => {
   writeFileSync(
     file,
     `import { fooCommand } from './foo/index.js'\n${src.replace('[helloCommand]', '[helloCommand, fooCommand]')}`,
+  )
+}
+
+const patchDuplicateIndex = (dir: string): void => {
+  const file = join(dir, 'src/commands/index.ts')
+  const src = readFileSync(file, 'utf8')
+  if (!src.includes('[helloCommand]')) throw new Error('index.ts no longer lists [helloCommand]')
+  writeFileSync(
+    file,
+    `import { helloCommand as copiedCommand } from './foo/index.js'\n${src.replace('[helloCommand]', '[helloCommand, copiedCommand]')}`,
   )
 }
 
@@ -97,8 +107,11 @@ const buildVariant = (root: string, variant: Variant, emit: boolean): { dir: str
     filter: skipTests,
   })
   cpSync(join(cliDir, 'src/ui'), join(dir, 'src/ui'), { recursive: true, filter: skipTests })
-  mkdirSync(join(dir, 'src/commands/foo'), { recursive: true })
-  if (variant !== 'pristine') {
+  if (variant !== 'duplicateDir') mkdirSync(join(dir, 'src/commands/foo'), { recursive: true })
+  if (variant === 'duplicateDir') {
+    cpSync(join(cliDir, 'src/commands/_hello'), join(dir, 'src/commands/foo'), { recursive: true })
+    patchDuplicateIndex(dir)
+  } else if (variant !== 'pristine') {
     for (const [name, body] of Object.entries(FOO_FILES))
       writeFileSync(join(dir, 'src/commands/foo', name), body)
     patchIndex(dir)
@@ -128,6 +141,7 @@ let root: string
 let pristine: { dir: string } & Tsc
 let withCase: { dir: string } & Tsc
 let indexOnly: { dir: string } & Tsc
+let duplicateDir: { dir: string } & Tsc
 
 beforeAll(() => {
   mkdirSync(join(cliDir, '.tmp'), { recursive: true })
@@ -135,13 +149,16 @@ beforeAll(() => {
   pristine = buildVariant(root, 'pristine', false)
   withCase = buildVariant(root, 'withDispatcherCase', false)
   indexOnly = buildVariant(root, 'indexOnly', true)
+  duplicateDir = buildVariant(root, 'duplicateDir', true)
 }, 280_000)
 
 afterAll(() => rmSync(root, { recursive: true, force: true }))
 
-const loadEmitted = async (): Promise<typeof import('./index.js')> =>
+const loadEmitted = async (
+  variant: { dir: string } = indexOnly,
+): Promise<typeof import('./index.js')> =>
   (await import(
-    pathToFileURL(join(indexOnly.dir, 'out/commands/index.js')).href
+    pathToFileURL(join(variant.dir, 'out/commands/index.js')).href
   )) as typeof import('./index.js')
 
 describe('registry contract (r0-1, r0-2, r0-3)', () => {
@@ -201,17 +218,17 @@ describe('registry contract (r0-1, r0-2, r0-3)', () => {
     expect(program.commands.map(c => c.name())).toEqual(['_hello', 'other'])
   })
 
-  it('RW5: duplicate command name error names both command directories (r0-3)', () => {
-    const program = new Command()
-    const deps = mkDeps()
-    registerCommandFromMetadata(program, helloCommand, deps, dispatchCommand)
+  it('RW5: duplicate name from a copied commands/foo dir names both commands/_hello and commands/foo (r0-3)', async () => {
+    expect(duplicateDir.status).toBe(0)
+    const { registerCommandsOnProgram } = await loadEmitted(duplicateDir)
     let message = ''
     try {
-      registerCommandFromMetadata(program, helloCommand, deps, dispatchCommand)
+      registerCommandsOnProgram(new Command(), mkDeps())
     } catch (e) {
       message = (e as Error).message
     }
     expect(message).toContain('"_hello"')
-    expect(message.split('commands/_hello').length - 1).toBeGreaterThanOrEqual(2)
+    expect(message).toContain('commands/_hello')
+    expect(message).toContain('commands/foo')
   })
 })
