@@ -27,7 +27,10 @@ def _run(argv, env):
     rel = f"anatomy/templates/{a.pillar}/{a.name}"
     folder = vault_io.resolve(root, rel)
     files = {
-        f"{rel}/template.md": frontmatter.dump({"scope": a.pillar, "description": a.description}, f"\n# {a.name}\n"),
+        f"{rel}/{a.name}.md": frontmatter.dump(
+            {"type": f"{a.pillar}-{a.name}", "topics": [], "scope": a.pillar, "description": a.description},
+            f"\n# {a.name}\n",
+        ),
         f"{rel}/files/note.md": PLACEHOLDER,
     }
 

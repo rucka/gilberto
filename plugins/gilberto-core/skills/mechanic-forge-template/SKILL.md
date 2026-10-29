@@ -1,6 +1,6 @@
 ---
 name: mechanic-forge-template
-description: Create a template folder `anatomy/templates/<pillar>/<name>/{template.md, files/}` with `{{SLUG}}`/`{{TITLE}}`/`{{DATE}}` placeholders. Idempotent, atomic, deterministic; use when a process or capability needs a new entity template.
+description: Create a template folder `anatomy/templates/<pillar>/<name>/{<name>.md, files/}` (folder-note, read by `mechanic-vault-new`) with `{{SLUG}}`/`{{TITLE}}`/`{{DATE}}` placeholders. Idempotent, atomic, deterministic; use when a process or capability needs a new entity template.
 ---
 
 # mechanic-forge-template
@@ -15,7 +15,7 @@ Vault root: `$GILBERTO_ROOT`. Surface the stdout JSON `{status, written, skipped
 
 - Name: `^[a-z0-9][a-z0-9-]{0,63}$` → else `INVALID_SLUG`.
 - Pillar: `me pulse projects intelligence journey network` → else `INVALID_PILLAR` + supplied value.
-- Writes `template.md` (frontmatter `scope` + `description`) and `files/note.md` (placeholders); existing files are kept, missing ones created.
+- Writes `<name>.md` (frontmatter `type: <pillar>-<name>`, `topics: []`, `scope`, `description`; `scope`/`description` are template-only, not copied by vault-new) and `files/note.md` (placeholders); existing files are kept, missing ones created.
 - Re-run with same inputs: `skipped (idempotent)`, no write.
 - Writes are atomic (tmp + fsync + rename); failure rolls back → `WRITE_FAILED`.
 - Errors (exit 1, nothing written): `INVALID_SLUG`, `INVALID_PILLAR`, `INVALID_PATH`, `INVALID_ARGS`.

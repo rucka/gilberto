@@ -51,18 +51,57 @@ def _section(text, file=ANATOMY):
     return m
 
 
-def _block(name):
-    return re.compile(rf"^### {re.escape(name)}\n\n```yaml\n(.*?)```\n", re.S | re.M)
+FIELD = re.compile(r"[a-z_][a-z0-9_-]{0,63}")
+_ITEM = re.compile(r"""\s*(?:"([^"]*)"|'([^']*)'|([^\s"',\[\]#]+))\s*""")
 
 
-def _parse_schema(yaml):
+def _span(body, name):
+    """-> (start, end) of the `### <name>` block (heading .. next heading/section end) in body, or None."""
+    m = re.search(rf"^### {re.escape(name)}[ \t]*$", body, re.M)
+    if not m:
+        return None
+    nxt = re.compile(r"^#{1,3} ", re.M).search(body, m.end())
+    return m.start(), nxt.start() if nxt else len(body)
+
+
+def _item(raw, bad):
+    m = _ITEM.fullmatch(raw)
+    v = m and next(g for g in m.groups() if g is not None)
+    if not v or not FIELD.fullmatch(v):
+        raise bad
+    return v
+
+
+def _parse_schema(block, name):
+    """Accepts YAML block lists (any indent) and flow lists, quoted or not, `#` comments; else INVALID_TYPE_BLOCK."""
+    bad = MechanicError("INVALID_TYPE_BLOCK", type=name)
+    m = re.search(r"^```ya?ml[ \t]*\n(.*?)^```[ \t]*$", block, re.S | re.M)
+    if not m:
+        raise bad
     schema, key = {}, None
-    for line in yaml.splitlines():
-        if line.startswith("  - ") and key:
-            schema[key].append(line[4:])
-        elif line.endswith(":") or line.endswith(": []"):
-            key = line.split(":")[0]
-            schema[key] = []
+    for line in m.group(1).splitlines():
+        line = re.sub(r"(^|\s)#.*$", "", line).rstrip()
+        if not line:
+            continue
+        item = re.fullmatch(r"\s*-\s+(.*)", line)
+        if item:
+            if key is None:
+                raise bad
+            schema[key].append(_item(item.group(1), bad))
+            continue
+        kv = re.fullmatch(r"(required|optional):\s*(.*)", line)
+        if not kv or kv.group(1) in schema:
+            raise bad
+        key, rest = kv.groups()
+        schema[key] = []
+        if rest:
+            if not (rest.startswith("[") and rest.endswith("]")):
+                raise bad
+            inner = rest[1:-1]
+            schema[key] = [_item(i, bad) for i in inner.split(",")] if inner.strip() else []
+            key = None
+    if "required" not in schema:
+        raise bad
     return schema
 
 
@@ -79,11 +118,17 @@ def render_schema(schema):
 
 def get_type(text, name):
     """-> {required, optional} of the `### <name>` block under `## Types`, or None."""
-    m = _block(name).search(_section(text).group(1))
-    if not m:
+    body = _section(text).group(1)
+    span = _span(body, name)
+    if not span:
         return None
-    schema = _parse_schema(m.group(1))
-    return {"required": schema.get("required", []), "optional": schema.get("optional", [])}
+    schema = _parse_schema(body[span[0] : span[1]], name)
+    return {"required": schema["required"], "optional": schema.get("optional", [])}
+
+
+def type_schema(text, name):
+    """Like get_type, but None when `## Types` is absent (consumers: no schema = no check)."""
+    return get_type(text, name) if _TYPES.search(text) else None
 
 
 def append_type(text, name, schema):
@@ -105,7 +150,8 @@ def merge_type(text, name, schema):
     merged = {"required": required, "optional": optional}
     added = {k: [i for i in merged[k] if i not in old[k]] for k in merged}
     m = _section(text)
-    body = _block(name).sub(
-        lambda _: f"### {name}\n\n```yaml\n{render_schema(merged)}```\n", m.group(1), count=1
-    )
+    body = m.group(1)
+    s, e = _span(body, name)
+    tail = body[s:e][len(body[s:e].rstrip("\n")) :] or "\n"
+    body = body[:s] + f"### {name}\n\n```yaml\n{render_schema(merged)}```{tail}" + body[e:]
     return text[: m.start(1)] + body + text[m.end(1):], added

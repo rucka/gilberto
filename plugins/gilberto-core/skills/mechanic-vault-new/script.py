@@ -9,6 +9,8 @@ from _lib import frontmatter, result, validate, vault_io  # noqa: E402
 from _lib.atomic_write import Transaction  # noqa: E402
 from _lib.result import MechanicError  # noqa: E402
 
+TEMPLATE_META = ("scope", "description")  # template-only keys (mechanic-forge-template), not copied to notes
+
 
 def _parse(argv):
     p = result.ArgParser(prog="mechanic-vault-new")
@@ -58,6 +60,7 @@ def _run(argv, env):
             raise MechanicError("TEMPLATE_NOT_FOUND", template=a.template, pillar=a.pillar)
         with open(tpl, encoding="utf-8") as f:
             tpl_fm, body = frontmatter.parse(f.read())
+        tpl_fm = {k: v for k, v in tpl_fm.items() if k not in TEMPLATE_META}
         fm = {**tpl_fm, **supplied, "created": today, "updated": today}
     validate.frontmatter(root, fm)
     ordered = {k: fm[k] for k in ("type", "topics")}

@@ -47,8 +47,8 @@ def _schema(raw):
     if "required" not in s:
         raise bad("required is mandatory")
     for k in s:
-        if not isinstance(s[k], list) or not all(isinstance(i, str) and i for i in s[k]):
-            raise bad(f"{k} must be an array of non-empty strings")
+        if not isinstance(s[k], list) or not all(isinstance(i, str) and anatomy_io.FIELD.fullmatch(i) for i in s[k]):
+            raise bad(f"{k} must be an array of field names ({anatomy_io.FIELD.pattern})")
     return {k: list(dict.fromkeys(s.get(k, []))) for k in ("required", "optional")}
 
 
