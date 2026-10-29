@@ -9,6 +9,9 @@
   "bin": {
     "gilberto": "dist/cli.js"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist",
     "README.md"

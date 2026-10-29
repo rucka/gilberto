@@ -20,6 +20,9 @@ jobs:
   release:
     name: Quality, build, publish, release
     runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,6 +51,21 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Pack check
+        run: node scripts/pack-check.js
+
+      - name: Assert prerelease tag is next
+        run: |
+          tag="$(node -p "require('./.changeset/pre.json').tag")"
+          if [ "$tag" != "next" ]; then
+            echo "::error::.changeset/pre.json tag is '$tag', expected 'next' — refusing to publish"
+            exit 1
+          fi
+
+      - name: Read published version
+        id: version
+        run: echo "version=$(node -p "require('./apps/cli/package.json').version")" >> "$GITHUB_OUTPUT"
+
       - name: Detect NPM_TOKEN presence
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -59,10 +77,11 @@ jobs:
           fi
 
       - name: Publish to npm
+        id: publish
         if: env.HAS_NPM_TOKEN == 'true'
         uses: changesets/action@v1
         with:
-          publish: pnpm changeset publish
+          publish: pnpm changeset publish --tag next
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -82,3 +101,30 @@ jobs:
             --title "$VERSION" \
             --generate-notes \
             --target "$TARGET_SHA"
+
+  smoke:
+    name: Smoke (${{ matrix.os }}, node ${{ matrix.node }})
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: [22, 24]
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: npx gilberto@next --version
+        env:
+          EXPECTED: ${{ needs.release.outputs.version }}
+        run: |
+          for i in 1 2 3 4 5 6; do
+            out="$(npx --yes gilberto@next --version)" && [ "$out" = "$EXPECTED" ] && exit 0
+            echo "attempt $i: got '${out:-}', expected '$EXPECTED'"
+            sleep 20
+          done
+          exit 1

@@ -2,6 +2,14 @@
 
 Workspace for the `gilberto` binary. `pnpm --filter gilberto build` emits `dist/cli.js` (executable).
 
+## Install (alpha)
+
+```bash
+npx gilberto@next --version
+```
+
+Requires Node ≥ 22.12. Published on npm tag `next`.
+
 ## Layout
 
 - `src/cli.ts` — Commander entry point (placeholder until #37)
