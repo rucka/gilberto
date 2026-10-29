@@ -1,3 +1,5 @@
+import { basename, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { Command } from 'commander'
 import type {
   CommandDeps,
@@ -6,6 +8,15 @@ import type {
   CommandOptions,
   CommandRegistryEntry,
 } from './types.js'
+
+const entryDirs = new WeakMap<object, string>()
+
+export const withOrigin = <E extends object>(metaUrl: string, entry: E): E => {
+  entryDirs.set(entry, `commands/${basename(dirname(fileURLToPath(metaUrl)))}`)
+  return entry
+}
+
+const origins = new WeakMap<Command, Map<string, string>>()
 
 const camel = (key: string): string => key.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
 
@@ -33,10 +44,14 @@ export const registerCommandFromMetadata = <C extends { command: string }>(
   dispatch: (config: C, deps: CommandDeps) => Promise<void>,
 ): Command => {
   const { name, description, usage, options, examples, notes }: CommandMetadata = entry.metadata
+  const dir = entryDirs.get(entry) ?? `commands/${name}`
+  const seen = origins.get(program) ?? new Map<string, string>()
+  origins.set(program, seen)
   if (program.commands.some(c => c.name() === name))
     throw new Error(
-      `command "${name}" already registered: commands/${name} conflicts with commands/${name}`,
+      `command "${name}" already registered: ${seen.get(name) ?? `commands/${name}`} conflicts with ${dir}`,
     )
+  seen.set(name, dir)
   const cmd = program.command(name).description(description).usage(usage)
   addCommandOptions(cmd, options)
   cmd.addHelpText('after', helpBlock('Examples', examples) + helpBlock('Notes', notes))

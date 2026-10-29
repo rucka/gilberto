@@ -5,7 +5,7 @@ One directory per command under `src/commands/<name>/`:
 - `metadata.ts` — `const` typed `CommandMetadata` (`name`, `description`, `usage`, `options`, `examples`, `notes`)
 - `parser.ts` — `parseXCommand(options, args) → XCommandConfig` (discriminated union, literal `command: 'x'`)
 - `handler.ts` — `handleXCommand(config, deps: CommandDeps) → Promise<void>`
-- `index.ts` — re-exports + `xCommand: CommandRegistryEntry<XCommandConfig>`
+- `index.ts` — re-exports + `xCommand: CommandRegistryEntry<XCommandConfig>` wrapped in `withOrigin(import.meta.url, {…})` so duplicate-name errors name the real directory
 - `*.test.ts` — colocated tests
 
 ## Register
@@ -43,10 +43,10 @@ export const handleFooCommand = async (config: FooCommandConfig, deps: CommandDe
 }
 
 // index.ts
-export const fooCommand: CommandRegistryEntry<FooCommandConfig> = {
+export const fooCommand: CommandRegistryEntry<FooCommandConfig> = withOrigin(import.meta.url, {
   name: 'foo',
   metadata: fooMetadata,
   parse: parseFooCommand,
   handle: handleFooCommand,
-}
+})
 ```
