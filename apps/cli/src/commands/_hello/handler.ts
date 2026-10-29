@@ -5,5 +5,6 @@ export const handleHelloCommand = async (
   config: HelloCommandConfig,
   deps: CommandDeps,
 ): Promise<void> => {
+  deps.logger.debug(`_hello: greeting '${config.name}'`)
   deps.write(`Hello, ${config.name}!\n`)
 }

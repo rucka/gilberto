@@ -4,7 +4,14 @@ import { fileURLToPath } from 'node:url'
 import chalk from 'chalk'
 import { Command, CommanderError, Option } from 'commander'
 import { registerCommandsOnProgram } from './commands/index.js'
-import { getLogLevel, LOG_LEVELS, setLogLevel, type LogLevel } from './ui/logger.js'
+import {
+  getLogLevel,
+  logger,
+  LOG_LEVELS,
+  resolveLogLevel,
+  setLogLevel,
+  type LogLevel,
+} from './ui/logger.js'
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
   name: string
@@ -18,8 +25,23 @@ const banner = (): string => `${chalk.blue(pkg.name)} v${pkg.version}`
 
 type GlobalOpts = { logLevel?: LogLevel; verbose?: boolean; banner: boolean; json?: boolean }
 
-const applyLogLevel = (opts: GlobalOpts): void =>
-  setLogLevel(opts.logLevel ?? (opts.verbose ? 'debug' : 'info'))
+const applyLogLevel = (opts: GlobalOpts, warnInvalid = true): void =>
+  setLogLevel(
+    resolveLogLevel(
+      opts.logLevel ?? (opts.verbose ? 'debug' : undefined),
+      process.env,
+      warnInvalid,
+    ),
+  )
+
+const normalizeError = (err: unknown): Error =>
+  err instanceof Error ? err : new Error(String(err))
+
+const reportError = (err: unknown): void => {
+  const e = normalizeError(err)
+  logger.error(`Error: ${e.message || 'unknown'}`)
+  if (getLogLevel() === 'debug' && e.stack) console.error(e.stack)
+}
 
 /** Builds the root Commander program: metadata, global options, pre-action hook. */
 export const createProgram = (): Command => {
@@ -35,9 +57,9 @@ export const createProgram = (): Command => {
     .exitOverride()
 
   program.hook('preAction', (cmd, action) => {
-    if (action === program) return
     const opts = cmd.optsWithGlobals<GlobalOpts>()
     applyLogLevel(opts)
+    if (action === program) return
     if (opts.banner && !opts.json) console.error(banner())
   })
   registerCommandsOnProgram(program)
@@ -58,7 +80,7 @@ export const runCli = async (
   program: Command = createProgram(),
 ): Promise<void> => {
   await program.parseAsync(argv)
-  applyLogLevel(program.opts<GlobalOpts>())
+  applyLogLevel(program.opts<GlobalOpts>(), false)
 }
 
 /**
@@ -66,6 +88,10 @@ export const runCli = async (
  * (help/version), Commander's own exit code for usage errors, 1 on unexpected errors.
  */
 export const main = async (argv: string[] = process.argv, program?: Command): Promise<void> => {
+  process.once('unhandledRejection', reason => {
+    reportError(reason)
+    process.exit(1)
+  })
   try {
     await runCli(argv, program)
     process.exit(0)
@@ -74,9 +100,7 @@ export const main = async (argv: string[] = process.argv, program?: Command): Pr
       process.exit(EXPECTED_EXIT_CODES.includes(err.code) ? 0 : err.exitCode)
       return
     }
-    const e = err instanceof Error ? err : new Error(String(err))
-    console.error(`Error: ${e.message}`)
-    if (getLogLevel() === 'debug' && e.stack) console.error(e.stack)
+    reportError(err)
     process.exit(1)
   }
 }
