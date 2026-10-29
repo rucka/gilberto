@@ -1,0 +1,73 @@
+{
+  "$meta": {
+    "pr": "86",
+    "phase": "r1-g3",
+    "base": "f8601c09247aa67babf5aac939630d7e1501bd7d",
+    "trailer": "Pair-RED-Snapshot: pr=86; phase=r1-g3; base=f8601c09247aa67babf5aac939630d7e1501bd7d; manifest=.pair/red-snapshots/pr-86-r1-g3.json",
+    "artifacts": [
+      "apps/cli/src/commands/commands.test.ts"
+    ]
+  },
+  "mode": "remediation",
+  "phase": "r1-g3",
+  "inputHead": "f8601c09247aa67babf5aac939630d7e1501bd7d",
+  "sourceOfTruth": "apps/cli/src/commands/helpers.ts addCommandOptions (program.command(name).usage(metadata.usage)) + _hello/metadata.ts",
+  "inventory": [
+    {
+      "id": "r0-4",
+      "producer": "apps/cli/src/commands/helpers.ts registerCommandFromMetadata (.usage(metadata.usage)) rendered by commander helpInformation",
+      "inputs": [
+        "helloMetadata.usage",
+        "createProgram() _hello command"
+      ],
+      "representations": [
+        "src/commands/_hello/metadata.ts",
+        "commander help text"
+      ],
+      "consumers": [
+        "--help output",
+        "AC-5 test"
+      ],
+      "classes": [
+        "usage non-empty: help has line 'Usage: gilberto _hello --name <name>'",
+        "usage empty (injected regression): help line becomes 'Usage: gilberto _hello [options]'"
+      ],
+      "interactions": [
+        "Options section also prints '--name <name>' so substring asserts cannot discriminate usage"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "apps/cli/src/commands/commands.test.ts",
+    "mode": "test",
+    "allowedPaths": []
+  },
+  "matrix": [
+    {
+      "id": "R4W1",
+      "kind": "witness",
+      "baseline": "pass",
+      "covers": [
+        "r0-4"
+      ],
+      "condition": "helloMetadata.usage='' injected in isolated edit",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/commands.test.ts -t AC-5",
+      "file": "apps/cli/src/commands/commands.test.ts",
+      "expected": "passes on current source; with usage injected to '' the --help test fails (1 failed, line is 'Usage: gilberto _hello [options]')"
+    }
+  ],
+  "redTests": [
+    {
+      "file": "apps/cli/src/commands/commands.test.ts",
+      "kind": "test",
+      "baseline": "pass",
+      "sha256": "sha256:92a92ea5da907106b9eedcb18db79c66245834c7eb6a96b522c971cecb5ccea1",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands",
+      "observed": "Tests 21 passed (21)"
+    }
+  ],
+  "testExempt": false,
+  "exemptionRationale": "mode test: production correct; guard strength only",
+  "groupId": "r1-g3",
+  "remediationBatchId": "r1"
+}

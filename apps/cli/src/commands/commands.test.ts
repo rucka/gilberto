@@ -136,8 +136,7 @@ describe('_hello (AC-1, AC-5)', () => {
     const hello = program.commands.find(c => c.name() === '_hello')
     const help = hello?.helpInformation() ?? ''
     expect(help).toContain('admin smoke command')
-    expect(help).toContain('Usage:')
-    expect(help).toContain('--name <name>')
+    expect(help).toMatch(/^Usage: .*_hello --name <name>$/m)
     let after = ''
     hello?.configureOutput({ writeOut: s => (after += s) })
     hello?.outputHelp()
