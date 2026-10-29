@@ -18,7 +18,7 @@
 ## Distribution Packages
 
 - `gilberto` (npm) — CLI installer/updater
-- `@gilberto/vault-bootstrap` (npm) — vault content package (anatomy + 5-pillar skeleton + network/ + `_ingest/` + `.claude/hooks/` + launchd plist templates)
+- `@foomakers/gilberto-vault-bootstrap` (npm) — vault content package (anatomy + 5-pillar skeleton + network/ + `_ingest/` + `.claude/hooks/` + launchd plist templates)
 - `gilberto-core` (Claude marketplace plugin) — core skills (11 processes + mechanic + core utility + core capability)
 - `pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial` (Claude marketplace plugins) — first-party domain plugins (P1)
 

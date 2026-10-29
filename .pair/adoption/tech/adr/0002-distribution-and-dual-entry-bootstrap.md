@@ -32,9 +32,9 @@ Accepted
 
 ### Option 3: Split distribution — marketplace plugins (skills) + npm package (vault content); dual entry-point
 
-- **Description**: split distribution by artifact nature. Skills travel via the **Claude marketplace** as plugins (core: `gilberto-core`; first-party: `pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`). Non-skill vault content (anatomy + 5-pillar skeleton + network + `_ingest/` + `.claude/hooks/` + launchd plists) travels via an **npm package** `@gilberto/vault-bootstrap`. The CLI consumes the npm package to populate the vault. Two equivalent entry-points exist, both first-class: **(A) skill-led** — user installs the `gilberto-core` plugin, launches a bootstrap skill, the skill downloads the CLI and invokes `gilberto install`; **(B) CLI-direct** — user runs `npm i -g gilberto && gilberto install` from the terminal. Both converge on the same `gilberto install` execution.
+- **Description**: split distribution by artifact nature. Skills travel via the **Claude marketplace** as plugins (core: `gilberto-core`; first-party: `pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`). Non-skill vault content (anatomy + 5-pillar skeleton + network + `_ingest/` + `.claude/hooks/` + launchd plists) travels via an **npm package** `@foomakers/gilberto-vault-bootstrap`. The CLI consumes the npm package to populate the vault. Two equivalent entry-points exist, both first-class: **(A) skill-led** — user installs the `gilberto-core` plugin, launches a bootstrap skill, the skill downloads the CLI and invokes `gilberto install`; **(B) CLI-direct** — user runs `npm i -g gilberto && gilberto install` from the terminal. Both converge on the same `gilberto install` execution.
 - **Pros**: distribution surface matches artifact nature (skill mechanic for skills, npm mechanic for code/templates); marketplace UX preserved for skill install/update; both user personas served; per-assistant adapter limited to skill format (anti-corruption layer at the plugin source build step); CLI remains the single install execution engine, satisfying ADR-0001.
-- **Cons**: two release pipelines to maintain (marketplace publish + npm publish); naming clarity required (`gilberto-core` plugin vs `gilberto` npm CLI vs `@gilberto/vault-bootstrap` npm content package); coordination between plugin and package versions for cross-cutting features (mitigated by Changesets fixed-group versioning).
+- **Cons**: two release pipelines to maintain (marketplace publish + npm publish); naming clarity required (`gilberto-core` plugin vs `gilberto` npm CLI vs `@foomakers/gilberto-vault-bootstrap` npm content package); coordination between plugin and package versions for cross-cutting features (mitigated by Changesets fixed-group versioning).
 
 ## Decision
 
@@ -46,7 +46,7 @@ Accepted
 | ----------------------------------------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Core skills (11 processes + mechanic primitives + core utilities + core capabilities)           | **Claude marketplace plugin**                 | `gilberto-core`                                                                                                  |
 | First-party domain plugins (Phase 3–4)                                                          | **Claude marketplace plugin**                 | `pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`                                 |
-| Non-skill vault content (anatomy, pillar skeleton, network/, `_ingest/`, `.claude/hooks/`, launchd plist templates) | **npm package**                               | `@gilberto/vault-bootstrap`                                                                                       |
+| Non-skill vault content (anatomy, pillar skeleton, network/, `_ingest/`, `.claude/hooks/`, launchd plist templates) | **npm package**                               | `@foomakers/gilberto-vault-bootstrap`                                                                                       |
 | CLI installer                                                                                   | **npm package** (already in PRD)              | `gilberto`                                                                                                       |
 
 ### Monorepo layout
@@ -56,7 +56,7 @@ apps/
   cli/                          ← npm: gilberto (installer/updater)
   website/                      ← Fumadocs documentation site
 packages/
-  vault-bootstrap/              ← npm: @gilberto/vault-bootstrap (vault content)
+  vault-bootstrap/              ← npm: @foomakers/gilberto-vault-bootstrap (vault content)
 plugins/                        ← Claude marketplace plugin sources (NOT pnpm workspaces)
   gilberto-core/
   pulse-health-tracking/
@@ -89,7 +89,7 @@ Both terminate at the same `gilberto install <target> --topics=… --plugins=…
 - AI-assistant-agnosticism preserved at the skill source level (one plugin source → per-assistant adapter at build)
 - Two user personas served by two equivalent entry-points
 - `gilberto install` remains the unique CLI executor — ADR-0001 (vault self-sufficiency) is unaffected
-- Naming separates concerns: `gilberto` (CLI npm) · `gilberto-core` (marketplace plugin) · `@gilberto/vault-bootstrap` (npm content) — no aliasing
+- Naming separates concerns: `gilberto` (CLI npm) · `gilberto-core` (marketplace plugin) · `@foomakers/gilberto-vault-bootstrap` (npm content) — no aliasing
 - `plugins/*` not being a pnpm workspace avoids polluting the dep graph with sources that are not Node packages
 
 ### Trade-offs and Limitations
@@ -103,7 +103,7 @@ Both terminate at the same `gilberto install <target> --topics=… --plugins=…
 ## Adoption Impact
 
 - [`../architecture.md`](../architecture.md) — Monorepo Layout describes `apps/`, `packages/`, `plugins/`, `tools/` with `plugins/*` as a non-workspace source tree.
-- [`../../product/PRD.md`](../../product/PRD.md) — §6 (Solution Overview) and §8 (Technical Considerations / Architecture Overview) describe dual-entry, marketplace + npm split, `gilberto-core` plugin, and `@gilberto/vault-bootstrap` content package.
+- [`../../product/PRD.md`](../../product/PRD.md) — §6 (Solution Overview) and §8 (Technical Considerations / Architecture Overview) describe dual-entry, marketplace + npm split, `gilberto-core` plugin, and `@foomakers/gilberto-vault-bootstrap` content package.
 - [`../tech-stack.md`](../tech-stack.md) — Workspace section declares `apps/*`, `packages/*`, `tools/*` with `plugins/*` as non-workspace sources; Distribution Packages section lists the four distributed names.
 - Epic #10 (Bootstrap process) — describes the dual-entry pattern; **issue #48** covers path A (skill-led entry): "Skill-led bootstrap entry from gilberto-core (CLI presence check + invoke)".
 - Issue #31 — refinement captures the layout (`pnpm-workspace.yaml: apps/*, packages/*, tools/*`).

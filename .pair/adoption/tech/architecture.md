@@ -43,7 +43,7 @@ Runtime mutations (new topic / template / type / playbook) happen via `mechanic-
 ```text
 gilberto/
 ├── apps/{cli,website}/
-├── packages/vault-bootstrap/   npm: @gilberto/vault-bootstrap (anatomy + vault skeleton + hooks + plists)
+├── packages/vault-bootstrap/   npm: @foomakers/gilberto-vault-bootstrap (anatomy + vault skeleton + hooks + plists)
 ├── plugins/                    Claude marketplace plugin sources (NOT pnpm workspaces)
 │   ├── gilberto-core/          core: 11 processes + mechanic + core utility + core capability
 │   ├── pulse-health-tracking/  P1
@@ -63,7 +63,7 @@ gilberto/
 | --------------------------------- | --------------------- | --------------------------------------------------------------------------------- |
 | Core skills                       | Claude marketplace    | `gilberto-core`                                                                   |
 | First-party domain plugins        | Claude marketplace    | `pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`  |
-| Non-skill vault content           | npm                   | `@gilberto/vault-bootstrap`                                                       |
+| Non-skill vault content           | npm                   | `@foomakers/gilberto-vault-bootstrap`                                                       |
 | CLI installer/updater             | npm                   | `gilberto`                                                                        |
 
 Dual entry-point (see ADR-0002):

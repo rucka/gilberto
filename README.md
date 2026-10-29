@@ -109,7 +109,7 @@ Composition: process → capability → utility; mechanic orthogonal. Target v1.
 
 ```text
 apps/{cli,website}/         CLI (npm gilberto) · docs site (Fumadocs)
-packages/vault-bootstrap/   npm @gilberto/vault-bootstrap
+packages/vault-bootstrap/   npm @foomakers/gilberto-vault-bootstrap
 plugins/                    marketplace plugin sources (not pnpm workspaces)
 tools/                      shared eslint/prettier/markdownlint/ts/commitlint configs
 .pair/                      product + tech adoption, ADRs, decision log
