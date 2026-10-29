@@ -3,7 +3,7 @@ import * as logger from '../ui/logger.js'
 import { helloCommand } from './_hello/index.js'
 import { dispatchCommand } from './dispatcher.js'
 import { registerCommandFromMetadata } from './helpers.js'
-import type { CommandDeps } from './types.js'
+import type { CommandDeps, CommandRegistryEntry } from './types.js'
 
 export const commandRegistry = [helloCommand] as const
 
@@ -30,5 +30,10 @@ export const registerCommandsOnProgram = (
   deps: CommandDeps = defaultDeps(),
 ): void => {
   for (const entry of commandRegistry)
-    registerCommandFromMetadata(program, entry, deps, dispatchCommand)
+    registerCommandFromMetadata(
+      program,
+      entry as CommandRegistryEntry<AnyCommandConfig>,
+      deps,
+      dispatchCommand,
+    )
 }

@@ -10,10 +10,9 @@ One directory per command under `src/commands/<name>/`:
 
 ## Register
 
-1. Add `xCommand` to `commandRegistry` in `commands/index.ts`.
-2. Add a `case 'x'` to `dispatchCommand` in `commands/dispatcher.ts` (exhaustiveness is compile-checked).
+Add `xCommand` to `commandRegistry` in `commands/index.ts` (one import + one array entry). `dispatchCommand` routes by `config.command` to the entry's `handle`; no dispatcher edit.
 
-Registration happens in `registerCommandsOnProgram`; duplicate names throw at startup.
+Registration happens in `registerCommandsOnProgram`; duplicate names throw at startup, naming both directories.
 
 Options reach `parse` camelCased (`--log-level` → `logLevel`); positionals are filtered with `onlyStrings`.
 Commands starting with `_` are internal/admin.

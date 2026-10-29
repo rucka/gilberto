@@ -1,17 +1,13 @@
-import type { AnyCommandConfig } from './index.js'
-import type { CommandDeps } from './types.js'
-import { handleHelloCommand } from './_hello/index.js'
+import { commandRegistry, type AnyCommandConfig } from './index.js'
+import type { CommandDeps, CommandRegistryEntry } from './types.js'
 
 export const dispatchCommand = async (
   config: AnyCommandConfig,
   deps: CommandDeps,
 ): Promise<void> => {
-  switch (config.command) {
-    case '_hello':
-      return handleHelloCommand(config, deps)
-    default: {
-      const unreachable: never = config.command
-      throw new Error(`unknown command: ${String(unreachable)}`)
-    }
-  }
+  const entry = (commandRegistry as readonly CommandRegistryEntry<AnyCommandConfig>[]).find(
+    e => e.name === config.command,
+  )
+  if (!entry) throw new Error(`unknown command: ${config.command}`)
+  return entry.handle(config, deps)
 }

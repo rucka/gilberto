@@ -34,7 +34,9 @@ export const registerCommandFromMetadata = <C extends { command: string }>(
 ): Command => {
   const { name, description, usage, options, examples, notes }: CommandMetadata = entry.metadata
   if (program.commands.some(c => c.name() === name))
-    throw new Error(`command "${name}" already registered`)
+    throw new Error(
+      `command "${name}" already registered: commands/${name} conflicts with commands/${name}`,
+    )
   const cmd = program.command(name).description(description).usage(usage)
   addCommandOptions(cmd, options)
   cmd.addHelpText('after', helpBlock('Examples', examples) + helpBlock('Notes', notes))
