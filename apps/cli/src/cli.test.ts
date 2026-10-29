@@ -102,6 +102,23 @@ describe('cli', () => {
     expect(err).toBe('')
   })
 
+  it('r0-5: unknown sub-command rejects with unknown command', async () => {
+    await expect(runCli(argv('bogus'))).rejects.toMatchObject({ code: 'commander.unknownCommand' })
+    expect(err).toContain("unknown command 'bogus'")
+  })
+
+  it('r0-5: unknown sub-command after root flags rejects too', async () => {
+    await expect(runCli(argv('--no-banner', 'bogus'))).rejects.toMatchObject({
+      code: 'commander.unknownCommand',
+    })
+  })
+
+  it('r0-5: main exits non-zero on unknown sub-command', async () => {
+    await main(argv('bogus'))
+    expect(exit).toHaveBeenCalledWith(1)
+    expect(exit).not.toHaveBeenCalledWith(0)
+  })
+
   it('AC-7: help/version codes exit 0 silently; bare invocation exit 0', async () => {
     const p = withCmd()
     await main(argv(), p)
@@ -171,5 +188,12 @@ describe('built binary', () => {
     expect(h.stdout).toContain('--no-banner')
     expect(run().status).toBe(0)
     expect(run('--nope').status).not.toBe(0)
+  }, 60_000)
+
+  it('r0-5: built binary rejects unknown sub-command with non-zero exit', () => {
+    execFileSync('pnpm', ['run', 'build'], { cwd: cliDir, stdio: 'ignore' })
+    const r = run('bogus')
+    expect(r.status).not.toBe(0)
+    expect(r.stderr).toContain("unknown command 'bogus'")
   }, 60_000)
 })
