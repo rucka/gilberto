@@ -1,7 +1,7 @@
 import { constants } from 'node:fs'
 import { access, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import { resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { WizardExit } from '../exit.js'
 import { quote, type WizardStep } from '../types.js'
 
@@ -34,12 +34,12 @@ export const pathStep: WizardStep = async (draft, { flags, prompts, cwd, env, tr
   const info = await statOrUndefined(targetPath)
   if (info && !info.isDirectory())
     throw new WizardExit(1, `target path is a file, not a directory: ${quote(targetPath)}`)
-  if (info) {
-    try {
-      await access(targetPath, constants.W_OK)
-    } catch {
-      throw new WizardExit(13, `target path is not writable: ${quote(targetPath)}`)
-    }
+  let probe = targetPath
+  while (!(await statOrUndefined(probe))) probe = dirname(probe)
+  try {
+    await access(probe, constants.W_OK)
+  } catch {
+    throw new WizardExit(13, `target path is not writable: ${quote(targetPath)}`)
   }
   trace(`step=path resolved=${quote(targetPath)}`)
   return { ...draft, targetPath }
