@@ -20,3 +20,5 @@ export function resolvePillarPath(vaultRoot: string, pillar: Pillar, _scope?: st
   if (!PILLARS.includes(pillar)) throw new UnknownPillarError(pillar)
   return join(vaultRoot, pillar)
 }
+
+export { renderPillarNote, renderTopicNote } from './templates.js'
