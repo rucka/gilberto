@@ -31,8 +31,9 @@ describe('step 7 hooks', () => {
       ['SessionEnd', 'session-end'],
     ] as const) {
       const cmd = s.hooks[ev]![0]!.hooks[0]!.command
-      expect(cmd).toBe(join(root, `.claude/hooks/gilberto.${id}.sh`))
-      expect((await stat(cmd)).mode & 0o111).not.toBe(0)
+      const file = join(root, `.claude/hooks/gilberto.${id}.sh`)
+      expect(cmd).toBe(`'${file}'`)
+      expect((await stat(file)).mode & 0o111).not.toBe(0)
     }
     expect(h.lines).toContain(
       'merged-keys=gilberto.session-start,gilberto.pre-compact,gilberto.session-end',

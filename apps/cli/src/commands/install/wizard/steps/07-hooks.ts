@@ -4,7 +4,7 @@ import { WizardExit } from '../exit.js'
 import { HOOK_IDS, mergeSettings, type HookId, type OwnedHook } from '../settings-merge.js'
 import { quote, type WizardStep } from '../types.js'
 
-type HookDef = { event: string; skill: string; args: string; guard: string }
+type HookDef = { event: string; skill: string; args: string; guard: string; transcript?: true }
 
 const DEFS: Record<HookId, HookDef> = {
   'gilberto.session-start': {
@@ -19,6 +19,7 @@ const DEFS: Record<HookId, HookDef> = {
     skill: 'gilberto-process-capture',
     args: '',
     guard: ':',
+    transcript: true,
   },
   'gilberto.session-end': {
     event: 'SessionEnd',
@@ -29,17 +30,26 @@ const DEFS: Record<HookId, HookDef> = {
   },
 }
 
+const sq = (s: string): string => `'${s.replace(/'/g, `'\\''`)}'`
+
+const TRANSCRIPT = (node: string): string => `NODE=${sq(node)}; [ -x "$NODE" ] || NODE=node
+INPUT=""; [ -t 0 ] || INPUT="$(cat)"
+TP="$(printf %s "$INPUT" | "$NODE" -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const t=JSON.parse(d).transcript_path;if(typeof t==="string")process.stdout.write(t)}catch{}})' 2>/dev/null)"
+`
+
 export const renderDispatcher = (root: string, id: HookId): string => {
-  const { skill, args, guard } = DEFS[id]
+  const { skill, args, guard, transcript } = DEFS[id]
   return `#!/bin/sh
 # ${id}: owned by gilberto; never blocks the session
-ROOT=${JSON.stringify(root)}
+[ -n "$GILBERTO_HOOK" ] && exit 0
+ROOT=${sq(root)}
 ${guard}
 if [ ! -f "$ROOT/.claude/skills/${skill}/SKILL.md" ]; then
   echo "skill not installed: ${skill}" >&2
   exit 0
 fi
-cd "$ROOT" && claude -p "/${skill}${args}" >/dev/null 2>&1 || true
+${transcript ? TRANSCRIPT(process.execPath) : ''}export GILBERTO_HOOK=1
+(cd "$ROOT" && exec claude -p "/${skill}${args}${transcript ? '${TP:+ $TP}' : ''}" >/dev/null 2>&1 </dev/null) &
 exit 0
 `
 }
@@ -82,15 +92,16 @@ export const hooksStep: WizardStep = async (draft, { flags, trace, now }) => {
   const owned: OwnedHook[] = HOOK_IDS.map(id => ({
     id,
     event: DEFS[id].event,
-    command: join(hooksDir, `${id}.sh`),
+    command: sq(join(hooksDir, `${id}.sh`)),
   }))
   const { merged, mergedKeys, conflict } = mergeSettings(existing ?? {}, owned)
 
   await mkdir(hooksDir, { recursive: true })
   for (const o of owned) {
-    await writeFile(o.command, renderDispatcher(targetPath, o.id))
-    await chmod(o.command, 0o755)
-    trace(`wrote file=${quote(o.command)}`)
+    const file = join(hooksDir, `${o.id}.sh`)
+    await writeFile(file, renderDispatcher(targetPath, o.id))
+    await chmod(file, 0o755)
+    trace(`wrote file=${quote(file)}`)
   }
   if (existing !== undefined && conflict) {
     const backup = `${settingsPath}.bak-${(now ?? (() => new Date()))().toISOString()}`
