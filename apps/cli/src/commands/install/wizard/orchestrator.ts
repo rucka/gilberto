@@ -4,6 +4,7 @@ import { pathStep } from './steps/01-path.js'
 import { overwriteStep } from './steps/02-overwrite.js'
 import { topicsStep } from './steps/03-topics.js'
 import { skeletonStep } from './steps/04-skeleton.js'
+import { anatomyStep } from './steps/05-06-anatomy.js'
 import { hooksStep } from './steps/07-hooks.js'
 import { launchdStep } from './steps/08-launchd.js'
 import { createTempDir, toExit } from './temp.js'
@@ -13,7 +14,7 @@ const STEPS: readonly WizardStep[] = [pathStep, overwriteStep, topicsStep]
 
 const POST_STEPS: readonly WizardStep[] = [hooksStep, launchdStep]
 
-const TEMP_STEPS: readonly TempStep[] = [skeletonStep]
+const TEMP_STEPS: readonly TempStep[] = [skeletonStep, anatomyStep]
 
 const ABORTED = 'aborted by user, target path left untouched'
 

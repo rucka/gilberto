@@ -55,7 +55,7 @@ describe('wizard steps 7-8 orchestration', () => {
   it('linux: stub, vault intact', async () => {
     const { state, h, target } = await run({ launchd: true }, 'linux')
     expect(state.launchd).toBe('stubbed')
-    expect(h.out[0]).toContain('linux scheduling stub')
+    expect(h.out.at(-1)).toContain('linux scheduling stub')
     expect(await readFile(join(target, '.claude/settings.json'), 'utf8')).toContain('SessionEnd')
   })
 })
