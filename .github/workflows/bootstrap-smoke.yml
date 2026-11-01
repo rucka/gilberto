@@ -50,10 +50,15 @@ jobs:
           (cd apps/cli && pnpm pack --pack-destination "$RUNNER_TEMP/pack")
           (cd packages/vault-bootstrap && pnpm pack --pack-destination "$RUNNER_TEMP/pack")
           npm i -g --prefix "$RUNNER_TEMP/npm-prefix" "$RUNNER_TEMP"/pack/*.tgz
+          # workspace CLI is 0.0.0; stamp an in-range version so the #48 skill accepts it
+          (cd "$RUNNER_TEMP/npm-prefix/lib/node_modules/gilberto" && npm pkg set version=0.1.0-smoke)
           echo "$RUNNER_TEMP/npm-prefix/bin" >> "$GITHUB_PATH"
 
       - name: Smoke (no-launchd, no-hooks)
         run: bash apps/cli/test/smoke/bootstrap.sh base
+
+      - name: Smoke (Path A skill vs Path B tree diff)
+        run: bash apps/cli/test/smoke/bootstrap.sh path-a
 
       - name: Smoke (macOS launchd)
         if: runner.os == 'macOS'
