@@ -5,7 +5,5 @@
   "author": {
     "name": "rucka"
   },
-  "skills": [
-    "./skills/gilberto-process-vault-bootstrap"
-  ]
+  "skills": ["./skills/gilberto-process-vault-bootstrap"]
 }
