@@ -12,7 +12,7 @@ import sys
 REQUIRES = ">=0.1.0 <2"
 DOCS_URL = "https://github.com/rucka/gilberto#install"
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
-NET_ERR = re.compile(r"ENOTFOUND|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|ECONNRESET|network", re.I)
+NET_ERR = re.compile(r"ENOTFOUND|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|ECONNRESET|^npm (?:error|ERR!) network", re.I | re.M)
 MESSAGES = {
     1: "target path is a file, not a directory",
     2: None,
@@ -107,9 +107,9 @@ def spawn(argv, env):
 
 
 def choose(a, msg):
-    print(msg, file=sys.stderr)
     if a.confirm:
         return a.confirm
+    print(msg, file=sys.stderr)
     if sys.stdin.isatty():
         return input("choose [upgrade|npx]: ").strip()
     return None
@@ -128,15 +128,25 @@ def main(argv, env=None, platform=None):
     p.add_argument("--confirm", choices=["upgrade", "npx"])
     a = p.parse_args(argv)
 
+    if a.verbose:
+        for d in env.get("PATH", "").split(os.pathsep):
+            if d and "node_modules/.bin" in d.replace("\\", "/") and shutil.which("gilberto", path=d):
+                print(f"ignored local gilberto at {d}", file=sys.stderr)
+
     cli = detect(env)
     if cli["source"] != "npx" and not in_range(cli["version"]):
         got = ".".join(map(str, cli["version"])) if cli["version"] else "unknown"
-        c = choose(a, f"installed gilberto version {got} is below required {REQUIRES}; upgrade with `npm i -g gilberto@latest` or rerun via `npx gilberto@latest`")
+        c = choose(a, f"installed gilberto version {got} is {"below" if cli["version"] and cli["version"] < (0, 1, 0) else "outside"} required {REQUIRES}; upgrade with `npm i -g gilberto@latest` or rerun via `npx gilberto@latest`")
         if c == "upgrade":
             r = run(["npm", "i", "-g", "gilberto@latest"], env=env)
             if r.returncode:
                 print(r.stderr, file=sys.stderr)
                 return r.returncode
+            cli = detect(env)
+            if cli["source"] == "npx" or not in_range(cli["version"]):
+                got = ".".join(map(str, cli["version"])) if cli["version"] else "unknown"
+                print(f"after upgrade gilberto version {got} is still outside required {REQUIRES}", file=sys.stderr)
+                return 64
         elif c == "npx":
             cli = {"argv": ["npx", "-y", "gilberto@latest"], "version": None, "source": "npx"}
         else:
@@ -146,9 +156,10 @@ def main(argv, env=None, platform=None):
     flags, notes = build_flags(a, platform)
     code, out, err = spawn(cli["argv"] + flags, env)
     if code == 0:
-        print("\n".join(summarize(out, a, notes)))
+        trace = out + err
+        print("\n".join(summarize(trace, a, notes)))
         if a.verbose:
-            print(out)
+            print(trace)
         return 0
     if cli["source"] == "npx" and NET_ERR.search(err):
         print(f"npm registry unreachable; install gilberto manually via the steps at {DOCS_URL} and re-run /gilberto-process-vault-bootstrap", file=sys.stderr)
