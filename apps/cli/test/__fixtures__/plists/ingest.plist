@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.foomakers.gilberto.ingest</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/bin/claude</string>
+    <string>-p</string>
+    <string>/gilberto-process-ingest</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/me/My Vault</string>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>WatchPaths</key>
+  <array>
+    <string>/Users/me/My Vault/_ingest</string>
+  </array>
+</dict>
+</plist>
