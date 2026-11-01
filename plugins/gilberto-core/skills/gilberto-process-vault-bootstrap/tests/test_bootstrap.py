@@ -135,15 +135,17 @@ def test_ac8_explicit_no_note(fake, capsys):
     assert sp[0].count("--no-launchd") == 1 and "auto-injected" not in capsys.readouterr().out
 
 
-def test_ac10_local_bin_ignored(tmp_path):
+def test_ac10_local_bin_ignored(tmp_path, monkeypatch):
     local = tmp_path / "proj" / "node_modules" / ".bin"
     local.mkdir(parents=True)
     exe = local / "gilberto"
     exe.write_text("#!/bin/sh\n")
     exe.chmod(0o755)
     env = {"PATH": f"{local}:/nonexistent"}
-    assert str(local) not in mod.global_path(env)
-    assert mod.shutil.which("gilberto", path=mod.global_path(env)) is None
+    monkeypatch.setenv("PATH", env["PATH"])
+    monkeypatch.setattr(mod, "run", lambda argv, **kw: SimpleNamespace(stdout="{}", stderr="", returncode=0))
+    cli = mod.detect(env)
+    assert cli["source"] == "npx" and cli["argv"] == ["npx", "-y", "gilberto@latest"]
 
 
 def test_no_fs_mutation(fake, tmp_path, monkeypatch):
