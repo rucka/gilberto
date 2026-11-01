@@ -50,6 +50,7 @@ describe('step 8 launchd', () => {
     expect(mb).toContain('/gilberto-process-surface morning-briefing')
     expect(h.out.join('\n')).toContain('inactive')
     expect(h.out.join('\n')).toContain('gilberto status')
+    for (const f of await readdir(agents)) expect(h.out).toContain(`  ${join(agents, f)}`)
     expect(h.lines.filter(l => l.startsWith('wrote file='))).toHaveLength(3)
   })
 
