@@ -136,7 +136,8 @@ def main(argv, env=None, platform=None):
     cli = detect(env)
     if cli["source"] != "npx" and not in_range(cli["version"]):
         got = ".".join(map(str, cli["version"])) if cli["version"] else "unknown"
-        c = choose(a, f"installed gilberto version {got} is {"below" if cli["version"] and cli["version"] < (0, 1, 0) else "outside"} required {REQUIRES}; upgrade with `npm i -g gilberto@latest` or rerun via `npx gilberto@latest`")
+        rel = "below" if cli["version"] and cli["version"] < (0, 1, 0) else "outside"
+        c = choose(a, f"installed gilberto version {got} is {rel} required {REQUIRES}; upgrade with `npm i -g gilberto@latest` or rerun via `npx gilberto@latest`")
         if c == "upgrade":
             r = run(["npm", "i", "-g", "gilberto@latest"], env=env)
             if r.returncode:
