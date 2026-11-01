@@ -8,7 +8,13 @@ import { anatomyStep } from './steps/05-06-anatomy.js'
 import { hooksStep } from './steps/07-hooks.js'
 import { launchdStep } from './steps/08-launchd.js'
 import { createTempDir, toExit } from './temp.js'
-import type { StepContext, TempStep, WizardDraft, WizardStep } from './types.js'
+import {
+  quote,
+  type StepContext,
+  type TempStep,
+  type WizardDraft,
+  type WizardStep,
+} from './types.js'
 
 const STEPS: readonly WizardStep[] = [pathStep, overwriteStep, topicsStep]
 
@@ -57,6 +63,7 @@ export const runWizard = async (ctx: StepContext): Promise<WizardState> => {
   let draft: WizardDraft = {}
   for (const step of STEPS) draft = await step(draft, ctx)
   draft = await materialize(draft, ctx)
+  ctx.trace(`step=skeleton decision=written target=${quote(draft.targetPath ?? '')}`)
   for (const step of POST_STEPS) draft = await step(draft, ctx)
   return WizardStateSchema.parse(draft)
 }
