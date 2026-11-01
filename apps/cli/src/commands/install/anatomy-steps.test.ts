@@ -163,4 +163,33 @@ describe('step 6 — runAnatomySteps', () => {
     expect(lines.every(l => /^wrote (file|dir)=/.test(l))).toBe(true)
     expect(lines).toHaveLength(3 + 8)
   })
+
+  it('r0-2: default loadSeedRoot resolves the real seed package', async () => {
+    const code = await runAnatomySteps({
+      tmp,
+      date: '2026-10-29',
+      topics: [],
+      verbose: false,
+      write: t => out.push(t),
+      error: t => err.push(t),
+    })
+    expect(err).toEqual([])
+    expect(code).toBe(0)
+    expect(existsSync(join(tmp, 'anatomy', 'anatomy.md'))).toBe(true)
+  })
+
+  it('r0-3: non-.md files are byte-copied (no utf8 decode, no {{DATE}} replace)', async () => {
+    const seed = mkdtempSync(join(tmpdir(), 'gilberto-seed-test-'))
+    const bin = Buffer.concat([Buffer.from('89504e47fffe0080', 'hex'), Buffer.from('{{DATE}}')])
+    try {
+      mkdirSync(join(seed, 'anatomy'))
+      writeFileSync(join(seed, 'anatomy', 'logo.png'), bin)
+      writeFileSync(join(seed, 'anatomy', 'a.md'), 'x {{DATE}}')
+      expect(await run({ loadSeedRoot: async () => seed })).toBe(0)
+      expect(readFileSync(join(tmp, 'anatomy', 'logo.png')).equals(bin)).toBe(true)
+      expect(readFileSync(join(tmp, 'anatomy', 'a.md'), 'utf8')).toBe('x 2026-10-29')
+    } finally {
+      rmSync(seed, { recursive: true, force: true })
+    }
+  })
 })

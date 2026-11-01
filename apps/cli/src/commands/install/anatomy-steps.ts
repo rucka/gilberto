@@ -25,6 +25,7 @@ export type AnatomyStepsInput = {
   write: (text: string) => void
   error: (text: string) => void
   loadSeedRoot?: () => Promise<string>
+  signal?: AbortSignal
 }
 
 const defaultLoadSeedRoot = async (): Promise<string> =>
@@ -32,23 +33,28 @@ const defaultLoadSeedRoot = async (): Promise<string> =>
 
 class SeedFailure extends Error {}
 
-const copyTree = async (
-  src: string,
-  dest: string,
-  transform: (path: string, text: string) => string,
-  log: (kind: 'file' | 'dir', path: string) => void,
-): Promise<void> => {
+type CopyIo = {
+  transform: (path: string, text: string) => string
+  log: (kind: 'file' | 'dir', path: string) => void
+  signal?: AbortSignal | undefined
+}
+
+const copyTree = async (src: string, dest: string, io: CopyIo): Promise<void> => {
+  const { transform, log, signal } = io
+  signal?.throwIfAborted()
   await mkdir(dest, { recursive: true })
   log('dir', dest)
   for (const e of await readdir(src, { withFileTypes: true })) {
     const from = join(src, e.name)
     const to = join(dest, e.name)
     if (e.isDirectory()) {
-      await copyTree(from, to, transform, log)
+      await copyTree(from, to, io)
       continue
     }
+    signal?.throwIfAborted()
     try {
-      await writeFile(to, transform(from, await readFile(from, 'utf8')))
+      const bytes = await readFile(from)
+      await writeFile(to, from.endsWith('.md') ? transform(from, bytes.toString('utf8')) : bytes)
     } catch {
       throw new SeedFailure(`failed to seed anatomy: ${from}`)
     }
@@ -81,10 +87,15 @@ export const runAnatomySteps = async (input: AnatomyStepsInput): Promise<number>
   }
 
   try {
-    await copyTree(src, join(tmp, 'anatomy'), transform, (kind, path) => {
-      if (verbose) write(`wrote ${kind}=${path}\n`)
+    await copyTree(src, join(tmp, 'anatomy'), {
+      transform,
+      log: (kind, path) => {
+        if (verbose) write(`wrote ${kind}=${path}\n`)
+      },
+      signal: input.signal,
     })
   } catch (e) {
+    if (input.signal?.aborted) throw input.signal.reason
     return fail(
       e instanceof SeedFailure ? e.message : `failed to seed anatomy: ${join(tmp, 'anatomy')}`,
     )
