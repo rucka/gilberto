@@ -6,6 +6,7 @@ import { loadBootstrap } from './04-skeleton.js'
 
 export const anatomyStep: TempStep = async (draft, ctx, { root, signal }) => {
   printBundledPlugins(t => ctx.print(t.trimEnd()))
+  ctx.trace('step=plugins decision=listed')
   const errors: string[] = []
   const code = await runAnatomySteps({
     tmp: root,
@@ -22,4 +23,5 @@ export const anatomyStep: TempStep = async (draft, ctx, { root, signal }) => {
     signal,
   })
   if (code !== 0) throw new WizardExit(code, errors.join('\n'))
+  ctx.trace('step=anatomy decision=seeded')
 }

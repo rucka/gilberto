@@ -55,6 +55,8 @@ describe('handler + wizard', () => {
     const ids = logs.flatMap(l => /^step=(\w+)/.exec(l)?.[1] ?? [])
     expect(ids).toContain('skeleton')
     expect(ids.indexOf('skeleton')).toBeGreaterThan(ids.lastIndexOf('topics'))
+    expect(ids.indexOf('plugins')).toBeGreaterThan(ids.lastIndexOf('topics'))
+    expect(ids.indexOf('anatomy')).toBeGreaterThan(ids.indexOf('plugins'))
     const help = JSON.stringify(installMetadata)
     for (const f of [
       '--seed-topics',
