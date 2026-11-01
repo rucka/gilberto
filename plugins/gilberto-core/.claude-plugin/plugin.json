@@ -4,5 +4,8 @@
   "description": "Gilberto core skills: vault bootstrap, mechanics and lifecycle for the AI-native second brain.",
   "author": {
     "name": "rucka"
-  }
+  },
+  "skills": [
+    "./skills/gilberto-process-vault-bootstrap"
+  ]
 }
