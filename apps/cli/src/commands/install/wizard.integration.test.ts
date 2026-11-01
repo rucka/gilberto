@@ -5,6 +5,7 @@ import { main } from '../../cli.js'
 import type { CommandDeps } from '../types.js'
 import { handleInstallCommand } from './handler.js'
 import { baseFlags, listing, stubPrompts, tmpRoot } from './wizard/test-utils/index.js'
+import { installMetadata } from './metadata.js'
 import { WizardExit } from './wizard/exit.js'
 import { inquirerPrompts } from './wizard/prompts.js'
 import { DEFAULT_TOPIC_SEEDS } from './wizard/state.js'
@@ -41,6 +42,42 @@ describe('handler + wizard', () => {
     await expect(logs.slice(5).join('\n').replaceAll(target, '<vault>') + '\n').toMatchFileSnapshot(
       '../../../test/__snapshots__/install-verbose-default.txt',
     )
+  })
+
+  it('T-1: --verbose emits step=skeleton between topics and hooks; help lists flags and 8 steps', async () => {
+    const root = await tmpRoot()
+    const { deps, logs } = makeDeps()
+    await handleInstallCommand(
+      baseFlags({ target: join(root, 'v'), verbose: true }),
+      deps,
+      stubPrompts().prompts,
+    )
+    const ids = logs.flatMap(l => /^step=(\w+)/.exec(l)?.[1] ?? [])
+    expect(ids).toContain('skeleton')
+    expect(ids.indexOf('skeleton')).toBeGreaterThan(ids.lastIndexOf('topics'))
+    expect(ids.indexOf('plugins')).toBeGreaterThan(ids.lastIndexOf('topics'))
+    expect(ids.indexOf('anatomy')).toBeGreaterThan(ids.indexOf('plugins'))
+    const help = JSON.stringify(installMetadata)
+    for (const f of [
+      '--seed-topics',
+      '--no-hooks',
+      '--no-launchd',
+      '--launchd-in-ci',
+      '--non-interactive',
+      '--verbose',
+    ])
+      expect(help).toContain(f)
+    for (const n of [
+      '1 target path',
+      '2 overwrite',
+      '3 topic',
+      '4 vault skeleton',
+      '5 plugins',
+      '6 anatomy',
+      '7 .claude hooks',
+      '8 launchd',
+    ])
+      expect(help).toContain(n)
   })
 
   it('without --verbose prints nothing', async () => {

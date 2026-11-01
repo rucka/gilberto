@@ -24,6 +24,7 @@
     "postbuild": "node scripts/postbuild.js",
     "dev": "ts-node src/cli.ts",
     "test": "vitest run",
+    "cli:smoke": "bash test/smoke/run.sh",
     "test:coverage": "vitest run --coverage",
     "ts:check": "tsc --noEmit",
     "lint": "lint",

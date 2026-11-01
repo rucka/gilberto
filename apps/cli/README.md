@@ -52,3 +52,7 @@ Flags:
 - `-v, --verbose` — one `key=value` line per decision, plus `wrote dir="<rel>"` / `wrote file="<rel>"` per item of steps 4, 7, 8, and `merged-keys=<list>` for step 7
 
 Exit codes: `0` declined overwrite, `1` target is a file, `2` vault exists, `13` not writable, `28` disk full, `64` missing/invalid input, `65` invalid settings.json / plist validation / plutil missing, `70` vault-bootstrap package missing, `130` Ctrl+C.
+
+## Smoke
+
+CI workflow `.github/workflows/bootstrap-smoke.yml` runs `test/smoke/bootstrap.sh` on ubuntu/macOS × Node 22/24 against the packed CLI. Local re-run: `pnpm cli:smoke` (builds, packs, installs to a temp prefix; `pnpm cli:smoke launchd` on macOS for the plist branch, HOME redirected to a temp dir). Assertions: `test/smoke/assertions.sh`. Prints `metric: install_duration_seconds=<n>`; budget 180s (`SMOKE_BUDGET_SECONDS`). `SMOKE_STEPS_5_6=1` also asserts plugins/anatomy steps (owned by #58).

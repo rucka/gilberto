@@ -28,6 +28,7 @@
     "mdlint:check": "./tools/markdownlint-config/bin/markdownlint-check.sh '.pair/adoption/**/*.md' '*.md'",
     "mdlint:fix": "./tools/markdownlint-config/bin/markdownlint-fix.sh '.pair/adoption/**/*.md' '*.md'",
     "ts:check": "turbo run ts:check",
+    "cli:smoke": "pnpm --filter gilberto cli:smoke",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "deps:outdated": "pnpm -r outdated",
