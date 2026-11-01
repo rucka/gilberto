@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Smoke for `gilberto install` (Path B). Usage: bootstrap.sh [base|launchd]
+# Smoke for `gilberto install` (Path B). Usage: bootstrap.sh [base|launchd|path-a]
 # Env: GILBERTO_BIN (default: gilberto), SMOKE_BUDGET_SECONDS (default 180).
 set -u
 here=$(cd "$(dirname "$0")" && pwd)
@@ -36,6 +36,24 @@ if [ "$mode" = launchd ]; then
     assert_file "$p"
     plutil -lint "$p" >/dev/null 2>&1 || _fail "plutil -lint failed: $p"
   done
+  finish; rc=$?; exit $rc
+fi
+
+if [ "$mode" = path-a ]; then
+  # #48 AC-9: Path A (skill script) and Path B (direct CLI) yield the same tree; AC-6 summary from real CLI.
+  skill="$here/../../../../plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/script.py"
+  export HOME="$work/home-b"; mkdir -p "$HOME"
+  "$BIN" install "$work/b" --no-launchd --non-interactive --no-banner --seed-topics='intelligence=ai,product' >"$work/out-b" 2>&1
+  assert_exit 0 $? "path B install"
+  export HOME="$work/home-a"; mkdir -p "$HOME"
+  PATH="$(dirname "$(command -v "$BIN")"):$PATH" python3 "$skill" --target-path="$work/a" \
+    --seed-topics='intelligence=ai,product' --disable-launchd >"$work/out-a" 2>"$work/err-a"
+  assert_exit 0 $? "path A skill"
+  sum=$(cat "$work/out-a")
+  for w in "vault: $work/a" "pillars: 6" "hooks: merged" "launchd: skipped"; do assert_contains "$sum" "$w" "skill summary"; done
+  grep -qE '^anatomy seeds: [1-9]' "$work/out-a" || _fail "skill summary: no anatomy seeds: $sum"
+  diff <(cd "$work/b" && find . -type f | sort) <(cd "$work/a" && find . -type f | sort) || _fail "Path A tree != Path B tree"
+  diff <(cd "$work/home-b" && find . -type f | sort) <(cd "$work/home-a" && find . -type f | sort) || _fail "Path A HOME != Path B HOME"
   finish; rc=$?; exit $rc
 fi
 
