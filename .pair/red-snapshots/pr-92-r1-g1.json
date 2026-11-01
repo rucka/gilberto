@@ -1,0 +1,490 @@
+{
+  "$meta": {
+    "pr": "92",
+    "phase": "r1-g1",
+    "base": "d563be3884c7c4171ccf84b0854da5097cd84bdf",
+    "trailer": "Pair-RED-Snapshot: pr=92; phase=r1-g1; base=d563be3884c7c4171ccf84b0854da5097cd84bdf; manifest=.pair/red-snapshots/pr-92-r1-g1.json",
+    "artifacts": [
+      "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts"
+    ]
+  },
+  "status": "red",
+  "mode": "repair",
+  "phase": "r1-g1",
+  "inputHead": "d563be3884c7c4171ccf84b0854da5097cd84bdf",
+  "sourceOfTruth": "apps/cli/src/commands/install/wizard/steps/07-hooks.ts",
+  "inventory": [
+    {
+      "id": "r0-1",
+      "producer": "renderDispatcher ROOT= line and hooksStep owned.command in 07-hooks.ts",
+      "inputs": [
+        "targetPath"
+      ],
+      "representations": [
+        "07-hooks.ts renderDispatcher + hooksStep (canonical source); generated .claude/hooks/*.sh and settings.json in the vault"
+      ],
+      "consumers": [
+        "sh -c (Claude Code hook runner)",
+        "sh dispatcher",
+        "nested claude -p"
+      ],
+      "classes": [
+        "plain",
+        "space",
+        "$(..)",
+        "backtick",
+        "$VAR",
+        "single quote",
+        "double quote",
+        "backslash"
+      ],
+      "interactions": [
+        "hook command quoting (sh -c) x dispatcher ROOT quoting (sh <file>) x event (SessionStart/PreCompact/SessionEnd; SessionEnd guard also uses \"$ROOT\" in STAMP)"
+      ],
+      "rationale": "command-level rows run `sh -c <settings command>`; dispatcher-level rows run `sh <dispatcher file>` resolved as join(root,.claude/hooks,<id>.sh), independent of command quoting. The three events share renderDispatcher and the owned.command rendering, so hostile-path rows are covered per event via it.each. Backtick and $VAR have command-level rows (r0-1k, r0-1l) of their own: no equivalence to $(..) is assumed, since a fix escaping only quote/backslash/$( would still expand them."
+    },
+    {
+      "id": "r0-2",
+      "producer": "renderDispatcher claude -p invocation in 07-hooks.ts",
+      "inputs": [
+        "env guard",
+        "nested claude re-firing SessionStart"
+      ],
+      "representations": [
+        "07-hooks.ts renderDispatcher + hooksStep (canonical source); generated .claude/hooks/*.sh and settings.json in the vault"
+      ],
+      "consumers": [
+        "sh -c (Claude Code hook runner)",
+        "sh dispatcher",
+        "nested claude -p"
+      ],
+      "classes": [
+        "top-level trigger",
+        "nested trigger SessionStart",
+        "nested trigger PreCompact",
+        "nested trigger SessionEnd (daily stamp cleared by stub, else stamp masks recursion)"
+      ],
+      "interactions": [
+        "each dispatcher x nested claude -p re-firing the same dispatcher",
+        "each ordered pair of dispatchers (nested session loads the same settings.json and fires all three hooks)"
+      ]
+    },
+    {
+      "id": "r0-3",
+      "producer": "renderDispatcher stdin handling in 07-hooks.ts",
+      "inputs": [
+        "PreCompact stdin JSON transcript_path"
+      ],
+      "representations": [
+        "07-hooks.ts renderDispatcher + hooksStep (canonical source); generated .claude/hooks/*.sh and settings.json in the vault"
+      ],
+      "consumers": [
+        "sh -c (Claude Code hook runner)",
+        "sh dispatcher",
+        "nested claude -p"
+      ],
+      "classes": [
+        "payload with transcript_path",
+        "empty stdin",
+        "valid JSON without transcript_path",
+        "transcript_path with space / $(..)",
+        "transcript_path with single quote / double quote / backslash",
+        "non-JSON stdin",
+        "truncated JSON stdin"
+      ],
+      "interactions": [
+        "stdin payload value x skill invocation (must reach claude literally, never shell-expanded)"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "apps/cli/src/commands/install/wizard/steps/07-hooks.ts",
+    "mode": "behavioral",
+    "allowedPaths": [
+      "apps/cli/src/commands/install/wizard/steps/07-hooks.ts",
+      "apps/cli/src/commands/install/wizard/steps/07-hooks.test.ts"
+    ]
+  },
+  "matrix": [
+    {
+      "id": "ROW-r0-1a",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault \"My Vault\": `sh -c <PreCompact command>`",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1a",
+      "expected": "exit 0 + dispatcher stderr",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1b",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault `v$(echo INJECTED 1>&2)`: `sh -c <command>`",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1b",
+      "expected": "no INJECTED on stderr, exit 0, stderr contains `skill not installed: gilberto-process-capture`",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1c",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault with $(..) / backtick: `sh <resolved PreCompact dispatcher file>`",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1c",
+      "expected": "no INJECTED, exit 0, skill-not-installed msg",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1d",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault \"it's mine\": `sh -c <PreCompact command>` (command-level only)",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1d",
+      "expected": "exit 0 + dispatcher stderr",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1d2",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "vault \"it's mine\": `sh <resolved dispatcher file>` (dispatcher-level, already correct via JSON.stringify)",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1d2",
+      "expected": "exit 0 + dispatcher stderr",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1e",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault `lit$X`, env X=zzz, `sh <resolved dispatcher file>`, stub claude logs pwd",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1e",
+      "expected": "claude cwd == literal vault",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1f",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "plain path: `sh -c <command>`",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1f",
+      "expected": "exit 0 + dispatcher stderr",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1g",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault \"My Vault\": `sh -c <command>` for SessionStart and SessionEnd",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1g",
+      "expected": "exit 0 + dispatcher stderr",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1h",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault with $(..) / backtick: `sh <dispatcher file>` for SessionStart and SessionEnd",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1h",
+      "expected": "no INJECTED, exit 0, skill-not-installed msg",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1i",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault with `\"` or `\\`: `sh -c <command>` for all three events",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1i",
+      "expected": "exit 0 + dispatcher stderr",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1j",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "vault with `\"` or `\\`: `sh <dispatcher file>` for all three events (already correct via JSON.stringify)",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1j",
+      "expected": "exit 0 + dispatcher stderr",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-2a",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "SessionStart dispatcher via `sh <file>`; stub re-invokes it (cap 5)",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-2a",
+      "expected": "counter == 1",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "ROW-r0-2b",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "single SessionStart trigger via `sh <file>`, non-recursing stub",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-2b",
+      "expected": "counter == 1",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "ROW-r0-2c",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "PreCompact dispatcher; recursive stub",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-2c",
+      "expected": "counter == 1",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "ROW-r0-2d",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "SessionEnd dispatcher; recursive stub deletes daily stamp before re-entry",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-2d",
+      "expected": "counter == 1",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "ROW-r0-3a",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "PreCompact JSON {transcript_path} on stdin via `sh <file>`, stub logs argv+env",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-3a",
+      "expected": "log contains transcript path",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "ROW-r0-3b",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "PreCompact empty stdin via `sh <file>`",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-3b",
+      "expected": "exit 0, argv `-p /gilberto-process-capture`",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "ROW-r0-3c",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "PreCompact JSON without transcript_path",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-3c",
+      "expected": "exit 0, argv `-p /gilberto-process-capture`",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "ROW-r0-3d",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "transcript_path `/tmp/a b/$(echo INJECTED 1>&2).jsonl`",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-3d",
+      "expected": "no INJECTED on stderr; log contains literal path",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "ROW-r0-1k",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault `w`echo INJECTED 1>&2``: `sh -c <PreCompact command>`",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1k",
+      "expected": "exit 0, no INJECTED, stderr contains skill-not-installed",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-1l",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "vault `lit$X`, env X=zzz: `sh -c <PreCompact command>`",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-1l",
+      "expected": "exit 0, stderr contains skill-not-installed (no $X expansion)",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r0-2e",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "each ordered pair X!=Y of SessionStart/PreCompact/SessionEnd: X dispatcher, recursive stub re-invokes Y dispatcher (all skills installed, SessionEnd stamp cleared)",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-2e",
+      "expected": "counter == 1",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "ROW-r0-3e",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "transcript_path `/tmp/it's \"q\" \\ x.jsonl` (JSON-escaped) on stdin",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-3e",
+      "expected": "no INJECTED; argv/env log contains literal decoded path",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "ROW-r0-3f",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "stdin `not json {` and truncated JSON `{\"transcript_path\": \"/tmp/tr`",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "test": "ROW-r0-3f",
+      "expected": "exit 0, argv `-p /gilberto-process-capture`",
+      "covers": [
+        "r0-3"
+      ]
+    }
+  ],
+  "redTests": [
+    {
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:60f23e44e978a7883468825e90f8937e49b85b188da738c5a46553ae1074aed0",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "observed": "Tests 32 failed | 13 passed (45): witnesses r0-1a,1b,1c,1d,1e,1g,1h,1i,1k,1l,2a,2c,2d,2e,3a,3d,3e fail (127 / INJECTED / counter x5 / no transcript path); controls pass"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "findings": [
+          "r0-1",
+          "r0-2",
+          "r0-3"
+        ],
+        "owner": "apps/cli/src/commands/install/wizard/steps/07-hooks.ts",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "apps/cli/src/commands/install/wizard/steps/07-hooks.ts",
+          "apps/cli/src/commands/install/wizard/steps/07-hooks.test.ts"
+        ],
+        "dependsOn": [],
+        "oracle": "vitest 07-hooks.shell.test.ts"
+      },
+      {
+        "groupId": "r1-g2",
+        "findings": [
+          "r0-4"
+        ],
+        "owner": "apps/cli/src/commands/install/wizard/steps/08-launchd.ts",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "apps/cli/src/commands/install/wizard/steps/08-launchd.ts"
+        ],
+        "dependsOn": [],
+        "oracle": "vitest step 8 claude-missing warning"
+      },
+      {
+        "groupId": "r1-g3",
+        "findings": [
+          "r0-5"
+        ],
+        "owner": "apps/cli/src/commands/install/wizard/steps/08-launchd.test.ts",
+        "mode": "test",
+        "allowedPaths": [],
+        "dependsOn": [],
+        "oracle": "mutation of 08-launchd.ts plist-path print loop"
+      }
+    ],
+    "carried": []
+  },
+  "notes": "existing 07-hooks.test.ts AC1 asserts raw command path; quoting changes it, so fixer updates that assertion (in allowedPaths). Attempt 3: artifact formatted with repo prettier (prettier --check clean).",
+  "changedRows": [
+    "MISSING-r0-1-command-level-classes",
+    "MISSING-r0-2-cross-event",
+    "MISSING-r0-3-payload-classes",
+    "ROW-r0-1b",
+    "ROW-r0-1k",
+    "ROW-r0-1l",
+    "ROW-r0-2e",
+    "ROW-r0-3e",
+    "ROW-r0-3f"
+  ]
+}
