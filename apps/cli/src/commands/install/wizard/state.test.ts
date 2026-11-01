@@ -3,7 +3,13 @@ import { DEFAULT_TOPIC_SEEDS, TOPIC_PILLARS, WizardStateSchema } from './state.j
 
 describe('WizardStateSchema', () => {
   it('accepts a complete state', () => {
-    const s = { targetPath: '/t', topicSeeds: DEFAULT_TOPIC_SEEDS, materialized: false }
+    const s = {
+      targetPath: '/t',
+      topicSeeds: DEFAULT_TOPIC_SEEDS,
+      materialized: false,
+      hooks: 'installed',
+      launchd: 'stubbed',
+    }
     expect(WizardStateSchema.parse(s)).toEqual(s)
   })
 

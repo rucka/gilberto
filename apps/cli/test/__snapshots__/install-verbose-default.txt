@@ -35,3 +35,9 @@ wrote dir="anatomy"
 wrote dir=".claude"
 wrote dir=".claude/skills"
 wrote file="CLAUDE.md"
+wrote file="<vault>/.claude/hooks/gilberto.session-start.sh"
+wrote file="<vault>/.claude/hooks/gilberto.pre-compact.sh"
+wrote file="<vault>/.claude/hooks/gilberto.session-end.sh"
+wrote file="<vault>/.claude/settings.json"
+merged-keys=gilberto.session-start,gilberto.pre-compact,gilberto.session-end
+step=launchd decision=skipped reason=--no-launchd

@@ -11,6 +11,7 @@ export type InstallCommandConfig = {
   nonInteractive: boolean
   hooks: boolean
   launchd: boolean
+  launchdInCi: boolean
   verbose: boolean
 }
 
@@ -56,5 +57,6 @@ export const parseInstallCommand = (
   nonInteractive: options['nonInteractive'] === true,
   hooks: options['hooks'] !== false,
   launchd: options['launchd'] !== false,
+  launchdInCi: options['launchdInCi'] === true,
   verbose: options['verbose'] === true,
 })

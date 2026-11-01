@@ -7,7 +7,10 @@ import { renderPlist, escapeXml } from './render.js'
 import { renderReflectDay } from './reflect-day.js'
 
 const fx = (n: string): string =>
-  readFileSync(fileURLToPath(new URL(`../../../../../test/__fixtures__/plists/${n}`, import.meta.url)), 'utf8')
+  readFileSync(
+    fileURLToPath(new URL(`../../../../../test/__fixtures__/plists/${n}`, import.meta.url)),
+    'utf8',
+  )
 
 const input = { claude: '/opt/bin/claude', root: '/Users/me/My Vault' }
 
@@ -30,7 +33,11 @@ describe('plist renderers', () => {
     expect(escapeXml('&<>"\'')).toBe('&amp;&lt;&gt;&quot;&apos;')
   })
   it('RunAtLoad false, never gilberto CLI', () => {
-    for (const out of [renderMorningBriefing(input), renderReflectDay(input), renderIngest(input)]) {
+    for (const out of [
+      renderMorningBriefing(input),
+      renderReflectDay(input),
+      renderIngest(input),
+    ]) {
       expect(out).toContain('<key>RunAtLoad</key>\n  <false/>')
       expect(out).not.toMatch(/<string>[^<]*\/gilberto<\/string>/)
     }

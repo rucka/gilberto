@@ -2,9 +2,21 @@ import { describe, expect, it } from 'vitest'
 import { HOOK_IDS, mergeSettings, ownerOf, type OwnedHook } from './settings-merge.js'
 
 const owned: OwnedHook[] = [
-  { id: 'gilberto.session-start', event: 'SessionStart', command: '/v/.claude/hooks/gilberto.session-start.sh' },
-  { id: 'gilberto.pre-compact', event: 'PreCompact', command: '/v/.claude/hooks/gilberto.pre-compact.sh' },
-  { id: 'gilberto.session-end', event: 'SessionEnd', command: '/v/.claude/hooks/gilberto.session-end.sh' },
+  {
+    id: 'gilberto.session-start',
+    event: 'SessionStart',
+    command: '/v/.claude/hooks/gilberto.session-start.sh',
+  },
+  {
+    id: 'gilberto.pre-compact',
+    event: 'PreCompact',
+    command: '/v/.claude/hooks/gilberto.pre-compact.sh',
+  },
+  {
+    id: 'gilberto.session-end',
+    event: 'SessionEnd',
+    command: '/v/.claude/hooks/gilberto.session-end.sh',
+  },
 ]
 const entry = (command: string) => ({ matcher: '', hooks: [{ type: 'command', command }] })
 

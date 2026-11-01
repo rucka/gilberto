@@ -1,4 +1,8 @@
-export const HOOK_IDS = ['gilberto.session-start', 'gilberto.pre-compact', 'gilberto.session-end'] as const
+export const HOOK_IDS = [
+  'gilberto.session-start',
+  'gilberto.pre-compact',
+  'gilberto.session-end',
+] as const
 
 export type HookId = (typeof HOOK_IDS)[number]
 

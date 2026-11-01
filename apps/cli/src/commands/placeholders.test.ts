@@ -104,6 +104,7 @@ describe('parsers', () => {
       nonInteractive: false,
       hooks: true,
       launchd: true,
+      launchdInCi: false,
       verbose: false,
     })
     expect(
@@ -113,6 +114,7 @@ describe('parsers', () => {
           nonInteractive: true,
           hooks: false,
           launchd: false,
+          launchdInCi: true,
           verbose: true,
         },
         ['/x'],
@@ -124,6 +126,7 @@ describe('parsers', () => {
       nonInteractive: true,
       hooks: false,
       launchd: false,
+      launchdInCi: true,
       verbose: true,
     })
   })
