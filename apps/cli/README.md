@@ -18,7 +18,7 @@ Requires Node ≥ 22.12. Published on npm tag `next`.
 
 ## `gilberto install [target]`
 
-Wizard steps 1-4, 7-8 (steps 1-3 never write; step 4 writes only inside a temp dir, then moves it atomically; steps 7-8 run on the written vault):
+Wizard steps 1-8 (steps 1-3 never write; steps 4-6 write only inside a temp dir, then moves it atomically; steps 7-8 run on the written vault):
 
 1. target path — positional arg or prompt (default `~/Dropbox/Gilberto/`); `~`/`$HOME` expanded
 2. overwrite check — vault marker (`anatomy/anatomy.md` or `.claude/skills/gilberto-*`) aborts; other existing path asks `Target path exists. Continue?` (default No)
@@ -33,7 +33,11 @@ projects/projects.md  projects/<topic>/<topic>.md
 _ingest/.gitkeep  anatomy/  .claude/skills/  CLAUDE.md
 ```
 
-Folder-notes come from `@foomakers/gilberto-vault-bootstrap` templates; topics from step 3. 7. hooks — JSON-merges three Claude Code hooks into `<vault>/.claude/settings.json` (atomic tmp + rename), dispatchers in `<vault>/.claude/hooks/`. User keys/hooks are preserved; a gilberto hook already pointing elsewhere triggers `settings.json.bak-<ISO8601>` then overwrite. Invalid JSON → exit 65, file untouched.
+Folder-notes come from `@foomakers/gilberto-vault-bootstrap` templates; topics from step 3.
+
+5. plugins — prints the bundled first-party plugins, one line each (info only: no prompt, no install)
+6. anatomy — copies `seed/anatomy/` from `@foomakers/gilberto-vault-bootstrap` into `<tmp>/anatomy/` before the commit (`.md`: `{{DATE}}` → install date; other files byte-copied; one `| <topic> | |` row per seeded topic appended to `topics.md`). Missing package/seed → `vault-bootstrap content package not found; reinstall gilberto`, unreadable seed file → `failed to seed anatomy: <path>`; both exit 70, temp removed, target untouched. Ctrl+C → exit 130 as step 4
+7. hooks — JSON-merges three Claude Code hooks into `<vault>/.claude/settings.json` (atomic tmp + rename), dispatchers in `<vault>/.claude/hooks/`. User keys/hooks are preserved; a gilberto hook already pointing elsewhere triggers `settings.json.bak-<ISO8601>` then overwrite. Invalid JSON → exit 65, file untouched.
 8. launchd — macOS: writes 3 plists to `~/Library/LaunchAgents/`, `plutil -lint` each, never `launchctl` (written, not loaded; each process skill activates its job on install; `gilberto status` reports inactive jobs). Linux: prints `linux scheduling stub: cron/systemd timers land in Initiative #5`, writes nothing. `CI=true` skips unless `--launchd-in-ci`.
 
 Hook ids (command basename `<id>.sh`): `gilberto.session-start` (`SessionStart` → `/gilberto-process-next`, off via `- session-start: off` in `anatomy/preferences.md`), `gilberto.pre-compact` (`PreCompact` → `/gilberto-process-capture`), `gilberto.session-end` (`SessionEnd` → `/gilberto-process-reflect day`, first end of the day). Dispatchers exit 0 and log `skill not installed: <skill>` when the skill is absent. Targets Claude Code hooks schema `{hooks: {Event: [{matcher, hooks: [{type: "command", command}]}]}}` (current at time of writing).
