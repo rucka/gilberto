@@ -13,6 +13,8 @@ export const WizardStateSchema = z.object({
   targetPath: z.string().min(1),
   topicSeeds: z.object({ pulse: topics, intelligence: topics, projects: topics }),
   materialized: z.boolean(),
+  hooks: z.enum(['installed', 'skipped']),
+  launchd: z.enum(['installed', 'skipped', 'stubbed']),
 })
 
 export type WizardState = z.infer<typeof WizardStateSchema>

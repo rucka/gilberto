@@ -17,10 +17,15 @@ export type StepContext = {
   cwd: string
   env: NodeJS.ProcessEnv
   trace: (line: string) => void
+  print: (line: string) => void
   now?: () => Date
   loadBootstrap?: () => Promise<Bootstrap>
   signals?: SignalSource
+  platform?: NodeJS.Platform
+  run?: (cmd: string, args: string[]) => RunResult
 }
+
+export type RunResult = { status: number | null; stderr: string; error?: NodeJS.ErrnoException }
 
 export type TempWork = { root: string; signal: AbortSignal }
 

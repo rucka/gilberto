@@ -38,7 +38,7 @@ describe('handler + wizard', () => {
       'step=topics pillar=intelligence selected=ai,product',
       `step=topics pillar=projects selected=${DEFAULT_TOPIC_SEEDS.projects.join(',')}`,
     ])
-    await expect(logs.slice(5).join('\n') + '\n').toMatchFileSnapshot(
+    await expect(logs.slice(5).join('\n').replaceAll(target, '<vault>') + '\n').toMatchFileSnapshot(
       '../../../test/__snapshots__/install-verbose-default.txt',
     )
   })
@@ -100,7 +100,7 @@ describe('gilberto install via main()', () => {
 
   it('--non-interactive with path completes with exit 0', async () => {
     const root = await tmpRoot()
-    await run(join(root, 'v'), '--non-interactive')
+    await run(join(root, 'v'), '--non-interactive', '--no-launchd')
     expect(exit).toHaveBeenCalledWith(0)
   })
 
@@ -144,7 +144,7 @@ describe('gilberto install via main()', () => {
   it('--seed-topics + path run with no prompt and exit 0', async () => {
     const root = await tmpRoot()
     const input = vi.spyOn(inquirerPrompts, 'checkbox')
-    await run(join(root, 'v'), '--seed-topics', 'pulse=health')
+    await run(join(root, 'v'), '--seed-topics', 'pulse=health', '--no-launchd')
     expect(input).not.toHaveBeenCalled()
     expect(exit).toHaveBeenCalledWith(0)
   })

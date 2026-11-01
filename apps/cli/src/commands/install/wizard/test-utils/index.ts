@@ -10,7 +10,8 @@ export const baseFlags = (over: Partial<InstallCommandConfig> = {}): InstallComm
   seedTopics: {},
   nonInteractive: false,
   hooks: true,
-  launchd: true,
+  launchd: false,
+  launchdInCi: false,
   verbose: false,
   ...over,
 })
@@ -43,16 +44,18 @@ type CtxOverrides = Partial<Pick<StepContext, 'cwd' | 'env'>> & {
 export const makeCtx = (over: CtxOverrides = {}) => {
   const { prompts, calls } = stubPrompts(over.script)
   const lines: string[] = []
+  const out: string[] = []
   const ctx: StepContext = {
     flags: baseFlags(over.flags),
     prompts,
     cwd: '/nonexistent-cwd',
     env: { HOME: '/home/u' },
     trace: l => lines.push(l),
+    print: l => out.push(l),
     ...(over.cwd === undefined ? {} : { cwd: over.cwd }),
     ...(over.env === undefined ? {} : { env: over.env }),
   }
-  return { ctx, calls, lines }
+  return { ctx, calls, lines, out }
 }
 
 export const tmpRoot = (): Promise<string> => mkdtemp(join(tmpdir(), 'gilberto-wizard-'))

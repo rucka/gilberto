@@ -15,6 +15,7 @@ export const handleInstallCommand = async (
       prompts,
       cwd: deps.cwd,
       env: deps.env,
+      print: line => deps.write(`${line}\n`),
       trace: line => {
         if (config.verbose) deps.logger.info(line)
       },
