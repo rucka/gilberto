@@ -22,7 +22,7 @@ core=(me/me.md pulse/pulse.md projects/projects.md intelligence/intelligence.md 
   network/network.md network/people network/companies _ingest/.gitkeep .claude/skills CLAUDE.md
   anatomy intelligence/ai/ai.md intelligence/product/product.md
   anatomy/anatomy.md anatomy/gilberto.md anatomy/topics.md anatomy/plugins.md anatomy/preferences.md
-  anatomy/playbooks/surface/morning-briefing.md anatomy/playbooks/reflect/day.md)
+  anatomy/playbooks)
 steps=(path overwrite topics plugins skeleton anatomy hooks launchd)
 
 if [ "$mode" = launchd ]; then
