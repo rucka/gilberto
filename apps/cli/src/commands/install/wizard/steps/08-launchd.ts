@@ -22,7 +22,7 @@ const defaultRun = (cmd: string, args: string[]): RunResult => {
   return { status: r.status, stderr: r.stderr ?? '', ...(r.error ? { error: r.error } : {}) }
 }
 
-const findClaude = async (env: NodeJS.ProcessEnv): Promise<string> => {
+const findClaude = async (env: NodeJS.ProcessEnv): Promise<string | undefined> => {
   for (const dir of (env['PATH'] ?? '').split(delimiter).filter(Boolean)) {
     const p = join(dir, 'claude')
     if (
@@ -33,7 +33,7 @@ const findClaude = async (env: NodeJS.ProcessEnv): Promise<string> => {
     )
       return p
   }
-  return 'claude'
+  return undefined
 }
 
 const exists = (p: string): Promise<string | undefined> =>
@@ -76,7 +76,12 @@ const lintAll = async (run: NonNullable<StepContext['run']>, paths: string[]): P
 
 const write = async (ctx: StepContext, targetPath: string): Promise<void> => {
   const dir = join(ctx.env['HOME'] ?? homedir(), 'Library', 'LaunchAgents')
-  const input = { claude: await findClaude(ctx.env), root: targetPath }
+  const found = await findClaude(ctx.env)
+  if (found === undefined)
+    ctx.print(
+      'warning: claude not found on PATH; launchd jobs will fail to start. install claude, then re-run, or use --no-launchd to skip',
+    )
+  const input = { claude: found ?? 'claude', root: targetPath }
   const plists = [
     [MORNING_BRIEFING_LABEL, renderMorningBriefing(input)],
     [REFLECT_DAY_LABEL, renderReflectDay(input)],
