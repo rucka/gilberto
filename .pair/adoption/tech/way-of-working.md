@@ -31,16 +31,16 @@ Kanban — continuous flow, no fixed sprints.
 ## Per-Story Workflow
 
 1. Create issue with descriptive title (no code prefix); labels `user story` + `area:*`; set `Parent issue` (epic) + `Priority` (P0/P1/P2)
-2. `/pair-process-refine-story` → Todo → Refined
+2. `/pair-process-refine-story` → Draft → Ready
 3. Branch `feat/<number>-<slug>`
 4. `/pair-process-plan-tasks` → tasks in story body
-5. `/pair-process-implement` (TDD: RED → GREEN → REFACTOR) → Refined → In Progress
+5. `/pair-process-implement` (TDD: RED → GREEN → REFACTOR) → Ready → In Progress
 6. PR title `<type>: <desc>` (no code prefix) with `Closes #<number>` in body
 7. CI quality gate green
 8. Self-review (single-contributor)
-9. Squash merge → branch deleted → issue closed → In Progress → Done
+9. Squash merge → branch deleted → issue closed → Review → Done
 
-Initiatives & epics: simpler flow Todo → In Progress → Done as children progress.
+Initiatives & epics: simpler flow Todo → Review → Done as children progress.
 
 ## Implementation Execution
 
@@ -78,7 +78,7 @@ Initiatives & epics: simpler flow Todo → In Progress → Done as children prog
 
 ### Status Columns
 
-Todo · Refined · In Progress · Done. Review state via built-in `Linked pull requests`.
+Draft · Ready · In Progress · Review · Done (mirrors LearnnTag board).
 
 ### Custom Fields
 
@@ -98,20 +98,20 @@ No `Effort` field — story points live in story body.
 
 | Transition | Trigger |
 |---|---|
-| Todo → Refined | `/pair-process-refine-story` complete |
-| Refined → In Progress | `/pair-process-implement` start |
-| In Progress → Done | PR merged + issue closed |
+| Draft → Ready | `/pair-process-refine-story` complete |
+| Ready → In Progress | `/pair-process-implement` start |
+| In Progress → Review | PR published |
+| Review → Done | PR merged + issue closed |
 
 ## State Mapping
 
 | Board State | Macrostate  |
 | ----------- | ----------- |
-| Todo        | Draft       |
-| Refined     | Ready       |
+| Draft       | Draft       |
+| Ready       | Ready       |
 | In Progress | In Progress |
+| Review      | Review      |
 | Done        | Done        |
-
-No Review column: review lives on the PR (minimal board).
 
 ## Quality Gates
 
