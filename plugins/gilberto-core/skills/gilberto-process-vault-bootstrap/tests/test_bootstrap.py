@@ -11,14 +11,16 @@ spec = importlib.util.spec_from_file_location("bootstrap", HERE / "script.py")
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 
-OUT = 'wrote dir="me"\nwrote dir="pulse"\nwrote file="anatomy/anatomy.md"\nwrote file="anatomy/topics.md"\nstep=skeleton decision=written target="/v"\nmerged-keys=a,b\nstep=launchd decision=skipped\n'
-
+PILLARS = "".join(f'wrote dir="{d}"\n' for d in ["me", "pulse", "projects", "intelligence", "journey", "network"])
+SEEDS = "".join(f'wrote file="anatomy/{f}.md"\n' for f in "anatomy gilberto topics plugins preferences a b c".split())
+TRACE = f'{PILLARS}wrote dir="network/people"\nstep=skeleton decision=written target="/v"\n{SEEDS}merged-keys=a,b\nstep=launchd decision=skipped\n'
+STDOUT = "plugins: none\n"
 
 @pytest.fixture
 def fake(monkeypatch):
     """fake(which=, npm=, version=, spawn=(code,out,err)) -> list of spawned argvs"""
 
-    def setup(which=None, npm_version=None, version="0.1.0", result=(0, OUT, "")):
+    def setup(which=None, npm_version=None, version="0.1.0", result=(0, STDOUT, TRACE)):
         spawned = []
         monkeypatch.setattr(mod.shutil, "which", lambda n, path=None: which)
 
@@ -94,7 +96,7 @@ def test_ac6_summary(fake, capsys):
     fake(which="/g")
     assert mod.main([], {}, "darwin") == 0
     o = capsys.readouterr().out
-    assert "vault: /v" in o and "pillars: 2" in o and "anatomy seeds: 2" in o and "hooks: merged" in o and "launchd: skipped" in o
+    assert "vault: /v" in o and "pillars: 6" in o and "anatomy seeds: 8" in o and "hooks: merged" in o and "launchd: skipped" in o
     assert "wrote dir" not in o
     mod.main(["--verbose"], {}, "darwin")
     assert "wrote dir" in capsys.readouterr().out

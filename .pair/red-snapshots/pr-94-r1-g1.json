@@ -1,0 +1,455 @@
+{
+  "$meta": {
+    "pr": "94",
+    "phase": "r1-g1",
+    "base": "93403c55cd192b72c40b58d2fa54fe3329cb65e0",
+    "trailer": "Pair-RED-Snapshot: pr=94; phase=r1-g1; base=93403c55cd192b72c40b58d2fa54fe3329cb65e0; manifest=.pair/red-snapshots/pr-94-r1-g1.json",
+    "artifacts": [
+      "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_bootstrap.py"
+    ]
+  },
+  "status": "red",
+  "mode": "remediation",
+  "inputHead": "93403c55cd192b72c40b58d2fa54fe3329cb65e0",
+  "sourceOfTruth": "script.py producer + CLI logger stderr trace + card edge cases",
+  "inventory": [
+    {
+      "id": "r0-2",
+      "producer": "script.py:summarize()+main() (reads CLI streams; CLI logger emits trace on stderr per apps/cli smoke AC-8)",
+      "inputs": "script.py argv + env PATH + CLI exit/stdout/stderr",
+      "representations": [
+        "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/script.py"
+      ],
+      "consumers": [
+        "/gilberto-process-vault-bootstrap skill user",
+        "SKILL.md"
+      ],
+      "classes": [
+        "trace on stderr (real)",
+        "trace absent merged-keys",
+        "--verbose"
+      ],
+      "interactions": [
+        "spawn streams -> summarize -> print"
+      ]
+    },
+    {
+      "id": "r0-3",
+      "producer": "script.py:main() error mapping + NET_ERR",
+      "inputs": "script.py argv + env PATH + CLI exit/stdout/stderr",
+      "representations": [
+        "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/script.py"
+      ],
+      "consumers": [
+        "/gilberto-process-vault-bootstrap skill user",
+        "SKILL.md"
+      ],
+      "classes": [
+        "trace-only network word with CLI exit 65",
+        "real npm registry error ENOTFOUND",
+        "ECONNREFUSED boundary"
+      ],
+      "interactions": [
+        "-v trace on stderr feeds NET_ERR check ahead of exit-code table"
+      ]
+    },
+    {
+      "id": "r0-6",
+      "producer": "script.py:main() version gate and upgrade branch",
+      "inputs": "script.py argv + env PATH + CLI exit/stdout/stderr",
+      "representations": [
+        "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/script.py"
+      ],
+      "consumers": [
+        "/gilberto-process-vault-bootstrap skill user",
+        "SKILL.md"
+      ],
+      "classes": [
+        "upgrade still out of range",
+        "upgrade in range",
+        "npm failure",
+        "version above range"
+      ],
+      "interactions": [
+        "upgrade -> re-detect -> range check -> spawn"
+      ]
+    },
+    {
+      "id": "r0-7",
+      "producer": "script.py:global_path()/detect() verbose announce",
+      "inputs": "script.py argv + env PATH + CLI exit/stdout/stderr",
+      "representations": [
+        "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/script.py"
+      ],
+      "consumers": [
+        "/gilberto-process-vault-bootstrap skill user",
+        "SKILL.md"
+      ],
+      "classes": [
+        "verbose + local gilberto",
+        "non-verbose",
+        "verbose + empty local bin"
+      ],
+      "interactions": [
+        "global_path filter -> detect -> announce"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "script.py",
+    "mode": "behavioral",
+    "allowedPaths": [
+      "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/script.py",
+      "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/SKILL.md"
+    ]
+  },
+  "matrix": [
+    {
+      "id": "r0-2-w1",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "real stream split: trace on stderr, plugin list on stdout, real spawn of a stub gilberto",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_2_summary_parses_stderr_trace -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "pillars: 6, anatomy seeds: 8, hooks: merged, launchd: skipped, vault: /v",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "r0-2-w2",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "mocked spawn with real stream split fixture (trace stderr)",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_bootstrap.py::test_ac6_summary -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_bootstrap.py",
+      "expected": "summary shows 6 pillars / 8 seeds / merged / skipped; --verbose appends trace to stdout",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "r0-2-w3",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "--verbose with trace on stderr",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_2_verbose_appends_trace -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "stdout carries the trace lines (wrote dir=\"me\", merged-keys=)",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "r0-2-c1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "boundary: trace without merged-keys",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_2_hooks_skipped_without_merged_keys -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "hooks: skipped",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "r0-3-w1",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "npx failure exit 65 with trace line wrote dir=\"network\" on stderr",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_3_trace_network_dir_not_registry_error -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "return 65, message has (exit 65), no registry unreachable",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-3-c1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "real npm registry error (ENOTFOUND) via npx stub",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_3_real_registry_error_still_unreachable -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "registry unreachable, exit 1",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-3-c2",
+      "kind": "boundary",
+      "baseline": "pass",
+      "condition": "ECONNREFUSED signature alone still maps to registry unreachable",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_3_registry_error_after_trace_still_unreachable_boundary -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "registry unreachable, exit 1",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-6-w1",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "--confirm=upgrade, version 0.0.9 before and after",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_6_upgrade_still_out_of_range_exits_64 -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "return 64, version named, no `gilberto install` spawned",
+      "covers": [
+        "r0-6"
+      ]
+    },
+    {
+      "id": "r0-6-w2",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "version 2.0.0 (above range)",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_6_version_above_range_says_outside -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "message says outside, not below",
+      "covers": [
+        "r0-6"
+      ]
+    },
+    {
+      "id": "r0-6-c1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "upgrade that yields 0.2.0",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_6_upgrade_in_range_runs_install -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "install runs, exit 0",
+      "covers": [
+        "r0-6"
+      ]
+    },
+    {
+      "id": "r0-6-c2",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "npm i -g fails exit 3",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_6_upgrade_npm_failure_relayed -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "return 3, no install",
+      "covers": [
+        "r0-6"
+      ]
+    },
+    {
+      "id": "r0-7-w1",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "--verbose with ./node_modules/.bin/gilberto on PATH",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_7_verbose_announces_ignored_local -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "output contains \"ignored local gilberto at\" and the path",
+      "covers": [
+        "r0-7"
+      ]
+    },
+    {
+      "id": "r0-7-c1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "local bin, no --verbose",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_7_not_verbose_stays_silent -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "no announcement",
+      "covers": [
+        "r0-7"
+      ]
+    },
+    {
+      "id": "r0-7-c2",
+      "kind": "boundary",
+      "baseline": "pass",
+      "condition": "verbose, node_modules/.bin without gilberto",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_7_verbose_without_local_gilberto_silent -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "no announcement",
+      "covers": [
+        "r0-7"
+      ]
+    },
+    {
+      "id": "r0-6-w3",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "0.0.9, npm bumps to 2.0.0, --confirm=upgrade",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_6_upgrade_to_above_range_says_outside -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "return 64, stderr has outside and 2.0.0 not below, no install",
+      "covers": [
+        "r0-6"
+      ]
+    },
+    {
+      "id": "r0-7-w2",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "--verbose, local gilberto + global gilberto (which branch) on PATH",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_7_verbose_announces_ignored_local_with_global_present -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "announces 'ignored local gilberto at <local>', global spawned (install), local no calls",
+      "covers": [
+        "r0-7"
+      ]
+    },
+    {
+      "id": "r0-3-c3",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "npx exit 1, only signature ETIMEDOUT on stderr",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_3_each_signature_unreachable[ETIMEDOUT] -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "npm registry unreachable, exit 1",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-3-c4",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "npx exit 1, only signature EAI_AGAIN on stderr",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_3_each_signature_unreachable[EAI_AGAIN] -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "npm registry unreachable, exit 1",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-3-c5",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "npx exit 1, only signature ECONNRESET on stderr",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_3_each_signature_unreachable[ECONNRESET] -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "npm registry unreachable, exit 1",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-3-c6",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "npx exit 1, only signature network on stderr",
+      "oracle": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py::test_r0_3_each_signature_unreachable[network] -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "expected": "npm registry unreachable, exit 1",
+      "covers": [
+        "r0-3"
+      ]
+    }
+  ],
+  "redTests": [
+    {
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:fb7230cbfc641cb595d51aff58d9169efa23c0816e49f4d6936a91ebe7753c06",
+      "command": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_remediation_r1.py -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "observed": "8 failed, 11 passed: summary pillars 0 (expected 6); exit 1 (expected 65); exit 0 (expected 64); no outside; no ignored local gilberto at"
+    },
+    {
+      "file": "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_bootstrap.py",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:b72492c3f53df6ae9f7f867de9f545051a888348efa98122e1511e7cb8b4b4cf",
+      "command": "uv run --project tools/skill-tests pytest plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/tests/test_bootstrap.py -q --no-cov -p no:cacheprovider --import-mode=importlib",
+      "observed": "1 failed, 22 passed: test_ac6_summary AssertionError pillars: 0 / vault: default target"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "findings": [
+          "r0-2",
+          "r0-3",
+          "r0-6",
+          "r0-7"
+        ],
+        "owner": "script.py",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/script.py",
+          "plugins/gilberto-core/skills/gilberto-process-vault-bootstrap/SKILL.md"
+        ],
+        "dependsOn": [],
+        "oracle": "pytest skill tests"
+      },
+      {
+        "groupId": "r1-g2",
+        "findings": [
+          "r0-1"
+        ],
+        "owner": "plugin.json",
+        "mode": "structural",
+        "allowedPaths": [
+          "plugins/gilberto-core/.claude-plugin/plugin.json"
+        ],
+        "dependsOn": [],
+        "oracle": "prettier --check on plugin.json"
+      },
+      {
+        "groupId": "r1-g3",
+        "findings": [
+          "r0-4"
+        ],
+        "owner": "bootstrap-smoke workflow + Path A docker smoke",
+        "mode": "behavioral",
+        "allowedPaths": [
+          ".github/workflows/bootstrap-smoke.yml",
+          "apps/cli/test/smoke"
+        ],
+        "dependsOn": [],
+        "oracle": "CI smoke tree diff vs Path B baseline"
+      },
+      {
+        "groupId": "r1-g4",
+        "findings": [
+          "r0-5"
+        ],
+        "owner": "tests AC-10 guard",
+        "mode": "test",
+        "allowedPaths": [],
+        "dependsOn": [],
+        "oracle": "mutant of detect() shutil.which without path="
+      }
+    ],
+    "carried": []
+  },
+  "groupId": "r1-g1",
+  "remediationBatchId": "r1",
+  "findings": {
+    "received": [
+      "r0-2",
+      "r0-3",
+      "r0-6",
+      "r0-7"
+    ],
+    "covered": [
+      "r0-2",
+      "r0-3",
+      "r0-6",
+      "r0-7"
+    ]
+  },
+  "changedRows": [
+    "r0-6-w1",
+    "r0-7-w1",
+    "r0-3-c1",
+    "r0-6-w3",
+    "r0-7-w2",
+    "r0-3-c3",
+    "r0-3-c4",
+    "r0-3-c5",
+    "r0-3-c6"
+  ]
+}
