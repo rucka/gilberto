@@ -1,10 +1,13 @@
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[1] / "script.py"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from fetch_helpers import SCRIPT  # noqa: E402
 
 
 def load():
