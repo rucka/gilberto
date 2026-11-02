@@ -15,4 +15,8 @@ python3 script.py --type=atom --url=https://simonwillison.net/atom/everything/ \
 
 Appends a YAML block keyed by url to `anatomy/playbooks/intelligence/sources/core.md`. Dedup by normalized url. Plugins pass `--contributor=<plugin>` to write their own file.
 
-> **Planned** — actually fetching registered sources (`gilberto-capability-fetch`, RSS utility) and dropping files in `_ingest/` for classification: [#11](https://github.com/rucka/gilberto/issues/11), [#70](https://github.com/rucka/gilberto/issues/70), [#71](https://github.com/rucka/gilberto/issues/71), [#72](https://github.com/rucka/gilberto/issues/72).
+## Classify a drop
+
+A file dropped in `_ingest/` triggers the `gilberto-process-ingest` launchd job (loaded on the skill's first run, once the skill is installed). It classifies the file into a pillar and hands it to `gilberto-capability-<pillar>-archive`; the file lands in the pillar with an `.ingest.json` sidecar and leaves `_ingest/`. Low confidence, unsupported or unclassifiable files stay (errors get an `.error.md`).
+
+> **Planned** — fetching registered sources (`gilberto-capability-fetch`, RSS utility) and the pillar archive capabilities: [#11](https://github.com/rucka/gilberto/issues/11), [#71](https://github.com/rucka/gilberto/issues/71), [#72](https://github.com/rucka/gilberto/issues/72).

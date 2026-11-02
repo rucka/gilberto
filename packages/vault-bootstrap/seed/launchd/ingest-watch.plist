@@ -7,7 +7,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>{{VAULT_ROOT}}/.claude/hooks/dispatch.sh</string>
-    <string>ingest-watch</string>
+    <string>gilberto-process-ingest</string>
   </array>
   <key>WorkingDirectory</key>
   <string>{{VAULT_ROOT}}</string>
