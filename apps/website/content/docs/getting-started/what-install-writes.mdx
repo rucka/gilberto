@@ -47,4 +47,4 @@ Three plists in `~/Library/LaunchAgents/`, `RunAtLoad=false`, linted with `pluti
 | `com.foomakers.gilberto.reflect-day` | 22:00 | `/gilberto-process-reflect day` |
 | `com.foomakers.gilberto.ingest` | on change in `<vault>/_ingest/` | `/gilberto-process-ingest` |
 
-Jobs run `claude -p` (resolved from `PATH` at install). Each process skill will activate its own job when installed (**Planned**: ingest [#70](https://github.com/rucka/gilberto/issues/70), surface/reflect [#13](https://github.com/rucka/gilberto/issues/13)). Re-run install after moving `claude`.
+Jobs run `claude -p` (resolved from `PATH` at install). Each process skill activates its own job when installed: ingest ([#70](https://github.com/rucka/gilberto/issues/70)) is available; surface/reflect are **Planned** ([#13](https://github.com/rucka/gilberto/issues/13)). Re-run install after moving `claude`.
