@@ -82,7 +82,8 @@ def load_sources(root, pillar=None, source=None):
 
 
 def resolve_profile(root, entry):
-    """Stub for the #60 resolver (explicit > folder note > global default > profile-unresolved): no profile."""
+    """#60 seam, called only for a `provider:` entry without `profile:`: -> profile | None, or raise MechanicError("PROFILE_UNRESOLVED").
+    Stub until #60 (explicit > folder note > global default > profile-unresolved): no profile."""
     return None
 
 
@@ -98,8 +99,6 @@ def _script(name, env):
 
 
 def _integration(root, key, profile):
-    if not _SLUG.fullmatch(key):
-        return None
     rels = [f"{key}.md"]
     if not profile or _SLUG.fullmatch(profile):
         rels.insert(0, f"{key}/{profile or 'default'}.md")
@@ -121,7 +120,7 @@ def _fallback(entry, integration):
 
 
 def _run_utility(name, path, root, entry, env):
-    profile = entry.get("profile") or resolve_profile(root, entry)
+    profile = entry.get("profile") or (resolve_profile(root, entry) if entry.get("provider") else None)
     argv = [sys.executable, path, f"--url={entry['url']}"] + ([f"--profile={profile}"] if profile else [])
     bad = lambda **x: MechanicError("UTILITY_ERROR", utility=name, **x)
     try:
@@ -147,6 +146,8 @@ def dispatch(root, entry, env):
     """Route by `provider:` else `type` -> ("items", [{id, markdown}]) | ("mcp", request) | ("manual", hint); typed MechanicError otherwise."""
     by_provider = bool(entry.get("provider"))
     key = entry["provider"] if by_provider else entry["type"]
+    if not _SLUG.fullmatch(key):
+        raise MechanicError("INVALID_PROVIDER" if by_provider else "INVALID_TYPE", **{"provider" if by_provider else "type": key})
     name = (not by_provider and ROUTES.get(key)) or f"utility-{key}-read"
     path = _script(name, env)
     integration = _integration(root, key, entry.get("profile"))
@@ -175,7 +176,10 @@ def _load_state(root, e):
 
 
 def _fetched(state, url):
-    fetched = state.get(url, {}).get("fetched", [])
+    value = state.get(url, {})
+    if not isinstance(value, dict):
+        raise MechanicError("STATE_CORRUPT", url=url, error="entry is not an object")
+    fetched = value.get("fetched", [])
     if not isinstance(fetched, list):
         raise MechanicError("STATE_CORRUPT", url=url, error="fetched is not a list")
     return fetched
