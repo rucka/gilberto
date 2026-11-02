@@ -14,6 +14,8 @@ Quiet hours and do-not-disturb windows.
 
 Limits that trigger a notification or a proposal.
 
+- `ingest-confidence: 0.7` — min classification confidence (0..1) to file a drop from `_ingest/`; below it a proposal waits for confirmation.
+
 ## Cadences
 
 How often recurring processes run.

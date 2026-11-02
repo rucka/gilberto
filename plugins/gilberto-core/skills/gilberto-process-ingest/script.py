@@ -5,6 +5,7 @@ import fcntl
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -16,7 +17,10 @@ from _lib.result import MechanicError  # noqa: E402
 
 PILLARS = ("me", "pulse", "projects", "intelligence", "journey")
 SUPPORTED = {".pdf", ".md", ".txt", ".html", ".docx", ".png", ".jpg", ".jpeg"}
-SIDECARS = (".ingest.json", ".error.md")
+SIDECARS = (".ingest.json", ".error.md", ".classification.json")
+CLASSIFICATION = ".classification.json"
+DEFAULT_THRESHOLD = 0.7
+THRESHOLD_LINE = re.compile(r"^ingest-confidence:[ \t]*(\d+(?:\.\d+)?|\.\d+)[ \t]*$")
 LOCK = ".ingest.lock"
 RUN = ".ingest.run"
 
@@ -32,6 +36,36 @@ def _unit(v):
     return f
 
 
+def _alternatives(v):
+    try:
+        alts = json.loads(v)
+        ok = isinstance(alts, list) and all(isinstance(x, dict) and x.get("pillar") in PILLARS and isinstance(x.get("confidence"), (int, float)) for x in alts)
+    except ValueError:
+        ok = False
+    if not ok:
+        raise argparse.ArgumentTypeError(f"{v!r} not a JSON list of {{pillar,confidence}}")
+    return [{"pillar": x["pillar"], "confidence": x["confidence"]} for x in alts]
+
+
+def _threshold(root, flag):
+    if flag is not None:
+        return flag
+    try:
+        with open(os.path.join(root, "anatomy", "preferences.md")) as f:
+            lines = f.read().splitlines()
+    except (OSError, UnicodeDecodeError):
+        return DEFAULT_THRESHOLD
+    in_section = False
+    for line in lines:
+        if line.startswith("## "):
+            in_section = line.strip() == "## Thresholds"
+        elif in_section:
+            m = THRESHOLD_LINE.match(line.strip())
+            if m and 0.0 <= float(m.group(1)) <= 1.0:
+                return float(m.group(1))
+    return DEFAULT_THRESHOLD
+
+
 def _parse(argv):
     p = Parser(prog="gilberto-process-ingest")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -40,7 +74,14 @@ def _parse(argv):
     a.add_argument("--file", required=True)
     a.add_argument("--pillar", required=True)
     a.add_argument("--confidence", type=_unit, required=True)
-    a.add_argument("--threshold", type=_unit, default=0.7)
+    a.add_argument("--threshold", type=_unit, default=None)
+    a.add_argument("--alternatives", type=_alternatives, default=[])
+    sub.add_parser("status")
+    c = sub.add_parser("confirm")
+    r = sub.add_parser("reject")
+    for x in (c, r):
+        x.add_argument("--file", required=True)
+    c.add_argument("--pillar", choices=PILLARS)
     for x in (s, a):
         x.add_argument("--min-age", type=float, default=5.0)
     return p.parse_args(argv)
@@ -91,7 +132,7 @@ def _scan(ingest, min_age):
         p = os.path.join(ingest, n)
         if n.startswith(".") or n.endswith(SIDECARS) or not os.path.isfile(p):
             continue
-        if os.path.exists(p + ".error.md") or not _stable(p, min_age):
+        if os.path.exists(p + ".error.md") or os.path.exists(p + CLASSIFICATION) or not _stable(p, min_age):
             continue
         out.append(n)
     return out
@@ -118,8 +159,15 @@ def _error(ingest, name, code, detail):
     return {"status": "error", "code": code, "detail": detail, "file": name}
 
 
-def _apply(a, root, ingest, env):
-    name = a.file
+def _status(ingest):
+    return [
+        {"file": n[: -len(CLASSIFICATION)], "sidecar": f"_ingest/{n}"}
+        for n in sorted(os.listdir(ingest))
+        if n.endswith(CLASSIFICATION) and not n.startswith(".") and os.path.isfile(os.path.join(ingest, n[: -len(CLASSIFICATION)]))
+    ]
+
+
+def _source(root, ingest, name):
     if os.path.basename(name) != name or name in ("", ".", ".."):
         raise MechanicError("INVALID_PATH", input=name)
     src = vault_io.resolve(root, f"_ingest/{name}")
@@ -127,6 +175,72 @@ def _apply(a, root, ingest, env):
         raise MechanicError("INVALID_PATH", input=name)
     if not os.path.isfile(src):
         raise MechanicError("NOT_FOUND", input=name)
+    return src
+
+
+def _archive(root, ingest, env, name, src, pillar, confidence):
+    cap = f"gilberto-capability-{pillar}-archive"
+    script = _find_skill(env, cap)
+    if script is None:
+        return _error(ingest, name, "ARCHIVE_MISSING", f"skill {cap} not installed")
+    target = _unique(root, pillar, name)
+    r = subprocess.run(
+        [sys.executable, script, f"--source={src}", f"--pillar={pillar}", f"--name={target}"],
+        capture_output=True, text=True, env={**os.environ, **env},
+    )
+    dest = os.path.join(root, pillar, target)
+    if r.returncode != 0 or not os.path.isfile(dest):
+        return _error(ingest, name, "ARCHIVE_FAILED", (r.stderr or f"exit {r.returncode}; {pillar}/{target} not written").strip())
+    rel = f"{pillar}/{target}"
+    side = {"source": f"_ingest/{name}", "pillar": pillar, "confidence": confidence, "ingested_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    atomic_write.atomic_write(dest + ".ingest.json", json.dumps(side) + "\n")
+    os.unlink(src)
+    for ext in (".error.md", CLASSIFICATION):
+        if os.path.exists(src + ext):
+            os.unlink(src + ext)
+    return {"status": "archived", "file": name, "archived": rel}
+
+
+def _confirm(a, root, ingest, env):
+    src = _source(root, ingest, a.file)
+    side = src + CLASSIFICATION
+    if not os.path.isfile(side):
+        raise MechanicError("NOT_FOUND", input=a.file + CLASSIFICATION)
+    try:
+        with open(side) as f:
+            proposal = json.load(f)["proposal"]
+    except (OSError, ValueError, KeyError, TypeError):
+        proposal = None
+    if proposal not in PILLARS:
+        raise MechanicError("INVALID_SIDECAR", input=a.file + CLASSIFICATION)
+    lock = _lock(ingest)
+    if lock is None:
+        return {"status": "skipped", "reason": "locked", "file": a.file}
+    try:
+        return _archive(root, ingest, env, a.file, src, a.pillar or proposal, 1.0)
+    finally:
+        lock.close()
+
+
+def _reject(a, root, ingest):
+    src = _source(root, ingest, a.file)
+    side = src + CLASSIFICATION
+    if not os.path.isfile(side):
+        raise MechanicError("NOT_FOUND", input=a.file + CLASSIFICATION)
+    lock = _lock(ingest)
+    if lock is None:
+        return {"status": "skipped", "reason": "locked", "file": a.file}
+    try:
+        _error(ingest, a.file, "REJECTED", "classification rejected by user")
+        os.unlink(side)
+        return {"status": "rejected", "file": a.file}
+    finally:
+        lock.close()
+
+
+def _apply(a, root, ingest, env):
+    name = a.file
+    src = _source(root, ingest, name)
     lock = _lock(ingest)
     if lock is None:
         return {"status": "skipped", "reason": "locked", "file": name}
@@ -137,28 +251,12 @@ def _apply(a, root, ingest, env):
             return _error(ingest, name, "UNSUPPORTED", f"extension not in {sorted(SUPPORTED)}")
         if a.pillar not in PILLARS:
             return _error(ingest, name, "UNCLASSIFIABLE", f"pillar {a.pillar!r} not in {list(PILLARS)}")
-        if a.confidence < a.threshold:
-            return {"status": "kept", "reason": "below-threshold", "file": name, "confidence": a.confidence, "threshold": a.threshold}
-        cap = f"gilberto-capability-{a.pillar}-archive"
-        script = _find_skill(env, cap)
-        if script is None:
-            return _error(ingest, name, "ARCHIVE_MISSING", f"skill {cap} not installed")
-        target = _unique(root, a.pillar, name)
-        r = subprocess.run(
-            [sys.executable, script, f"--source={src}", f"--pillar={a.pillar}", f"--name={target}"],
-            capture_output=True, text=True, env={**os.environ, **env},
-        )
-        dest = os.path.join(root, a.pillar, target)
-        if r.returncode != 0 or not os.path.isfile(dest):
-            return _error(ingest, name, "ARCHIVE_FAILED", (r.stderr or f"exit {r.returncode}; {a.pillar}/{target} not written").strip())
-        rel = f"{a.pillar}/{target}"
-        side = {"source": f"_ingest/{name}", "pillar": a.pillar, "confidence": a.confidence, "ingested_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
-        atomic_write.atomic_write(dest + ".ingest.json", json.dumps(side) + "\n")
-        os.unlink(src)
-        stale = src + ".error.md"
-        if os.path.exists(stale):
-            os.unlink(stale)
-        return {"status": "archived", "file": name, "archived": rel}
+        threshold = _threshold(root, a.threshold)
+        if a.confidence < threshold:
+            side = {"proposal": a.pillar, "confidence": a.confidence, "threshold": threshold, "alternatives": a.alternatives, "proposed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+            atomic_write.atomic_write(src + CLASSIFICATION, json.dumps(side) + "\n")
+            return {"status": "kept", "reason": "below-threshold", "file": name, "confidence": a.confidence, "threshold": threshold}
+        return _archive(root, ingest, env, name, src, a.pillar, a.confidence)
     finally:
         lock.close()
 
@@ -181,6 +279,12 @@ def main(argv=None, env=None):
                 out = {"status": "ok", "files": _scan(ingest, a.min_age)}
             else:
                 out = {"status": "skipped", "reason": "locked", "files": []}
+        elif a.cmd == "status":
+            out = {"status": "ok", "pending": _status(ingest)}
+        elif a.cmd == "confirm":
+            out = _confirm(a, root, ingest, env)
+        elif a.cmd == "reject":
+            out = _reject(a, root, ingest)
         else:
             out = _apply(a, root, ingest, env)
     except MechanicError as e:
