@@ -17,11 +17,22 @@ Idempotent. Loads the `com.foomakers.gilberto.ingest` job via `launchctl bootstr
 
 ## Run
 
-1. `python3 script.py scan [--min-age=5]` → `{status, files}`. `status: skipped` (`locked`) ⇒ another run is active: stop. Files modified < `--min-age` s (still copying) and files with an `.error.md` are not listed; a later WatchPaths event retries.
+1. `python3 script.py scan [--min-age=5]` → `{status, files}`. `status: skipped` (`locked`) ⇒ another run is active: stop. Files modified < `--min-age` s (still copying) and files with an `.error.md` or a pending `.classification.json` are not listed; a later WatchPaths event retries.
 2. For each file: read it, choose `pillar` ∈ {me, pulse, projects, intelligence, journey} and `confidence` ∈ [0,1]. No fit ⇒ `--pillar=none`.
-3. `python3 script.py apply --file=<name> --pillar=<p> --confidence=<c> [--threshold=0.7]`
+3. `python3 script.py apply --file=<name> --pillar=<p> --confidence=<c> [--threshold=<t>] [--alternatives='[{"pillar":"pulse","confidence":0.2}]']`
 
-`apply` outcomes (JSON, exit 0): `archived` (+ `archived` path) · `kept` (confidence < threshold; file stays, proposal sidecar owned by #74) · `skipped` (`locked` | `unstable`) · `error` (`UNSUPPORTED` | `UNCLASSIFIABLE` | `ARCHIVE_MISSING` | `ARCHIVE_FAILED`; file stays, `<name>.error.md` written). Exit 1: `INVALID_PATH`, `NOT_FOUND`, `INVALID_ARGS` (`--confidence`/`--threshold` outside [0,1], NaN included).
+Threshold: `--threshold` > `ingest-confidence: <0..1>` line under `## Thresholds` in `anatomy/preferences.md` > 0.7 (absent/invalid/missing file ⇒ 0.7, no error).
+
+`apply` outcomes (JSON, exit 0): `archived` (+ `archived` path) · `kept` (confidence < threshold; file stays, `<name>.classification.json` written, rewritten on re-classification) · `skipped` (`locked` | `unstable`) · `error` (`UNSUPPORTED` | `UNCLASSIFIABLE` | `ARCHIVE_MISSING` | `ARCHIVE_FAILED`; file stays, `<name>.error.md` written). Exit 1: `INVALID_PATH`, `NOT_FOUND`, `INVALID_ARGS` (`--confidence`/`--threshold` outside [0,1], NaN included).
+
+## Confirm / reject
+
+Ask the user about each pending file (`python3 script.py status` → `{status, pending:[{file, sidecar}]}`), then:
+
+- `python3 script.py confirm --file=<name> [--pillar=<p>]` → archives the current file (confidence 1.0, optional pillar override, collision suffix), writes `.ingest.json`, removes source + sidecar. Outcomes as `apply` (`archived` | `skipped` | `error`). Exit 1: `NOT_FOUND` (no sidecar), `INVALID_SIDECAR` (file stays), `INVALID_ARGS` (bad pillar), `INVALID_PATH`.
+- `python3 script.py reject --file=<name>` → removes sidecar, writes `<name>.error.md` (`REJECTED`), file stays; outcome `rejected`. Exit 1: `NOT_FOUND`.
+
+Sidecar `<name>.classification.json`: `proposal` (pillar), `confidence`, `threshold`, `alternatives[{pillar, confidence}]`, `proposed_at` (UTC ISO).
 
 ## Archive contract
 

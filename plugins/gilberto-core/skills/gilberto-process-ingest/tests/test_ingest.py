@@ -93,15 +93,6 @@ def test_dispatch_target_per_pillar(env, capsys, drop, stub_archive, pillar):
     assert out["status"] == "archived" and (root(env) / pillar / "a.md").exists()
 
 
-def test_ac4_below_threshold_stays_no_sidecar(env, capsys, drop, stub_archive):
-    stub_archive("me")
-    drop("a.pdf")
-    _, out = run(env, capsys, "apply", "--file=a.pdf", "--pillar=me", "--confidence=0.3")
-    assert out["status"] == "kept"
-    assert sorted(p.name for p in (root(env) / "_ingest").iterdir() if p.name != ".ingest.lock") == ["a.pdf"]
-    assert not (root(env) / "me" / "a.pdf").exists()
-
-
 def test_threshold_boundary_inclusive(env, capsys, drop, stub_archive):
     stub_archive("me")
     drop("a.pdf")
