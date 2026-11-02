@@ -69,3 +69,20 @@ jobs:
         run: |
           rm -f "$HOME/Library/LaunchAgents/com.foomakers.gilberto.morning-briefing.plist" \
                 "$HOME/Library/LaunchAgents/com.foomakers.gilberto.reflect-day.plist"
+
+  docker-smoke:
+    name: docker smoke (path A/B parity, npx fallback)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -f apps/cli/test/smoke/docker/Dockerfile -t gilberto-smoke .
+
+      - name: Path A vs Path B parity (clean container)
+        run: docker run --rm gilberto-smoke parity
+
+      - name: No gilberto on PATH -> npx fallback (offline)
+        run: docker run --rm --network none gilberto-smoke npx
