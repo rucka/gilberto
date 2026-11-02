@@ -84,7 +84,7 @@ User reads/hears about gilberto → installs CLI via npm → runs `gilberto inst
 
 A monorepo (`rucka/gilberto`) that ships two distribution surfaces (see [ADR-0002](../tech/adr/0002-distribution-and-dual-entry-bootstrap.md)):
 
-- **Claude marketplace plugins** for skills: `gilberto-core` (11 processes + mechanic + core utility + core capability) plus first-party domain plugins (`pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`).
+- **Claude marketplace plugins** for skills: `gilberto-core` (11 processes + mechanic + core utility + core capability) plus first-party domain plugins (`pulse-health-tracking`, `pulse-ratko`, `projects-venture`, `projects-editorial`). Public repo ships tools only; owner-personal data/apps (e.g. Ratko, finance, health) ship as private plugins outside this repo, installed only on the owner's instance — see [ADL public tools, private content](../decision-log/2026-11-02-public-tools-private-content.md).
 - **npm packages** for code and vault content: the CLI installer `gilberto`, and the vault content package `@foomakers/gilberto-vault-bootstrap` (anatomy + 5-pillar skeleton + network + `_ingest/` + `.claude/hooks/` + launchd plist templates).
 
 The user reaches a working vault through **two equivalent entry-points**, both first-class:
@@ -100,7 +100,7 @@ Both converge on the same `gilberto install` execution; the CLI is the single fi
 
 1. **CLI installer (`gilberto install`):** Interactive bootstrap that creates the vault, populates anatomy templates, configures hooks, and registers schedules.
 2. **Vault structure (5 pillars + network + anatomy):** Filesystem-as-database, navigable in Obsidian or any markdown editor.
-3. **11 core processes:** `ingest`, `structure`, `surface`, `act`, `reflect`, `next`, plus 5 lifecycle (`vault-bootstrap`, `vault-upgrade`, `vault-migrate`, `vault-export`, `vault-archive`). Drive the operating cycle.
+3. **11 core processes:** `ingest`, `structure`, `surface`, `act`, `reflect`, `next`, plus 5 lifecycle (`vault-bootstrap`, `vault-upgrade`, `vault-migrate`, `vault-export`, `vault-archive`). Drive the operating cycle. Plus `capture` (P1): run by the PreCompact hook, snapshots session observations into the daily journey so knowledge survives compaction.
 4. **`gilberto-capability-fetch` cross-pillar dispatcher:** Universal source-fetcher with default scripts (RSS) plus utility-overrides registered in anatomy (Oura, Withings, calendar, mail, etc.).
 5. **Anatomy as operating manual:** Data-driven `playbooks/` + `preferences/` + `templates/` files that govern process behavior without hard-coding.
 6. **Plugin protocol:** First-party + external plugins installable via CLI. Anatomy registry (`anatomy/plugins.md`) tracks state and routing.
@@ -250,7 +250,7 @@ Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspa
 - Core: `utility-classify-medical`
 - Per-pillar `pulse` capabilities (`archive`, `refresh-index`, `summarize`)
 - **Ratko-app integration contract** (Initiative #3 epic): HTTP API contract preserving current Ratko JSON shapes for sessions/wearables/medical/reviews/trainer, replacing skill-direct file writes with `POST` to Ratko-app backend. Implementation in `ratko-mvp` repo coordinated with this phase.
-- Migration: `ratko-mvp/users/<user>/{sessions, plans, medical, wearable}` → vault `pulse/`
+- Migration: `ratko-mvp/users/<user>/{sessions, plans, medical, wearable}` → vault `pulse/` (run on the owner's instance via generic import tool + private config; Ratko plugin private, outside repo)
 - **M3b:** Morning-briefing + reflect-day work end-to-end across intelligence + pulse.
 - **M4a:** ratko-mvp KB dismissed; workout-session creation remains in Ratko-app via contract.
 
@@ -353,7 +353,7 @@ Monorepo (`rucka/gilberto`) using pnpm + turbo (pair-aligned). Top-level workspa
 ### Research & Data
 
 - **Discovery sources:** Cole Medin (AI-native workflows), Ben AI (vault patterns), Dario Vignali (delegation principle: "automate the unimportant to free time for the important"). Synthesized during Phase 1 discovery.
-- **Reference projects:** [foomakers/pair](https://github.com/foomakers/pair) for monorepo + AI-native tooling pattern. Existing author projects (`my-intelligence`, `ratko-mvp`) absorbed as plugins.
+- **Reference projects:** [foomakers/pair](https://github.com/foomakers/pair) for monorepo + AI-native tooling pattern. Existing author projects (`my-intelligence`, `ratko-mvp`) absorbed by running generic import tools on the owner's instance; personal plugins live in private repos.
 
 ### Mockups & Prototypes
 

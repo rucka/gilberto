@@ -7,7 +7,7 @@ description: The target experience, step by step — what works today and what i
 
 ## 07:00 — Morning briefing · Planned
 
-launchd fires `com.foomakers.gilberto.morning-briefing`, which runs `claude -p "/gilberto-process-surface morning-briefing"`. Surface reads `anatomy/playbooks/surface/morning-briefing.md` and writes a briefing into today's `journey/YYYY/MM/YYYY-MM-DD.md`: calendar, open tasks, what is new per topic.
+launchd fires `com.foomakers.gilberto.morning-briefing`, which runs `claude -p "/gilberto-process-surface morning-briefing"`. Surface reads `anatomy/playbooks/surface/morning-briefing/core.md` (+ plugin contributor files) and writes a briefing into today's `journey/YYYY/MM/YYYY-MM-DD.md`: calendar, open tasks, what is new per topic.
 
 - Available: plist written at install (not loaded); playbook can be authored with `mechanic-forge-playbook`.
 - Planned: surface process [#13](https://github.com/rucka/gilberto/issues/13), calendar via `connector-google` [#27](https://github.com/rucka/gilberto/issues/27).

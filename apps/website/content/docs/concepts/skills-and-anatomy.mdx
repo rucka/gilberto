@@ -12,7 +12,7 @@ description: Data-driven behavior — thin process skills dispatch through anato
 | `anatomy.md` | structure, naming, frontmatter, partitioning, `## Types`, `## Relationship levels` |
 | `topics.md` · `plugins.md` · `scopes.md` · `gilberto.md` | registries |
 | `preferences.md` | silence, thresholds, cadences, integrations |
-| `playbooks/<domain>/<event>.md` | per-event dispatch |
+| `playbooks/<domain>/<event>/<contributor>.md` | per-event dispatch (`core.md` + plugin files) |
 | `templates/<pillar>/<name>/` | entity templates |
 | `integrations/<provider>.md` | connector accounts |
 
@@ -27,7 +27,7 @@ description: Data-driven behavior — thin process skills dispatch through anato
 
 Composition: process → capability → utility; mechanics orthogonal. Target v1.0 ≈ 90 skills.
 
-Process skills are thin dispatchers: read `anatomy/playbooks/<domain>/<event>.md`, then dispatch to the skills listed in `dispatch_to`.
+Process skills are thin dispatchers: read the merged `anatomy/playbooks/<domain>/<event>/*.md` (`core.md` + contributors), then dispatch to the skills listed in `dispatch_to`.
 
 ## Cycles
 

@@ -20,14 +20,15 @@ Issues #9, #10, #11, #42, #43 placed the same registries in different files (`an
 | Plugins             | `anatomy/plugins.md`                                         | CLI `plugin *`, plugin install |
 | Scopes              | `anatomy/scopes.md` (registry, private, storage mode, accounts) — [ADR-0004](../tech/adr/0004-scopes.md) | `mechanic-forge-scope` |
 | Identity / system   | `anatomy/gilberto.md`                                        | bootstrap                   |
-| Preferences         | `anatomy/preferences.md` (`## Silence`, `## Thresholds`, `## Cadences`, global `## Integrations` switches) | manual, reflect/evolve |
+| Preferences         | `anatomy/preferences.md` (`## Silence`, `## Thresholds`, `## Cadences`, `## Topics`, global `## Integrations` switches) | manual, reflect/evolve |
 | Integrations        | `anatomy/integrations/<provider>.md` (non-secret config)     | connector setup             |
 | Sources             | `anatomy/playbooks/<pillar>/sources/<contributor>.md`        | `mechanic-forge-source`     |
-| Playbooks           | `anatomy/playbooks/<domain>/<event>.md`                      | `mechanic-forge-playbook`   |
+| Playbooks           | `anatomy/playbooks/<domain>/<event>/<contributor>.md` (`core.md` = gilberto-core base; plugins add own file; merged per #103) | `mechanic-forge-playbook`   |
 | Templates           | `anatomy/templates/<pillar>/<name>/`                         | `mechanic-forge-template`   |
 
 - No `registries.md`, no `types.md`. Section names in English.
 - Secrets never in anatomy (ADR-0003).
+- Amended 2026-11-02: playbook path `<event>/<contributor>.md` (was `<event>.md`); `## Topics` added to preferences.
 
 ## References
 

@@ -13,7 +13,7 @@ python3 script.py --event=morning-briefing --domain=surface --mode=core \
   --frontmatter='{"triggers":[{"cron":"0 7 * * *"}],"dispatch_to":["gilberto-capability-journey-summarize"],"silence_learned":[]}'
 ```
 
-Writes `anatomy/playbooks/surface/morning-briefing.md` with validated frontmatter and a placeholder body. A plugin uses `--mode=contributor --contributor=<plugin>` → `anatomy/playbooks/surface/morning-briefing/<plugin>.md`, leaving other files untouched.
+Target layout: `anatomy/playbooks/surface/morning-briefing/core.md` (gilberto-core base). Today `--mode=core` still writes `morning-briefing.md`; realigned by [#103](https://github.com/rucka/gilberto/issues/103). A plugin uses `--mode=contributor --contributor=<plugin>` → `anatomy/playbooks/surface/morning-briefing/<plugin>.md`, leaving other files untouched.
 
 Triggers: single-key objects `cron` · `keyword` · `file` · `event`. Domains: `ingest structure surface act reflect next`. The mechanic does not check that dispatched skills exist.
 

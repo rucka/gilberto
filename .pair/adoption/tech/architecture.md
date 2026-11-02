@@ -30,7 +30,7 @@ All runtime behavior is sourced from the vault:
 |---|---|
 | Operations | `.claude/skills/<skill-name>/` (process · capability · utility · mechanic) |
 | Structural rules | `anatomy/anatomy.md` (folder-notes vs `index.md`, naming, frontmatter, partitioning) |
-| Per-event dispatch | `anatomy/playbooks/<domain>/<event>.md` |
+| Per-event dispatch | `anatomy/playbooks/<domain>/<event>/<contributor>.md` (`core.md` + plugin files, merged) |
 | Preferences | `anatomy/preferences.md` (silence · thresholds · cadences · integrations) |
 | Canonical registries | `anatomy/topics.md` · `anatomy/plugins.md` · `anatomy/gilberto.md` |
 | Templates | `anatomy/templates/<pillar>/<name>/` |
@@ -94,7 +94,7 @@ Scopes ([ADR-0004](adr/0004-scopes.md)): person-level at root (`me/`, `network/`
 - `[scopes/<scope>/]journal/` · `[scopes/<scope>/]_ingest/`
 - `journey/YYYY/MM/YYYY-MM-DD.md` + `journey/tasks.md`
 - `network/{people,companies}/<slug>.md`
-- `anatomy/{anatomy,gilberto,topics,plugins,preferences,scopes}.md` + `integrations/<provider>.md` + `playbooks/<domain>/<event>.md` + `templates/<pillar>/<name>/` — see [anatomy file map](../decision-log/2026-10-27-anatomy-file-map.md)
+- `anatomy/{anatomy,gilberto,topics,plugins,preferences,scopes}.md` + `integrations/<provider>.md` + `playbooks/<domain>/<event>/<contributor>.md` + `templates/<pillar>/<name>/` — see [anatomy file map](../decision-log/2026-10-27-anatomy-file-map.md)
 - `_ingest/`, `.claude/{settings.json,skills/}`
 
 ## Skill Taxonomy
@@ -112,7 +112,7 @@ Composition: process → capability → utility; mechanic orthogonal. Target v1.
 
 ## Anatomy
 
-Process skills are thin dispatchers: read `anatomy/playbooks/<domain>/<event>.md` → dispatch.
+Process skills are thin dispatchers: read merged `anatomy/playbooks/<domain>/<event>/*.md` (`core.md` + contributors) → dispatch.
 
 Strata: `anatomy.md` (structure) · `playbooks/` (per-event) · `preferences.md` (silence/thresholds/cadences/integrations).
 
@@ -123,6 +123,7 @@ See [`adr/0003-connector-plugins.md`](adr/0003-connector-plugins.md): plugins pe
 ## Plugin Protocol
 
 - 4 first-party: `projects-venture`, `projects-editorial`, `pulse-health-tracking`, `pulse-ratko`
+- Public repo = tools only (procedures, skills, generic configurable import scripts); owner-personal data/apps (e.g. Ratko, finance, health) = private plugins in private repo(s), installed only on the owner's instance — [ADL](../decision-log/2026-11-02-public-tools-private-content.md)
 - External: `gilberto plugin install <repo-url>` (single + multi-plugin)
 - CLI `plugin *` manages anatomy contributions + `anatomy/plugins.md`; skills via marketplace
 - Manifest: Anthropic convention (`.claude-plugin/plugin.json`); per-runtime via adapters
