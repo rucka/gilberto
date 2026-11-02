@@ -27,3 +27,7 @@ CHANGELOG.md
 # fumadocs/next generated
 .source/
 next-env.d.ts
+
+# Test fixtures (verbatim inputs), local venvs
+**/tests/fixtures/
+**/.venv/
