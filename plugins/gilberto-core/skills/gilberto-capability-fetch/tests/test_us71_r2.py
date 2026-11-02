@@ -17,7 +17,7 @@ def test_us71_r2_provider_not_slug_is_typed_error_never_executed(fetch, source, 
     evil.mkdir(parents=True)
     (evil / "script.py").write_text("open(__file__ + '.ran', 'w').write('1')\n")
     utility("utility-rss-read", [ITEM])
-    source("intelligence", "core", block("https://a.example/bad", provider=key), block("https://a.example/ok", provider="rss"))
+    source("intelligence", "core", block("https://a.example/bad", provider=key), block("https://a.example/ok", provider="rss", profile="p"))
     code, out, _ = fetch(env={"GILBERTO_UTILITY_PATH": utility.path})
     assert code == 1
     assert [e["code"] for e in out["errors"]] == ["INVALID_PROVIDER"]

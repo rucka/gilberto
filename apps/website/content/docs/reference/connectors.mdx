@@ -1,0 +1,56 @@
+---
+title: Connector contract
+description: Utility contract, profile resolution and integrations config shared by every connector plugin.
+---
+
+Shared helpers live in `plugins/gilberto-core/skills/_lib/` (`connector.py`, `integrations.py`). Decisions: [ADR-0003](https://github.com/rucka/gilberto/blob/main/.pair/adoption/tech/adr/0003-connector-plugins.md).
+
+## Utility
+
+- Name `utility-<provider>-<op>`, `op` one of `read search write send delete`.
+- Call: `script.py --url=<url> [--profile=<profile>]`, `GILBERTO_ROOT` set.
+- Success, exit 0: stdout `{"items":[{"id","markdown"}]}`. Each `markdown` carries canonical frontmatter `type, source, created` plus `source_profile: <provider>:<profile>` (`connector.normalize_item`). Provider payloads never leave the utility.
+- Failure, exit ≠ 0: stdout `{"errors":[{"code"}]}`, `code` one of `auth rate-limit not-found provider profile-unresolved` (`connector.run_utility`). `rate-limit` and transient errors are retried with backoff first (`connector.retry`: 3 attempts, 0.5 s, 1 s).
+- Dedup: `_state.json` = `{url: {fetched: [ids]}}` (`load_state`, `new_items`, `save_state`). Missing or corrupt state counts as empty; rewrite is atomic.
+
+## Runner resolution
+
+1. Utility script, when available.
+2. `fallback: mcp` → `skipped`, reason `mcp-fallback` (the assistant reads via its MCP connector).
+3. `fallback: none` (default) → `skipped`, reason `manual`, hint to drop content into `_ingest/`.
+
+## Integrations config
+
+`anatomy/integrations/<provider>/<profile>.md` (`default` for single-profile setups; flat `<provider>.md` accepted as `default`). Frontmatter keys only:
+
+| Key | Value |
+| --- | --- |
+| `type` `provider` `profile` `cadence` `created` `updated` | scalar |
+| `accounts` `scopes` `channels` | flow list |
+| `fallback` | `mcp` or `none` |
+| `auto_write` | list of allowlisted actions, e.g. `["calendar:create-event"]`; an action containing the segment `send` is rejected |
+| `secret` | reference only: `keychain:gilberto/<provider>/<profile>` or `file:<path>` |
+
+`validate_integration` rejects unknown keys, secret-looking values (known token prefixes, long opaque blobs), a literal `secret` and malformed frontmatter with `INVALID_INTEGRATION`.
+
+## Profile resolution
+
+`integrations.resolve_profile(root, target, provider, explicit)`:
+
+1. `explicit` profile (source entry `profile:`).
+2. Nearest folder note `<dir>/<dir>.md` with `connectors:` naming the provider, walking up from `target`, stopping at the vault root. A folder note without it, or without that provider, keeps walking.
+3. `anatomy/preferences.md`, section `## Integrations`, line `<provider>: <profile>`.
+4. `profile-unresolved`. Never a guess, even with a single profile configured.
+
+`connectors:` accepts `{google: learnn, slack: acme}` or a nested block. `gilberto-capability-fetch` calls it for `provider:` entries without `profile:`, with `target` (else the source pillar) as the start path.
+
+## Unattended writes
+
+`integrations.guard_write` sits in front of every non-read op:
+
+| Case | Decision |
+| --- | --- |
+| `read`, `search` | `allow` |
+| action in `auto_write` (never `send`) | `allow` |
+| attended, otherwise | `confirm` (through `gilberto-process-act`) |
+| unattended (`GILBERTO_UNATTENDED=1`), otherwise | `pending`: no external call, one line `- [ ] pending confirmation: <provider>:<profile> <action> — <summary>` appended to `journey/tasks.md` (idempotent) |

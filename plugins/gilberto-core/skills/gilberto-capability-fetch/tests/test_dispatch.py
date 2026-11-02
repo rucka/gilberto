@@ -28,7 +28,7 @@ def test_routes_by_type(fetch, utility):
 def test_provider_wins_over_type(fetch, utility):
     utility("utility-fetch-rss", [ITEM])
     utility("utility-gmail-read", [{"id": "g", "markdown": "m"}])
-    assert dispatch(fetch, utility, entry(provider="gmail")) == ("items", [{"id": "g", "markdown": "m"}])
+    assert dispatch(fetch, utility, entry(provider="gmail", profile="p")) == ("items", [{"id": "g", "markdown": "m"}])
 
 
 def test_profile_passed_through(fetch, utility):
@@ -52,10 +52,9 @@ def test_explicit_profile_skips_resolver(fetch, utility, monkeypatch):
     dispatch(fetch, utility, entry(provider="gmail", profile="learnn"))
 
 
-def test_default_resolver_stub_passes_no_profile(fetch, utility):
+def test_default_resolver_unresolved_is_typed_error(fetch, utility):
     utility("utility-gmail-read", [ITEM])
-    dispatch(fetch, utility, entry(provider="gmail"))
-    assert utility.args("utility-gmail-read") == ["--url=https://a.example/f"]
+    assert code(fetch, utility, entry(provider="gmail")) == "PROFILE_UNRESOLVED"
 
 
 def test_unavailable_fallback_mcp(fetch, utility):
@@ -84,7 +83,7 @@ def test_integration_without_fallback_defaults_to_manual(fetch, utility):
 
 def test_available_utility_ignores_fallback(fetch, utility):
     utility("utility-slack-read", [ITEM])
-    assert dispatch(fetch, utility, entry(provider="slack", fallback="mcp"))[0] == "items"
+    assert dispatch(fetch, utility, entry(provider="slack", profile="p", fallback="mcp"))[0] == "items"
 
 
 def test_unknown_provider_and_type(fetch, utility):
