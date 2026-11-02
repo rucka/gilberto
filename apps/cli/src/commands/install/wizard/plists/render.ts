@@ -30,6 +30,11 @@ export const renderPlist = (spec: PlistSpec): string => {
     '  </array>',
     '  <key>WorkingDirectory</key>',
     str(spec.workingDirectory, '  '),
+    '  <key>EnvironmentVariables</key>',
+    '  <dict>',
+    '    <key>GILBERTO_ROOT</key>',
+    str(spec.workingDirectory, '    '),
+    '  </dict>',
     '  <key>RunAtLoad</key>',
     '  <false/>',
   ]

@@ -32,6 +32,17 @@ describe('plist renderers', () => {
     expect(out).toContain('<string>p q</string>')
     expect(escapeXml('&<>"\'')).toBe('&amp;&lt;&gt;&quot;&apos;')
   })
+  it('every job sets GILBERTO_ROOT to the vault path', () => {
+    for (const out of [
+      renderMorningBriefing(input),
+      renderReflectDay(input),
+      renderIngest(input),
+    ]) {
+      expect(out).toContain(
+        '  <key>EnvironmentVariables</key>\n  <dict>\n    <key>GILBERTO_ROOT</key>\n    <string>/Users/me/My Vault</string>\n  </dict>',
+      )
+    }
+  })
   it('RunAtLoad false, never gilberto CLI', () => {
     for (const out of [
       renderMorningBriefing(input),

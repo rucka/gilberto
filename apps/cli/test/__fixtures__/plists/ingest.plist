@@ -12,6 +12,11 @@
   </array>
   <key>WorkingDirectory</key>
   <string>/Users/me/My Vault</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>GILBERTO_ROOT</key>
+    <string>/Users/me/My Vault</string>
+  </dict>
   <key>RunAtLoad</key>
   <false/>
   <key>WatchPaths</key>
