@@ -1,0 +1,21 @@
+---
+title: Scopes & topics
+description: One person, vertical scopes, horizontal topics (ADR-0004).
+---
+
+From [ADR-0004](https://github.com/rucka/gilberto/blob/main/.pair/adoption/tech/adr/0004-scopes.md).
+
+## Topics (horizontal) — available
+
+A topic (`ai`, `health`, …) is global, registered in `anatomy/topics.md`, and can span pillars and scopes. Create with [`mechanic-forge-topic`](/docs/use-cases/add-a-topic) or seed at install with `--seed-topics`.
+
+## Scopes (vertical) — Planned
+
+A scope is a context: an employer, a venture, personal life. Scopes are **optional**; v1 starts unscoped (root pillars only, empty `anatomy/scopes.md`).
+
+- Per scope, in `anatomy/scopes.md`: `layout: folder` (content under `scopes/<scope>/`) or `layout: tag` (root pillars + frontmatter `scope`); `private`; storage `reference` (summary + link to source of truth) or `copy`; bound accounts.
+- Person-level data (`me`, `network`, `pulse`, `journey`) always stays at root; people/companies/tasks carry `scope: [...]`.
+- Wikilinks cross scopes freely; a `private` scope is excluded from other scopes' context unless explicitly linked.
+- Processes accept `scope=` and `topic=` filters; export/archive per scope.
+
+Scope mechanics (`mechanic-forge-scope`, `mechanic-scope-move`) and the path resolver: **Planned**, [#76](https://github.com/rucka/gilberto/issues/76).

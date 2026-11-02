@@ -1,0 +1,21 @@
+---
+title: Add a topic
+description: Register a new horizontal topic and seed its folder-notes.
+---
+
+```text
+/mechanic-forge-topic
+> add topic "climbing", seed it in pulse and intelligence
+```
+
+```bash
+python3 script.py --slug=climbing --seed=pulse,intelligence --description="Climbing training and gear"
+```
+
+Writes:
+
+- `pulse/climbing/climbing.md` + `pulse/climbing/history/`
+- `intelligence/climbing/climbing.md`
+- a row in `anatomy/topics.md` (last write)
+
+Seed notes come from `anatomy/templates/<pillar>/topic/topic.md` if present, else a built-in default; existing notes are never overwritten. Re-run → `skipped (idempotent)`. Pillar names and `anatomy` are reserved (`RESERVED_NAME`).

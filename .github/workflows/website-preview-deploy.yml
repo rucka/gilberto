@@ -1,0 +1,75 @@
+# Preview website deploy to Vercel on PRs touching the site (mirrors pair).
+# Gated: runs only when repo variable WEBSITE_DEPLOY_ENABLED == 'true'.
+# Secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
+name: Website Preview Deploy
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths:
+      - 'apps/website/**'
+
+jobs:
+  preview:
+    if: vars.WEBSITE_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.33.2'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Create GitHub deployment
+        id: deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DEPLOY_ID=$(jq -n --arg ref "${{ github.event.pull_request.head.sha || github.sha }}" \
+            '{ref: $ref, environment: "Website Preview", auto_merge: false, required_contexts: []}' \
+            | gh api -X POST repos/${{ github.repository }}/deployments --input - | jq -r '.id')
+          echo "id=$DEPLOY_ID" >> $GITHUB_OUTPUT
+          gh api repos/${{ github.repository }}/deployments/${DEPLOY_ID}/statuses -f state=in_progress
+
+      - name: Deploy preview to Vercel
+        id: deploy
+        run: |
+          set +e
+          OUTPUT=$(./scripts/workflows/deploy-website.sh 2>&1)
+          EXIT_CODE=$?
+          set -e
+          echo "$OUTPUT"
+          [ $EXIT_CODE -eq 0 ] || exit $EXIT_CODE
+          URL=$(echo "$OUTPUT" | grep '^URL:' | sed 's/^URL: //')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          printf '### Website Preview\n\n%s\n' "$URL" >> $GITHUB_STEP_SUMMARY
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deployment status
+        if: always() && steps.deployment.outputs.id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -n "${{ steps.deploy.outputs.url }}" ]; then
+            gh api repos/${{ github.repository }}/deployments/${{ steps.deployment.outputs.id }}/statuses \
+              -f state=success -f environment_url="${{ steps.deploy.outputs.url }}"
+          else
+            gh api repos/${{ github.repository }}/deployments/${{ steps.deployment.outputs.id }}/statuses \
+              -f state=failure
+          fi

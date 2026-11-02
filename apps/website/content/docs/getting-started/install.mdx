@@ -1,0 +1,82 @@
+---
+title: Install
+description: Two entry points, one engine — both run `gilberto install`.
+---
+
+Both paths converge on `gilberto install`, the only filesystem mutator ([ADR-0002](https://github.com/rucka/gilberto/blob/main/.pair/adoption/tech/adr/0002-distribution-and-dual-entry-bootstrap.md)). Requires Node ≥ 22.12. Platform: macOS first, Linux supported, Windows out of v1.
+
+## Path A — skill-led (Claude Code)
+
+```text
+/plugin marketplace add rucka/gilberto
+/plugin install gilberto-core@gilberto
+/gilberto-process-vault-bootstrap
+```
+
+Answer the in-chat prompts (target path, topic seeds). Arguments you already gave skip their prompt; any you leave out take the CLI defaults.
+
+The skill is a thin orchestrator. It never writes to the vault, `.claude/` or `~/Library/LaunchAgents/`. It:
+
+- detects the CLI: `which gilberto` → `npm ls -g gilberto --depth=0` → fallback `npx gilberto@latest` (project-local `node_modules/.bin` ignored);
+- checks the version against `>=0.1.0 <2`; on mismatch asks `upgrade` or `npx`, never proceeds silently;
+- always runs `gilberto install <target> --non-interactive`; adds `--no-launchd` on non-macOS hosts;
+- reports a summary (target, pillars, anatomy seeds, hooks, launchd); `verbose` appends the CLI output.
+
+Skill arguments: `target_path`, `seed_topics`, `enable_plugins` (accepted, not forwarded yet — CLI flag **Planned**, [#15](https://github.com/rucka/gilberto/issues/15)), `disable_hooks`, `disable_launchd`, `verbose`.
+
+If the npm registry is unreachable during the npx fallback, the skill exits non-zero: install the CLI via Path B, then re-run the skill.
+
+## Path B — CLI-direct
+
+```bash
+npx gilberto@next install ~/vault
+# or
+npm i -g gilberto@next && gilberto install ~/vault
+```
+
+Interactive by default; pass `--non-interactive` for scripts. The alpha is published on npm tag `next` (`0.x`).
+
+### Flags
+
+| Flag | Effect |
+| --- | --- |
+| `[target]` | vault directory (default `~/Dropbox/Gilberto/`) |
+| `--seed-topics <list>` | topic seeds per pillar, e.g. `"intelligence=ai,product;pulse=health"` |
+| `--non-interactive` | never prompt; use arguments and defaults (`target` required) |
+| `--no-hooks` | skip step 7 |
+| `--no-launchd` | skip step 8 |
+| `--launchd-in-ci` | write launchd plists even when `CI=true` (macOS) |
+| `-v`, `--verbose` | one line per wizard decision |
+
+Global options (any command): `--log-level <debug|info|warn|error>`, `--no-banner`, `--json`, `-V/--version`.
+
+## Wizard steps
+
+| Step | What | Writes |
+| --- | --- | --- |
+| 1 | target path | nothing |
+| 2 | overwrite check | nothing (existing vault aborts; other existing path asks, default No) |
+| 3 | topic seeds | nothing (pillars: pulse, intelligence, projects) |
+| 4 | vault skeleton | pillars + `CLAUDE.md` into a temp dir |
+| 5 | plugins | nothing (lists bundled plugins) |
+| 6 | anatomy seeds | `anatomy/` seeds into the temp dir, then the temp dir moves atomically to the target |
+| 7 | `.claude` hooks | `.claude/hooks/*.sh` + merge into `.claude/settings.json` |
+| 8 | launchd plists | `~/Library/LaunchAgents/com.foomakers.gilberto.{ingest,morning-briefing,reflect-day}.plist` |
+
+Step 8 runs on macOS only (Linux: stub, cron/systemd **Planned** in [#5](https://github.com/rucka/gilberto/issues/5)) and is skipped when `CI=true` unless `--launchd-in-ci`. Plists are written, never loaded (no `launchctl`). Details: [What install writes](/docs/getting-started/what-install-writes).
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | success, or user declined |
+| 1 | target is a file, or a foreign plist is in place |
+| 2 | vault already exists |
+| 13 | target not writable |
+| 28 | disk full |
+| 64 | bad or missing input |
+| 65 | invalid `settings.json` or plist/plutil failure |
+| 70 | vault-bootstrap content package missing |
+| 130 | aborted |
+
+Path A maps these to friendly messages (exit 2 shows CLI stderr verbatim). Any other code reports `unexpected CLI failure (exit N)`.

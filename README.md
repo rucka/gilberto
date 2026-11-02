@@ -14,7 +14,7 @@ npx gilberto@next --version
 
 Requires Node ≥ 22.12. Published on npm tag `next` (versions `0.x`); releases never move an existing `latest` (npm sets it once on first publish).
 
-Full guide (Path A skill-led, Path B CLI, flags, exit codes): [docs/install.md](docs/install.md).
+Full guide (Path A skill-led, Path B CLI, flags, exit codes): [apps/website/content/docs/getting-started/install.mdx](apps/website/content/docs/getting-started/install.mdx).
 
 ## Architecture
 

@@ -1,0 +1,25 @@
+---
+title: Define a type
+description: Give an entity type a schema; add relationship levels for people.
+---
+
+## Type schema
+
+```text
+/mechanic-forge-type
+> type "book" in intelligence: required author, optional isbn
+```
+
+```bash
+python3 script.py --name=book --scope=intelligence --schema='{"required":["author"],"optional":["isbn"]}'
+```
+
+Appends `### intelligence-book` + a YAML block under `anatomy/anatomy.md > ## Types`. Same schema again → skipped; different schema → `TYPE_CONFLICT` unless `--merge` (union of keys; a key now required leaves `optional`). `person` / `company` take no `--scope`.
+
+## Relationship level
+
+```bash
+python3 script.py --name=inner-circle --criteria="talk weekly, trusted with personal matters"
+```
+
+Adds `inner-circle` under `anatomy/anatomy.md > ## Relationship levels` (list item or table row, matching the section). Dedup by name.

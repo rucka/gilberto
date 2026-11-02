@@ -1,0 +1,53 @@
+---
+title: Skills catalog
+description: Every skill in the gilberto-core plugin, plus planned processes.
+---
+
+Install `gilberto-core` (see [Install](/docs/getting-started/install)), then invoke a skill in Claude Code with `/<skill-name>` or by asking in plain language ("add a topic called ai"). Each mechanic runs a deterministic `script.py` against `$GILBERTO_ROOT` and prints `{status, written, skipped, errors}` as JSON. All mechanics are idempotent, atomic (tmp + fsync + rename, rollback on failure), offline, and never touch anything outside the vault. Slugs match `^[a-z0-9][a-z0-9-]{0,63}$`.
+
+## Processes
+
+| Skill | Purpose | Inputs |
+| --- | --- | --- |
+| `gilberto-process-vault-bootstrap` | create a vault from the chat (Path A): detect CLI, run `gilberto install --non-interactive` | `target_path?` `seed_topics?` `enable_plugins?` `disable_hooks?` `disable_launchd?` `verbose?` |
+
+### Planned processes
+
+| Skill | Cycle step | Tracked in |
+| --- | --- | --- |
+| `gilberto-process-ingest` | CAPTURE: classify `_ingest/` drops into pillars | [#11](https://github.com/rucka/gilberto/issues/11), [#70](https://github.com/rucka/gilberto/issues/70) |
+| `gilberto-process-capture` | snapshot the session (PreCompact hook) | [#11](https://github.com/rucka/gilberto/issues/11) |
+| `gilberto-process-structure` | STRUCTURE | [#12](https://github.com/rucka/gilberto/issues/12) |
+| `gilberto-process-surface` | SURFACE (e.g. `morning-briefing`) | [#13](https://github.com/rucka/gilberto/issues/13) |
+| `gilberto-process-reflect` | REFLECT `day` / `week` / … (+evolve) | [#13](https://github.com/rucka/gilberto/issues/13) |
+| `gilberto-process-act`, `gilberto-process-next` | ACT, NEXT | [#20](https://github.com/rucka/gilberto/issues/20) |
+| upgrade · migrate · export · archive | lifecycle | [#25](https://github.com/rucka/gilberto/issues/25) |
+
+Capabilities and utilities (e.g. `gilberto-capability-fetch`, connector utilities) are **Planned**: [#11](https://github.com/rucka/gilberto/issues/11), [#18](https://github.com/rucka/gilberto/issues/18), [#23](https://github.com/rucka/gilberto/issues/23), [#26](https://github.com/rucka/gilberto/issues/26), [#59](https://github.com/rucka/gilberto/issues/59).
+
+## Mechanics — vault entities
+
+| Skill | Purpose | Inputs |
+| --- | --- | --- |
+| `mechanic-vault-new` | create a folder-note entity from a template | `--pillar` `--template` `--slug` `--frontmatter=<json>` `[--force]` |
+| `mechanic-vault-promote` | file → folder-note (`<pillar>/<name>.md` → `<pillar>/<name>/<name>.md`) | `--path=<pillar>/<name>.md` |
+| `mechanic-vault-collapse` | folder-note → file; refuses if the folder has other children (`HAS_CHILDREN`) | `--path=<pillar>/<name>` |
+
+## Mechanics — anatomy (forge)
+
+| Skill | Purpose | Inputs |
+| --- | --- | --- |
+| `mechanic-forge-topic` | register a topic in `anatomy/topics.md`, optionally seed folder-notes | `--slug` `[--seed=<pillar>,…]` `[--description]` |
+| `mechanic-forge-template` | create `anatomy/templates/<pillar>/<name>/` | `--name` `--pillar` `[--description]` |
+| `mechanic-forge-type` | define an entity type schema under `## Types` | `--name` `[--scope]` `--schema='{"required":[…],"optional":[…]}'` `[--merge]` |
+| `mechanic-forge-source` | register an ingestion source (registers only, never fetches) | `--type` `--url` `--cadence` `--target-pillar` `--target-topic` `[--contributor]` |
+| `mechanic-forge-relationship-level` | add a people-relationship level under `## Relationship levels` | `--name` `--criteria` |
+| `mechanic-forge-playbook` | create a per-event playbook | `--event` `--domain` `--mode=core\|contributor` `[--contributor]` `--frontmatter=<json>` |
+
+Allowed values:
+
+- pillars: `me pulse projects intelligence journey network`
+- source `type`: `rss atom youtube medical oura withings google-calendar outlook-calendar icloud-calendar caldav gmail outlook-mail imap-mail apple-mail http`; `cadence`: `realtime hourly daily weekly monthly`; `target-pillar`: `pulse intelligence journey`
+- playbook `domain`: `ingest structure surface act reflect next`
+
+Planned mechanics: `mechanic-forge-scope`, `mechanic-scope-move` ([#76](https://github.com/rucka/gilberto/issues/76)).

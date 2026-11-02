@@ -1,0 +1,25 @@
+---
+title: Promote / collapse notes
+description: Switch an entity between file and folder-note without breaking links.
+---
+
+## Promote — a note needs sub-content
+
+```text
+/mechanic-vault-promote
+> promote projects/garden.md
+```
+
+```bash
+python3 script.py --path=projects/garden.md
+```
+
+`projects/garden.md` → `projects/garden/garden.md`; only `updated` changes. Wikilinks keep resolving (same name). Already promoted → no write.
+
+## Collapse — back to a single file
+
+```bash
+python3 script.py --path=projects/garden
+```
+
+Moves the folder-note back to `projects/garden.md`, removes its sidecar and the folder. Any other child (hidden included) → exit 1 `HAS_CHILDREN` with the list, nothing written.

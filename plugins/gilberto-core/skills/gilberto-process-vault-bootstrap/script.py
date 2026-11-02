@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 REQUIRES = ">=0.1.0 <2"
-DOCS_URL = "https://github.com/rucka/gilberto#install"
+DOCS_URL = "https://github.com/rucka/gilberto/blob/main/apps/website/content/docs/getting-started/install.mdx"
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 NET_ERR = re.compile(r"ENOTFOUND|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|ECONNRESET|^npm (?:error|ERR!) network", re.I | re.M)
 MESSAGES = {

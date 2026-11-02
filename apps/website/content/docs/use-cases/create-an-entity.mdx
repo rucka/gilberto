@@ -1,0 +1,31 @@
+---
+title: Create an entity
+description: Add a template, then create entities from it.
+---
+
+## 1. Template
+
+```text
+/mechanic-forge-template
+> template "book" for intelligence
+```
+
+```bash
+python3 script.py --name=book --pillar=intelligence --description="A book I read"
+```
+
+Writes `anatomy/templates/intelligence/book/book.md` (frontmatter `type: intelligence-book`, `topics: []`) and `files/note.md` with slug/title/date placeholders.
+
+## 2. Entity
+
+```text
+/mechanic-vault-new
+> new book "thinking-in-systems" in intelligence, topics ai
+```
+
+```bash
+python3 script.py --pillar=intelligence --template=book --slug=thinking-in-systems \
+  --frontmatter='{"topics":["ai"]}'
+```
+
+Writes `intelligence/thinking-in-systems/thinking-in-systems.md` + `.thinking-in-systems.json` sidecar, with `created`/`updated` set to today. If the type has a schema (see [Define a type](/docs/use-cases/define-a-type)) the frontmatter is validated (`INVALID_FRONTMATTER` + diff). `--force` rewrites frontmatter only.

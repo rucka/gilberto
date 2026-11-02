@@ -1,0 +1,35 @@
+---
+title: Skills & anatomy
+description: Data-driven behavior — thin process skills dispatch through anatomy playbooks.
+---
+
+## Anatomy
+
+`anatomy/` is the vault's operating manual. Skills read it; mechanics extend it in place (no CLI re-run, no repo access).
+
+| File | Role |
+| --- | --- |
+| `anatomy.md` | structure, naming, frontmatter, partitioning, `## Types`, `## Relationship levels` |
+| `topics.md` · `plugins.md` · `scopes.md` · `gilberto.md` | registries |
+| `preferences.md` | silence, thresholds, cadences, integrations |
+| `playbooks/<domain>/<event>.md` | per-event dispatch |
+| `templates/<pillar>/<name>/` | entity templates |
+| `integrations/<provider>.md` | connector accounts |
+
+## Skill taxonomy
+
+| Category | Naming | Role |
+| --- | --- | --- |
+| process | `gilberto-process-<scope>-<op>` | orchestrates a cycle step |
+| capability | `gilberto-capability-<pillar>-[<sub>-]<op>` | pillar-level operation |
+| utility | `utility-<scope>-<op>` | low-level helper / connector |
+| mechanic | `mechanic-<scope>-<op>` | vault/anatomy extension |
+
+Composition: process → capability → utility; mechanics orthogonal. Target v1.0 ≈ 90 skills.
+
+Process skills are thin dispatchers: read `anatomy/playbooks/<domain>/<event>.md`, then dispatch to the skills listed in `dispatch_to`.
+
+## Cycles
+
+- **A — lifecycle**: bootstrap → upgrade ⇄ migrate → export / archive. Bootstrap available; the rest **Planned** ([#25](https://github.com/rucka/gilberto/issues/25)).
+- **B — operational**: CAPTURE (ingest) → STRUCTURE → SURFACE → ACT → REFLECT (+evolve) → NEXT. **Planned** ([#11](https://github.com/rucka/gilberto/issues/11), [#12](https://github.com/rucka/gilberto/issues/12), [#13](https://github.com/rucka/gilberto/issues/13), [#20](https://github.com/rucka/gilberto/issues/20)).

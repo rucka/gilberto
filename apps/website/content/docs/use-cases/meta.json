@@ -1,0 +1,13 @@
+{
+  "title": "Use cases",
+  "pages": [
+    "index",
+    "bootstrap-a-vault",
+    "add-a-topic",
+    "capture-a-source",
+    "create-an-entity",
+    "promote-and-collapse",
+    "define-a-type",
+    "define-a-playbook"
+  ]
+}

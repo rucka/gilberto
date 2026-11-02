@@ -1,0 +1,15 @@
+---
+title: Connectors
+description: Opt-in plugins per provider family with a uniform utility contract (ADR-0003). Planned.
+---
+
+> **Planned** — connector framework [#59](https://github.com/rucka/gilberto/issues/59). Today you can only *register* sources with [`mechanic-forge-source`](/docs/use-cases/capture-a-source).
+
+From [ADR-0003](https://github.com/rucka/gilberto/blob/main/.pair/adoption/tech/adr/0003-connector-plugins.md):
+
+- **Plugins per provider family** (shared auth): `connector-google` ([#27](https://github.com/rucka/gilberto/issues/27)), `connector-media` ([#63](https://github.com/rucka/gilberto/issues/63)), `connector-slack` ([#64](https://github.com/rucka/gilberto/issues/64)) for v1; Notion, GitHub, messaging, social post-v1.
+- **Uniform contract**: `utility-<provider>-<op>` skills.
+- **API-first**: deterministic scripts on official APIs; MCP connectors of the assistant only as fallback.
+- **Config** in `anatomy/integrations/<provider>.md` (each account declares its scope).
+- **Secrets** in the OS keychain, never in the vault ([#61](https://github.com/rucka/gilberto/issues/61)).
+- **Unattended runs never write externally.**
