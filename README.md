@@ -9,10 +9,10 @@ Markdown + JSON vault on your filesystem, operated by portable skills that run i
 ## Install (alpha)
 
 ```bash
-npx gilberto@next --version
+npx gilberto --version          # latest final; `gilberto@next` = pre/rc
 ```
 
-Requires Node ≥ 22.12. Published on npm tag `next` (versions `0.x`); releases never move an existing `latest` (npm sets it once on first publish).
+Requires Node ≥ 22.12. Finals on npm tag `latest`, pre/rc (`X.Y.Z-pre.N`, `-rc.N`) on `next`; a prerelease never moves an existing `latest`.
 
 Full guide (Path A skill-led, Path B CLI, flags, exit codes): [apps/website/content/docs/getting-started/install.mdx](apps/website/content/docs/getting-started/install.mdx).
 
@@ -36,7 +36,7 @@ rucka/gilberto (source only)            $GILBERTO_ROOT (user instance)
 Both converge on `gilberto install` ([ADR-0002](.pair/adoption/tech/adr/0002-distribution-and-dual-entry-bootstrap.md)):
 
 - **Path A — skill-led**: install `gilberto-core` plugin → `/gilberto-process-vault-bootstrap` → ensures CLI → `gilberto install`.
-- **Path B — CLI-direct**: `npm i -g gilberto@next && gilberto install <vault>`.
+- **Path B — CLI-direct**: `npm i -g gilberto && gilberto install <vault>`.
 
 ### Vault layout
 
