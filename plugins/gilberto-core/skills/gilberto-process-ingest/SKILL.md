@@ -27,4 +27,4 @@ Idempotent. Loads the `com.foomakers.gilberto.ingest` job via `launchctl bootstr
 
 Capability `gilberto-capability-<pillar>-archive` (found like `dispatch.sh`, dir under `*/skills/`) is run as `python3 script.py --source=<abs path> --pillar=<p> --name=<final name>`; it must create `$GILBERTO_ROOT/<pillar>/<name>` and exit 0. `<name>` is collision-free (`a.pdf` → `a-1.pdf`), never overwrites. On success ingest writes `<pillar>/<name>.ingest.json` (`source`, `pillar`, `confidence`, `ingested_at`) and removes the source from `_ingest/`.
 
-Supported: pdf md txt html docx png jpg jpeg. One run at a time (`_ingest/.ingest.lock`, non-blocking).
+Supported: pdf md txt html docx png jpg jpeg. One run at a time: `scan` records its parent (run) pid in `_ingest/.ingest.run`; another run's `scan` is `skipped` (`locked`) while that pid lives, a dead owner is stale. `apply` takes `_ingest/.ingest.lock` per file, non-blocking. Run scan and applies from the same parent process.

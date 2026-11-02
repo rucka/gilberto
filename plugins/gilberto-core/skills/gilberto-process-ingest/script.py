@@ -18,6 +18,7 @@ PILLARS = ("me", "pulse", "projects", "intelligence", "journey")
 SUPPORTED = {".pdf", ".md", ".txt", ".html", ".docx", ".png", ".jpg", ".jpeg"}
 SIDECARS = (".ingest.json", ".error.md")
 LOCK = ".ingest.lock"
+RUN = ".ingest.run"
 
 
 class Parser(result.ArgParser):
@@ -50,6 +51,31 @@ def _lock(ingest):
         f.close()
         return None
     return f
+
+
+def _alive(pid):
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        pass
+    return True
+
+
+def _claim_run(ingest):
+    path = os.path.join(ingest, RUN)
+    me = os.getppid()
+    try:
+        with open(path) as f:
+            owner = int(f.read().strip())
+    except (OSError, ValueError):
+        owner = None
+    if owner is not None and owner != me and _alive(owner):
+        return False
+    with open(path, "w") as f:
+        f.write(str(me))
+    return True
 
 
 def _scan(ingest, min_age):
@@ -141,11 +167,13 @@ def main(argv=None, env=None):
             raise MechanicError("NOT_FOUND", input="_ingest")
         if a.cmd == "scan":
             lock = _lock(ingest)
-            if lock is None:
-                out = {"status": "skipped", "reason": "locked", "files": []}
-            else:
+            claimed = lock is not None and _claim_run(ingest)
+            if lock is not None:
                 lock.close()
+            if claimed:
                 out = {"status": "ok", "files": _scan(ingest, a.min_age)}
+            else:
+                out = {"status": "skipped", "reason": "locked", "files": []}
         else:
             out = _apply(a, root, ingest, env)
     except MechanicError as e:
