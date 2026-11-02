@@ -66,6 +66,10 @@ def _decode(raw, header):
     try:
         return raw.decode("utf-8")
     except UnicodeDecodeError:
+        t = raw.decode("utf-8", "replace")
+        bad = t.count("\ufffd")
+        if sum(c > "\x7f" for c in t) - bad > bad:
+            return t
         return raw.decode("cp1252", "replace")
 
 
