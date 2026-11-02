@@ -1,0 +1,84 @@
+{
+  "$meta": {
+    "pr": "129",
+    "phase": "r1-g3",
+    "base": "ba28a59da1622d673df11d708167da9d8231a340",
+    "trailer": "Pair-RED-Snapshot: pr=129; phase=r1-g3; base=ba28a59da1622d673df11d708167da9d8231a340; manifest=.pair/red-snapshots/pr-129-r1-g3.json",
+    "artifacts": []
+  },
+  "status": "red",
+  "mode": "remediation",
+  "inputHead": "ba28a59da1622d673df11d708167da9d8231a340",
+  "sourceOfTruth": "plugins/gilberto-core/skills/gilberto-process-ingest/{SKILL.md,activate.py}",
+  "inventory": [
+    {
+      "id": "r0-3",
+      "producer": "gilberto-process-ingest SKILL.md + activate.py (shipped by this PR, #70)",
+      "inputs": "reader of three docs pages",
+      "representations": [
+        "a-day-with-gilberto.mdx:24",
+        "what-install-writes.mdx:50",
+        "index.mdx:8",
+        "reference/skills.mdx:15 (out of scope, already states archive capabilities Planned)",
+        "concepts/skills-and-anatomy.mdx:35 (out of scope: chain-B taxonomy line, see shared rule)"
+      ],
+      "consumers": [
+        "docs readers"
+      ],
+      "classes": [
+        "ingest skill + activation: shipped",
+        "pillar archive capabilities: still Planned",
+        "surface/reflect and other daily processes: still Planned",
+        "anatomy chain B (CAPTURE..NEXT) end-to-end pipeline label: Planned, tracked by #11,#12,#13,#20 (never #70); not a claim about the ingest skill"
+      ],
+      "interactions": [
+        "index.mdx status line lists ingest among Planned processes next to surface/reflect that remain Planned",
+        "skills-and-anatomy.mdx:35 lists CAPTURE (ingest) as a chain stage; shared rule: that line labels the whole operational chain B as Planned (STRUCTURE..REFLECT/NEXT unshipped, cited issues exclude #70); it states nothing about whether the ingest skill ships, which r0-3-c1..c3 and reference/skills.mdx assert as available. Line stays untouched (outside allowedPaths); a reader-level ingest claim there would need a coordinator $scope.widen."
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "website docs",
+    "mode": "doc",
+    "allowedPaths": [
+      "apps/website/content/docs/a-day-with-gilberto.mdx",
+      "apps/website/content/docs/getting-started/what-install-writes.mdx",
+      "apps/website/content/docs/index.mdx"
+    ]
+  },
+  "checklist": [
+    {
+      "id": "r0-3-c1",
+      "finding": "r0-3",
+      "requirement": "a-day-with-gilberto.mdx:24 states the ingest launchd job runs /gilberto-process-ingest as available (shipped, #70); no '**Planned**' tag on #70; archive-capability dependency (#74) may remain marked Planned.",
+      "authority": "plugins/gilberto-core/skills/gilberto-process-ingest/SKILL.md; activate.py (LABEL com.foomakers.gilberto.ingest)"
+    },
+    {
+      "id": "r0-3-c2",
+      "finding": "r0-3",
+      "requirement": "what-install-writes.mdx:50 states ingest job activates on installing gilberto-process-ingest (available); only surface/reflect (#13) remain '**Planned**'; no 'Planned: ingest #70'.",
+      "authority": "activate.py docstring: 'load the ingest launchd job iff gilberto-process-ingest is installed'"
+    },
+    {
+      "id": "r0-3-c3",
+      "finding": "r0-3",
+      "requirement": "index.mdx:8 status line no longer lists ingest among Planned daily processes; it states ingest is available while surface, reflect and the rest remain Planned.",
+      "authority": "gilberto-process-ingest shipped in this PR; surface/reflect (#13) unshipped"
+    },
+    {
+      "id": "r0-3-c4",
+      "finding": "r0-3",
+      "requirement": "No line anywhere under apps/website/content ties \"Planned\" to ingest #70: git grep -n -E \"Planned.*(#70|issues/70)|(#70|issues/70).*Planned\" -- apps/website/content yields none. #74 (archive capability) may stay Planned on a-day-with-gilberto.mdx:24; index.mdx:8 may list ingest as available next to Planned surface/reflect.",
+      "authority": "reference/skills.mdx:15 (archive capabilities Planned); finding oracle grep over apps/website/content"
+    },
+    {
+      "id": "r0-3-c5",
+      "finding": "r0-3",
+      "requirement": "skills-and-anatomy.mdx:35 is unchanged and is not an ingest claim: its **Planned** tag labels operational chain B (CAPTURE→STRUCTURE→SURFACE→ACT→REFLECT→NEXT) and cites #11,#12,#13,#20, never #70; no change required to that file; ingest availability is stated only by c1-c3.",
+      "authority": "SKILL.md + activate.py (ingest shipped); chain B incomplete (STRUCTURE..REFLECT unshipped, #11/#12/#13/#20)"
+    }
+  ],
+  "redTests": [],
+  "testExempt": true,
+  "exemptionRationale": "doc group: prose-only fix, acceptance checklist replaces executable witnesses"
+}
