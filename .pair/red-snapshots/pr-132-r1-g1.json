@@ -1,0 +1,293 @@
+{
+  "$meta": {
+    "pr": "132",
+    "phase": "r1-g1",
+    "base": "7bd5212e1c1ce6edc86ab8cd75e63470bf81dbb3",
+    "trailer": "Pair-RED-Snapshot: pr=132; phase=r1-g1; base=7bd5212e1c1ce6edc86ab8cd75e63470bf81dbb3; manifest=.pair/red-snapshots/pr-132-r1-g1.json",
+    "artifacts": [
+      "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py"
+    ]
+  },
+  "mode": "repair",
+  "phase": "r1-g1",
+  "inputHead": "7bd5212e1c1ce6edc86ab8cd75e63470bf81dbb3",
+  "sourceOfTruth": "ADR-0003 amendment 2026-11-02 (Connector profiles); mechanic-forge-source entry format",
+  "inventory": [
+    {
+      "id": "r0-3",
+      "producer": "mechanic-forge-source _entry (json.dumps(url) key) ↔ gilberto-capability-fetch _entries/_TOP (consumer decode)",
+      "inputs": [
+        "entry key: JSON-quoted string or bare http(s) token"
+      ],
+      "representations": [
+        "plugins/gilberto-core/skills/gilberto-capability-fetch/script.py"
+      ],
+      "consumers": [
+        "_run_utility argv --url",
+        "state key _state.json",
+        "mcp request url"
+      ],
+      "classes": [
+        "ASCII quoted",
+        "non-ASCII BMP quoted",
+        "non-BMP (surrogate pair) quoted",
+        "bare unquoted key (raw)"
+      ],
+      "interactions": [
+        "decoded url → utility argv and state key"
+      ]
+    },
+    {
+      "id": "r0-4",
+      "producer": "gilberto-capability-fetch dispatch/_fallback integration config resolution (ADR-0003 amendment Connector profiles)",
+      "inputs": [
+        "entry provider/profile",
+        "anatomy/integrations/<provider>/<profile>.md",
+        "anatomy/integrations/<provider>.md"
+      ],
+      "representations": [
+        "plugins/gilberto-core/skills/gilberto-capability-fetch/script.py",
+        ".pair/adoption/decision-log/2026-11-02-capability-fetch-contract.md",
+        "plugins/gilberto-core/skills/gilberto-capability-fetch/SKILL.md"
+      ],
+      "consumers": [
+        "dispatch → mcp request"
+      ],
+      "classes": [
+        "profile file present",
+        "default profile file, no profile in entry",
+        "flat file only (compat)",
+        "both present (profile wins)",
+        "profile named, profile file absent, flat present (flat is provider-level compat config)",
+        "profile value not a slug (path traversal, separator)",
+        "valid profile slug"
+      ],
+      "interactions": [
+        "profile file vs flat precedence",
+        "default.md vs flat precedence with no entry profile",
+        "entry profile value as path component of anatomy/integrations/<provider>/<profile>.md"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "gilberto-capability-fetch",
+    "mode": "behavioral",
+    "allowedPaths": [
+      "plugins/gilberto-core/skills/gilberto-capability-fetch/script.py",
+      "plugins/gilberto-core/skills/gilberto-capability-fetch/SKILL.md",
+      ".pair/adoption/decision-log/2026-11-02-capability-fetch-contract.md"
+    ]
+  },
+  "matrix": [
+    {
+      "id": "r0-3-w1",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "forge non-ASCII URL (café, emoji) via mechanic-forge-source then load_sources",
+      "expected": "loaded url == forged url",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::nonascii_url_roundtrips; uv run --frozen --directory tools/skill-tests pytest --no-cov -k nonascii_url_roundtrips",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-3-i1",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "forged non-ASCII entry run through main: utility argv and _state key",
+      "expected": "--url=https://example.com/café; state key decoded",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::utility_receives; uv run --frozen --directory tools/skill-tests pytest --no-cov -k utility_receives",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-3-c1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "forge ASCII URL with query",
+      "expected": "loaded url == forged url",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::forged_ascii_url; uv run --frozen --directory tools/skill-tests pytest --no-cov -k forged_ascii_url",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-3-b1",
+      "kind": "boundary",
+      "baseline": "pass",
+      "condition": "hand-written bare (unquoted) key containing backslash-u text stays raw",
+      "expected": "url unchanged",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::bare_key_stays; uv run --frozen --directory tools/skill-tests pytest --no-cov -k bare_key_stays",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "r0-4-w1",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "anatomy/integrations/slack/work.md fallback: mcp, entry provider slack profile work, no utility",
+      "expected": "dispatch[0]=='mcp', profile work",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::profile_layout_fallback; uv run --frozen --directory tools/skill-tests pytest --no-cov -k profile_layout_fallback",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-4"
+      ]
+    },
+    {
+      "id": "r0-4-w2",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "anatomy/integrations/slack/default.md fallback: mcp, entry without profile",
+      "expected": "dispatch[0]=='mcp'",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::default_layout_fallback; uv run --frozen --directory tools/skill-tests pytest --no-cov -k default_layout_fallback",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-4"
+      ]
+    },
+    {
+      "id": "r0-4-b1",
+      "kind": "boundary",
+      "baseline": "red",
+      "condition": "flat slack.md mcp AND slack/work.md none, profile work",
+      "expected": "profile file wins: dispatch[0]=='manual'",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::profile_file_wins_over_flat; uv run --frozen --directory tools/skill-tests pytest --no-cov -k profile_file_wins_over_flat",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-4"
+      ]
+    },
+    {
+      "id": "r0-4-c1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "flat slack.md fallback: mcp (compat)",
+      "expected": "dispatch[0]=='mcp'",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::flat_layout_still; uv run --frozen --directory tools/skill-tests pytest --no-cov -k flat_layout_still",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-4"
+      ]
+    },
+    {
+      "id": "r0-4-b2",
+      "kind": "boundary",
+      "baseline": "pass",
+      "condition": "only flat slack.md fallback: mcp; entry profile=work, slack/work.md absent",
+      "expected": "dispatch[0]=='mcp'",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::profile_falls_back_to_flat; uv run --frozen --directory tools/skill-tests pytest --no-cov -k profile_falls_back_to_flat",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-4"
+      ],
+      "rationale": "Rule: flat <provider>.md is the provider-level compat config; it applies when the named profile has no file (profile file, when present, wins: r0-4-b1). Passes at base (flat honoured); guards a fix that ignores flat when a profile is named."
+    },
+    {
+      "id": "r0-4-b3",
+      "kind": "boundary",
+      "baseline": "red",
+      "condition": "flat slack.md fallback: mcp AND slack/default.md fallback: none; entry without profile",
+      "expected": "dispatch[0]=='manual' (default.md wins over flat)",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::default_file_wins_over_flat; uv run --frozen --directory tools/skill-tests pytest --no-cov -k default_file_wins_over_flat",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-4"
+      ],
+      "rationale": "Rule: with no entry profile the profile is `default`; <provider>/default.md takes precedence over flat <provider>.md. Red at base: flat read only."
+    },
+    {
+      "id": "r0-4-b4",
+      "kind": "boundary",
+      "baseline": "pass",
+      "condition": "entry profile '../../playbooks/intelligence/sources/core' (file declaring fallback: mcp at that resolved in-vault path) and profile 'a/b' (slack/a/b.md mcp)",
+      "expected": "must NOT yield mcp: typed MechanicError or ignored",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::profile_path_component_rejected; uv run --frozen --directory tools/skill-tests pytest --no-cov -k profile_path_component_rejected",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-4"
+      ],
+      "rationale": "Rule: profile is a slug, never a path; separators/traversal are not resolved into anatomy/integrations. Passes at base (profile unused); guards a naive f-string path join in the fix."
+    },
+    {
+      "id": "r0-4-b5",
+      "kind": "boundary",
+      "baseline": "red",
+      "condition": "valid profile slug 'acme-2' with slack/acme-2.md fallback: mcp",
+      "expected": "dispatch[0]=='mcp', request profile acme-2",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::valid_profile_slug_resolves; uv run --frozen --directory tools/skill-tests pytest --no-cov -k valid_profile_slug_resolves",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-4"
+      ],
+      "rationale": "Control for r0-4-b4: a legitimate slug (digits, hyphen) must still resolve to its profile file. Red at base: profile layout unsupported."
+    },
+    {
+      "id": "r0-3-b2",
+      "kind": "boundary",
+      "baseline": "pass",
+      "condition": "file: valid entry, quoted key with invalid JSON escape (\\q), quoted key with truncated \\u00, valid entry",
+      "expected": "both valid entries loaded; each bad key isolated as MALFORMED_ENTRY or kept raw; no exception",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::quoted_key_invalid_escape_isolated; uv run --frozen --directory tools/skill-tests pytest --no-cov -k quoted_key_invalid_escape_isolated",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-3"
+      ],
+      "rationale": "Rule: a hand-written quoted key that is not valid JSON must not abort load_sources; per-entry isolation (MALFORMED_ENTRY) or raw key. Passes at base (no decoding); guards a bare json.loads fix."
+    },
+    {
+      "id": "r0-3-i2",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "forged non-ASCII URL: load_sources(source=<decoded url>) then dispatch fallback mcp with that entry",
+      "expected": "filter returns the entry; mcp request url == decoded url",
+      "oracle": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py::nonascii_url_source_filter_and_mcp_request; uv run --frozen --directory tools/skill-tests pytest --no-cov -k nonascii_url_source_filter_and_mcp_request",
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "covers": [
+        "r0-3"
+      ]
+    }
+  ],
+  "redTests": [
+    {
+      "file": "plugins/gilberto-core/skills/gilberto-capability-fetch/tests/test_us71_r1.py",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:eb5ed251a8a2c9ed80a46ad8aca9f347e9a5899d4b3c4c392ee0b7cd4a844c07",
+      "command": "uv run --frozen --directory tools/skill-tests pytest --no-cov -k us71_r1",
+      "observed": "9 failed, 7 passed: nonascii roundtrip (2), nonascii filter+mcp, utility argv, profile layout, default layout, profile-wins-over-flat, default-wins-over-flat, valid slug fail; ascii, bare key, invalid-escape isolation, flat compat, profile->flat fallback, 2 traversal pass"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "owner": "gilberto-capability-fetch",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "plugins/gilberto-core/skills/gilberto-capability-fetch/script.py",
+          "plugins/gilberto-core/skills/gilberto-capability-fetch/SKILL.md",
+          ".pair/adoption/decision-log/2026-11-02-capability-fetch-contract.md"
+        ],
+        "dependsOn": [],
+        "findings": [
+          "r0-3",
+          "r0-4"
+        ],
+        "oracle": "uv run --frozen --directory tools/skill-tests pytest --no-cov -k us71_r1"
+      }
+    ],
+    "carried": []
+  },
+  "changedRows": [
+    "r0-3-b2",
+    "r0-3-i2",
+    "r0-4-b1"
+  ]
+}
