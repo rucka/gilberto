@@ -206,7 +206,8 @@ LABEL = "com.foomakers.gilberto.ingest"
 
 
 @pytest.fixture
-def fake_launchctl(tmp_path, env):
+def fake_launchctl(tmp_path, env, monkeypatch):
+    monkeypatch.setattr(sys, "platform", "darwin")
     bindir = tmp_path / "bin"
     bindir.mkdir()
     log = tmp_path / "launchctl.log"
