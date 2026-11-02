@@ -1,4 +1,5 @@
 import datetime
+import http.client
 import ipaddress
 import os
 import re
@@ -35,6 +36,8 @@ def _check_host(url):
     host = urlsplit(url).hostname
     try:
         ips = _resolve(host)
+    except UnicodeError as e:
+        raise MechanicError("INVALID_URL", input=url, reason=f"invalid host: {e}")
     except OSError as e:
         raise MechanicError("FETCH_FAILED", url=url, reason=f"dns: {e}")
     for ip in ips:
@@ -50,6 +53,22 @@ class _SafeRedirect(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
+_CHARSET = re.compile(r"charset\s*=\s*[\"']?([A-Za-z0-9_.:-]+)", re.I)
+
+
+def _decode(raw, header):
+    m = _CHARSET.search(header) or _CHARSET.search(raw[:4096].decode("ascii", "ignore"))
+    if m:
+        try:
+            return raw.decode(m.group(1), "replace")
+        except LookupError:
+            pass
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return raw.decode("cp1252", "replace")
+
+
 def fetch(url):
     validate_url(url)
     _check_host(url)
@@ -59,13 +78,14 @@ def fetch(url):
             status = getattr(r, "status", 200)
             if not 200 <= status < 300:
                 raise MechanicError("FETCH_FAILED", url=url, status=status)
-            ctype = (r.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+            header = r.headers.get("Content-Type") or ""
+            ctype = header.split(";")[0].strip().lower()
             if ctype not in HTML_TYPES:
                 raise MechanicError("UNSUPPORTED_CONTENT", url=url, contentType=ctype)
-            return r.read(MAX_BYTES)
+            return _decode(r.read(MAX_BYTES), header)
     except urllib.error.HTTPError as e:
         raise MechanicError("FETCH_FAILED", url=url, status=e.code)
-    except (urllib.error.URLError, OSError) as e:
+    except (urllib.error.URLError, http.client.HTTPException, OSError) as e:
         raise MechanicError("FETCH_FAILED", url=url, reason=str(e))
 
 
@@ -81,7 +101,7 @@ def _slug(title, url):
 def _extract(html, url):
     import trafilatura
 
-    text = html.decode("utf-8", "replace") if isinstance(html, bytes) else html
+    text = html
     body = trafilatura.extract(text, url=url, output_format="markdown", include_comments=False, include_tables=True)
     if not body or not body.strip():
         raise MechanicError("NO_CONTENT", url=url)
@@ -100,7 +120,8 @@ def _target(ingest, slug, url):
     """-> (path, exists): same-source file for slug (or slug-N), else first free name."""
     n = 1
     while True:
-        path = os.path.join(ingest, f"{slug}{'' if n == 1 else f'-{n}'}.md")
+        base = slug if n == 1 else f"{slug[: 64 - len(str(n)) - 1].strip('-')}-{n}"
+        path = os.path.join(ingest, f"{base}.md")
         if not os.path.exists(path):
             return path, False
         with open(path, encoding="utf-8") as f:
