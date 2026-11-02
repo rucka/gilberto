@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import re
@@ -6,7 +7,8 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from _lib import frontmatter, vault_io  # noqa: E402
+from _lib import frontmatter, result, vault_io  # noqa: E402
+from _lib.atomic_write import atomic_write  # noqa: E402
 from _lib.result import MechanicError  # noqa: E402
 
 PLAYBOOKS = "anatomy/playbooks"
@@ -140,3 +142,92 @@ def dispatch(root, entry, env):
     if _fallback(entry, integration) == "mcp":
         return "mcp", {"provider": key, "profile": entry.get("profile"), "url": entry["url"], "utility": name}
     return "manual", {"url": entry["url"], "utility": name, "hint": "utility unavailable: drop the content into _ingest/ manually"}
+
+
+def _load_state(root, e):
+    rel = f"{PLAYBOOKS}/{e['pillar']}/sources/{e['contributor']}/_state.json"
+    path = vault_io.resolve(root, rel)
+    if not os.path.exists(path):
+        return rel, path, {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            state = json.load(f)
+        if not isinstance(state, dict):
+            raise ValueError("not an object")
+    except ValueError as ex:
+        raise MechanicError("STATE_CORRUPT", file=rel, error=str(ex))
+    return rel, path, state
+
+
+def _fetched(state, url):
+    fetched = state.get(url, {}).get("fetched", [])
+    if not isinstance(fetched, list):
+        raise MechanicError("STATE_CORRUPT", url=url, error="fetched is not a list")
+    return fetched
+
+
+def _write_items(root, e, items, state, written, skipped):
+    fetched = _fetched(state, e["url"])
+    for item in items:
+        digest = hashlib.sha1(f"{e['url']}\0{item['id']}".encode()).hexdigest()[:12]
+        rel = f"_ingest/{e['contributor']}-{digest}.md"
+        if item["id"] in fetched:
+            skipped.append({"path": rel, "reason": "already-fetched"})
+            continue
+        path = vault_io.resolve(root, rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        atomic_write(path, item["markdown"])
+        fetched.append(item["id"])
+        state[e["url"]] = {"fetched": fetched}
+        written.append(rel)
+
+
+def _fetch_one(root, e, env, written, skipped):
+    state_rel, state_path, state = _load_state(root, e)
+    before = json.dumps(state, sort_keys=True)
+    try:
+        kind, payload = dispatch(root, e, env)
+        if kind == "items":
+            _write_items(root, e, payload, state, written, skipped)
+        else:
+            skipped.append({"source": e["file"], "url": e["url"], "reason": "mcp-fallback" if kind == "mcp" else "manual", **payload})
+    finally:
+        if json.dumps(state, sort_keys=True) != before:
+            os.makedirs(os.path.dirname(state_path), exist_ok=True)
+            atomic_write(state_path, json.dumps(state, indent=2, sort_keys=True) + "\n")
+
+
+def _run(argv, env):
+    p = result.ArgParser(prog="gilberto-capability-fetch")
+    p.add_argument("--pillar")
+    p.add_argument("--source")
+    a = p.parse_args(argv)
+    root = vault_io.vault_root(env)
+    entries, errors = load_sources(root, a.pillar, a.source)
+    written, skipped = [], []
+    for e in entries:
+        try:
+            _fetch_one(root, e, env, written, skipped)
+        except MechanicError as ex:
+            errors.append({**ex.as_dict(), "source": e["file"], "url": e["url"]})
+        except OSError as ex:
+            errors.append({"code": "WRITE_FAILED", "source": e["file"], "url": e["url"], "error": str(ex)})
+    return written, skipped, errors
+
+
+def main(argv=None, env=None):
+    argv = sys.argv[1:] if argv is None else argv
+    env = os.environ if env is None else env
+    try:
+        written, skipped, errors = _run(argv, env)
+    except MechanicError as e:
+        result.log(f"error: {e.code}")
+        result.emit("error", errors=[e.as_dict()])
+        return 1
+    status = ("error" if not (written or skipped) else "partial") if errors else "skipped" if skipped and not written else "ok"
+    result.emit(status, written, skipped, errors)
+    return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
