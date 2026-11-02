@@ -10,12 +10,14 @@ Install `gilberto-core` (see [Install](/docs/getting-started/install)), then inv
 | Skill | Purpose | Inputs |
 | --- | --- | --- |
 | `gilberto-process-vault-bootstrap` | create a vault from the chat (Path A): detect CLI, run `gilberto install --non-interactive` | `target_path?` `seed_topics?` `enable_plugins?` `disable_hooks?` `disable_launchd?` `verbose?` |
+| `gilberto-process-ingest` | CAPTURE: classify `_ingest/` drops into a pillar, dispatch to `gilberto-capability-<pillar>-archive`, write `.ingest.json`; first run loads the `_ingest/` launchd job (`activate.py`, idempotent) | `scan [--min-age]` · `apply --file --pillar --confidence [--threshold=0.7]` |
+
+`gilberto-process-ingest` details: confidence below threshold ⇒ file stays; unsupported, unclassifiable or missing/failed archive capability ⇒ file stays + `<name>.error.md`; name collision ⇒ `-1`, `-2` suffix, never overwrite; files modified < 5 s ago skipped (retried on next drop); one run at a time. The pillar archive capabilities are **Planned**.
 
 ### Planned processes
 
 | Skill | Cycle step | Tracked in |
 | --- | --- | --- |
-| `gilberto-process-ingest` | CAPTURE: classify `_ingest/` drops into pillars | [#11](https://github.com/rucka/gilberto/issues/11), [#70](https://github.com/rucka/gilberto/issues/70) |
 | `gilberto-process-capture` | snapshot the session (PreCompact hook) | [#11](https://github.com/rucka/gilberto/issues/11) |
 | `gilberto-process-structure` | STRUCTURE | [#12](https://github.com/rucka/gilberto/issues/12) |
 | `gilberto-process-surface` | SURFACE (e.g. `morning-briefing`) | [#13](https://github.com/rucka/gilberto/issues/13) |
