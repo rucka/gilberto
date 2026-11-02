@@ -12,10 +12,10 @@ Story #71 implements the ADR-0003 dispatcher before the connector contract/resol
 ## Decision
 
 - **Precedence**: `provider:` wins over `type`.
-- **Utility name**: `utility-<provider|type>-read`; core table only for `rss`/`atom` → `utility-fetch-rss`, `http` → `utility-download-html`. Search path: core skills dir + `$GILBERTO_UTILITY_PATH`. Provider/type is _known_ when its utility exists, `anatomy/integrations/<key>.md` exists or the entry sets `fallback:`; else `UNKNOWN_PROVIDER` / `UNKNOWN_TYPE`. No provider list in core.
+- **Utility name**: `utility-<provider|type>-read`; core table only for `rss`/`atom` → `utility-fetch-rss`, `http` → `utility-download-html`. Search path: core skills dir + `$GILBERTO_UTILITY_PATH`. Provider/type is _known_ when its utility exists, an integration config (`anatomy/integrations/<key>/<profile|default>.md` or `<key>.md`) exists or the entry sets `fallback:`; else `UNKNOWN_PROVIDER` / `UNKNOWN_TYPE`. No provider list in core.
 - **Call**: `script.py --url=<url> [--profile=<p>]`, stdout `{items:[{id, markdown}]}`, failure → exit ≠ 0 + `{errors:[{code}]}` (surfaced as `UTILITY_ERROR`, `utility_code`). Items carry normalized markdown + canonical frontmatter (ADR-0003 anti-corruption); core writes it as-is.
 - **Profile**: entry `profile:` passed through; omitted → `resolve_profile()` seam, stubbed (`None`) until #60 merges — swap the body, signature unchanged.
-- **Fallback**: entry `fallback:`, else `anatomy/integrations/<provider>.md` frontmatter, default `none`. A script cannot call MCP, so `mcp` is delivered as a `skipped` entry (`reason: mcp-fallback`) the assistant acts on; `none` → `reason: manual` + `_ingest/` hint. Neither counts as failure.
+- **Fallback**: entry `fallback:`, else integration config frontmatter (ADR-0003 profiles: `anatomy/integrations/<provider>/<profile>.md`, `default` when no profile; flat `<provider>.md` as compat), default `none`. A script cannot call MCP, so `mcp` is delivered as a `skipped` entry (`reason: mcp-fallback`) the assistant acts on; `none` → `reason: manual` + `_ingest/` hint. Neither counts as failure.
 - **State**: `anatomy/playbooks/<pillar>/sources/<contributor>/_state.json` = `{url: {fetched: [ids]}}`; one file per source file, keyed per entry url (overturn: single global file).
 - **Output files**: `_ingest/<contributor>-<sha1(url,id)[:12]>.md`.
 

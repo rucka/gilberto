@@ -17,7 +17,8 @@ ROUTES = {"rss": "utility-fetch-rss", "atom": "utility-fetch-rss", "http": "util
 FALLBACKS = ("mcp", "none")
 TIMEOUT = 120
 _FENCE = re.compile(r"^```ya?ml[ \t]*\n(.*?)^```[ \t]*$", re.S | re.M)
-_TOP = re.compile(r'^(?:"([^"\n]+)"|(https?://\S+?)):[ \t]*$')
+_TOP = re.compile(r'^(?:("(?:[^"\\\n]|\\.)*")|(https?://\S+?)):[ \t]*$')
+_SLUG = re.compile(r"[a-z0-9][a-z0-9-]{0,63}")
 _KV = re.compile(r"^[ \t]+([a-z_][a-z0-9_-]*):[ \t]*(.*?)[ \t]*$")
 
 
@@ -36,7 +37,10 @@ def _entries(text):
             top = _TOP.match(line)
             kv = _KV.match(line)
             if top:
-                cur = [top.group(1) or top.group(2), {}]
+                try:
+                    cur = [json.loads(top.group(1)) if top.group(1) else top.group(2), {}]
+                except ValueError:
+                    cur = [None, None]
                 out.append(cur)
             elif kv and cur and cur[1] is not None:
                 cur[1][kv.group(1)] = _scalar(kv.group(2))
@@ -93,6 +97,18 @@ def _script(name, env):
             return path
 
 
+def _integration(root, key, profile):
+    if not _SLUG.fullmatch(key):
+        return None
+    rels = [f"{key}.md"]
+    if not profile or _SLUG.fullmatch(profile):
+        rels.insert(0, f"{key}/{profile or 'default'}.md")
+    for rel in rels:
+        path = vault_io.resolve(root, f"anatomy/integrations/{rel}")
+        if os.path.isfile(path):
+            return path
+
+
 def _fallback(entry, integration):
     value = entry.get("fallback")
     if value is None and integration:
@@ -133,8 +149,7 @@ def dispatch(root, entry, env):
     key = entry["provider"] if by_provider else entry["type"]
     name = (not by_provider and ROUTES.get(key)) or f"utility-{key}-read"
     path = _script(name, env)
-    integration = vault_io.resolve(root, f"anatomy/integrations/{key}.md") if re.fullmatch(r"[a-z0-9][a-z0-9-]{0,63}", key) else None
-    integration = integration if integration and os.path.isfile(integration) else None
+    integration = _integration(root, key, entry.get("profile"))
     if not (path or integration or entry.get("fallback")):
         raise MechanicError("UNKNOWN_PROVIDER" if by_provider else "UNKNOWN_TYPE", **{"provider" if by_provider else "type": key})
     if path:
