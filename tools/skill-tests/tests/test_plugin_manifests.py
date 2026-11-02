@@ -1,5 +1,4 @@
 import json
-import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -10,7 +9,6 @@ ROOT = Path(__file__).resolve().parents[3]
 PLUGIN_DIR = ROOT / "plugins" / "gilberto-core"
 PLUGIN_JSON = PLUGIN_DIR / ".claude-plugin" / "plugin.json"
 MARKETPLACE_JSON = ROOT / ".claude-plugin" / "marketplace.json"
-SEMVER = re.compile(r"^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$")
 
 
 def load(path):
@@ -20,7 +18,7 @@ def load(path):
 def test_plugin_json_fields():
     p = load(PLUGIN_JSON)
     assert p["name"] == "gilberto-core"
-    assert SEMVER.match(p["version"])
+    assert "version" not in p  # unpinned: tracks the commit (ADL 2026-11-02-release-process)
     assert p["description"].strip()
 
 

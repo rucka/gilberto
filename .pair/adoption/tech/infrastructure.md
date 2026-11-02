@@ -11,14 +11,14 @@
 
 - GitHub Actions
 - `ci.yml` on PR + main: install · type-check · lint · format-check · test · build
-- `release.yml` on tag: build CLI · npm publish · website deploy · changelog · append to website Releases index
+- `version.yml` (dispatch: channel pre/rc/final) → version + tag → dispatches `release.yml` (build from tag · npm publish · GitHub Release · smoke) — [ADL](../decision-log/2026-11-02-release-process.md)
 - Cache: pnpm store + turbo
 - Merge gate: `pnpm quality-gate`
 
 ## Release & Distribution
 
-- SemVer via Changesets
-- CLI on npm as `gilberto`
+- SemVer via Changesets; release dispatch-only
+- CLI on npm as `gilberto` + `@foomakers/gilberto-vault-bootstrap` (fixed group): finals on `latest`, pre/rc on `next`
 - Website auto-deploys on tag (Vercel)
 - Marketplaces: Claude Code (primary) · self-hosted `marketplace.json` · skills.sh · Codex (best-effort)
 - Alt installers post-v1: `curl ... | sh`, Homebrew

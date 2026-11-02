@@ -5,10 +5,10 @@ Workspace for the `gilberto` binary. `pnpm --filter gilberto build` emits `dist/
 ## Install (alpha)
 
 ```bash
-npx gilberto@next --version
+npx gilberto --version
 ```
 
-Requires Node ≥ 22.12. Published on npm tag `next`.
+Requires Node ≥ 22.12. Finals on npm `latest`, pre/rc on `next`.
 
 ## Layout
 

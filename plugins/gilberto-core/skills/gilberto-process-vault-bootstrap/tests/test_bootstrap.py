@@ -45,7 +45,7 @@ def fake(monkeypatch):
 def test_ac1_no_cli_uses_npx(fake, capsys):
     sp = fake()
     assert mod.main(["--target-path=/v"], {}, "darwin") == 0
-    assert sp[0][:3] == ["npx", "-y", "gilberto@latest"] and sp[0][3:5] == ["install", "/v"] and "--non-interactive" in sp[0]
+    assert sp[0][:3] == ["npx", "-y", "gilberto@>=0.1.0-0 <2"] and sp[0][3:5] == ["install", "/v"] and "--non-interactive" in sp[0]
 
 
 def test_ac2_global_cli_direct(fake):
@@ -63,10 +63,17 @@ def test_npm_global_fallback(fake):
 def test_ac3_version_below_range(fake, capsys):
     sp = fake(which="/g", version="0.0.9")
     assert mod.main([], {}, "darwin") == 64 and not sp
-    assert "installed gilberto version 0.0.9 is below required >=0.1.0 <2; upgrade with `npm i -g gilberto@latest` or rerun via `npx gilberto@latest`" in capsys.readouterr().err
+    assert "installed gilberto version 0.0.9 is below required >=0.1.0-0 <2; upgrade with `npm i -g 'gilberto@>=0.1.0-0 <2'` or rerun via `npx 'gilberto@>=0.1.0-0 <2'`" in capsys.readouterr().err
     sp = fake(which="/g", version="0.0.9")
     mod.main(["--confirm=npx"], {}, "darwin")
     assert sp[0][0] == "npx"
+
+
+@pytest.mark.parametrize("v", ["0.1.0-pre.0", "0.1.0-rc.2", "0.1.0"])
+def test_release_channels_in_range(fake, v):
+    sp = fake(which="/g", version=v)
+    mod.main([], {}, "darwin")
+    assert sp[0][0] == "/g"
 
 
 def test_version_above_range(fake):
@@ -145,7 +152,7 @@ def test_ac10_local_bin_ignored(tmp_path, monkeypatch):
     monkeypatch.setenv("PATH", env["PATH"])
     monkeypatch.setattr(mod, "run", lambda argv, **kw: SimpleNamespace(stdout="{}", stderr="", returncode=0))
     cli = mod.detect(env)
-    assert cli["source"] == "npx" and cli["argv"] == ["npx", "-y", "gilberto@latest"]
+    assert cli["source"] == "npx" and cli["argv"] == ["npx", "-y", "gilberto@>=0.1.0-0 <2"]
 
 
 def test_no_fs_mutation(fake, tmp_path, monkeypatch):
@@ -160,6 +167,8 @@ def test_skill_frontmatter_and_manifest():
     fm = (HERE / "SKILL.md").read_text().split("---")[1]
     kv = dict(l.split(": ", 1) for l in fm.strip().splitlines())
     assert kv["name"] == HERE.name and re.fullmatch(r"gilberto-process-[a-z]+-[a-z]+", kv["name"])
-    assert kv["description"] and kv["requires"] == "gilberto@>=0.1.0 <2"
+    assert kv["description"] and kv["requires"] == "gilberto@>=0.1.0-0 <2"
     manifest = json.loads((HERE.parent.parent / ".claude-plugin" / "plugin.json").read_text())
     assert f"./skills/{kv['name']}" in manifest["skills"]
+    # no pinned version: Claude Code falls back to the git SHA (ADL 2026-11-02-release-process)
+    assert "version" not in manifest

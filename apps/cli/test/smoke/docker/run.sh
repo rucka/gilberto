@@ -19,7 +19,7 @@ PATH="$work/bin:$PATH" python3 "$skill" --target-path="$work/v" --seed-topics='i
   --disable-launchd >"$work/out" 2>"$work/err"
 assert_exit 1 $? "skill (npx, offline)"
 log=$(cat "$work/npx.log" 2>/dev/null)
-assert_contains "$log" "-y gilberto@latest install $work/v" "npx argv"
+assert_contains "$log" "-y gilberto@>=0.1.0-0 <2 install $work/v" "npx argv"
 assert_contains "$log" "--non-interactive" "npx argv"
 assert_contains "$(cat "$work/err")" "npm registry unreachable; install gilberto manually" "skill stderr"
 assert_absent "$work/v"

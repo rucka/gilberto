@@ -169,10 +169,13 @@ No `Effort` field — story points live in story body.
 
 ## Release
 
-- Changesets (`@changesets/cli`)
-- Flow: `pnpm changeset` → version on merge → tag → `release.yml` (npm publish + website deploy + release notes)
-- SemVer; on-demand cadence
-- Hotfix: branch off main → fix → fast-track tag
+- Changesets (`@changesets/cli`), no pre mode; every user-facing PR carries `.changeset/<story>.md`
+- Dispatch-only, never merge-triggered: `gh workflow run version.yml -f channel=<pre|rc|final> [-f version=X.Y.Z]` → `version.yml` (changeset version, `scripts/release-plan.js`, tag) → dispatches `release.yml` (quality gate, pack check, `scripts/publish.js`, GitHub Release, smoke)
+- Channels forward-only `pre` → `rc` → `final`, skippable: pre/rc `X.Y.Z-<ch>.N` on npm `next`, ephemeral commit + tag only; final `X.Y.Z` on npm `latest`, version commit + CHANGELOG on `main`
+- Fixed group `gilberto` + `@foomakers/gilberto-vault-bootstrap`; plugin manifests unversioned (track the commit)
+- SemVer, 0.x: breaking → minor; on-demand cadence
+- Hotfix: branch off main → fix + changeset → merge → dispatch `final`
+- Decision: [ADL 2026-11-02-release-process](../decision-log/2026-11-02-release-process.md)
 
 ## Definition of Done
 

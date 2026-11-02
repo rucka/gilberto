@@ -9,7 +9,9 @@ import signal
 import subprocess
 import sys
 
-REQUIRES = ">=0.1.0 <2"
+REQUIRES = ">=0.1.0-0 <2"
+# npm resolves a range to `latest` when it satisfies, else the highest match (incl. pre/rc on `next`)
+SPEC = f"gilberto@{REQUIRES}"
 DOCS_URL = "https://github.com/rucka/gilberto/blob/main/apps/website/content/docs/getting-started/install.mdx"
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 NET_ERR = re.compile(r"ENOTFOUND|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|ECONNRESET|^npm (?:error|ERR!) network", re.I | re.M)
@@ -57,7 +59,7 @@ def detect(env):
             return {"argv": [os.path.join(prefix, "bin", "gilberto")], "version": parse_version(ver), "source": "npm-global"}
     except (OSError, ValueError):
         pass
-    return {"argv": ["npx", "-y", "gilberto@latest"], "version": None, "source": "npx"}
+    return {"argv": ["npx", "-y", SPEC], "version": None, "source": "npx"}
 
 
 def build_flags(a, platform):
@@ -137,9 +139,9 @@ def main(argv, env=None, platform=None):
     if cli["source"] != "npx" and not in_range(cli["version"]):
         got = ".".join(map(str, cli["version"])) if cli["version"] else "unknown"
         rel = "below" if cli["version"] and cli["version"] < (0, 1, 0) else "outside"
-        c = choose(a, f"installed gilberto version {got} is {rel} required {REQUIRES}; upgrade with `npm i -g gilberto@latest` or rerun via `npx gilberto@latest`")
+        c = choose(a, f"installed gilberto version {got} is {rel} required {REQUIRES}; upgrade with `npm i -g '{SPEC}'` or rerun via `npx '{SPEC}'`")
         if c == "upgrade":
-            r = run(["npm", "i", "-g", "gilberto@latest"], env=env)
+            r = run(["npm", "i", "-g", SPEC], env=env)
             if r.returncode:
                 print(r.stderr, file=sys.stderr)
                 return r.returncode
@@ -149,7 +151,7 @@ def main(argv, env=None, platform=None):
                 print(f"after upgrade gilberto version {got} is still outside required {REQUIRES}", file=sys.stderr)
                 return 64
         elif c == "npx":
-            cli = {"argv": ["npx", "-y", "gilberto@latest"], "version": None, "source": "npx"}
+            cli = {"argv": ["npx", "-y", SPEC], "version": None, "source": "npx"}
         else:
             print("re-run with --confirm=upgrade or --confirm=npx", file=sys.stderr)
             return 64
