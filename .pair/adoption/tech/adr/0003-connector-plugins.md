@@ -77,6 +77,18 @@ Source: `plugins/connector-<family>/` (marketplace plugins per ADR-0002). Enable
 - Unattended runs (launchd/cron) never perform external writes: proposed actions land in `journey/tasks.md` as pending confirmation, approved via `next`. `auto_write` allowlists specific ops per provider (e.g. `calendar:create-event`), never message sends.
 - Sources (what to pull, when) stay in `anatomy/playbooks/<pillar>/sources/` and reference a connector by `provider:`.
 
+### Connector profiles (amendment 2026-11-02)
+
+Same provider, several accounts (e.g. Gmail work vs personal, several Vercel teams).
+
+- Profile = named configuration `<provider>:<profile>` (e.g. `google:learnn`, `google:personal`). Config: `anatomy/integrations/<provider>/<profile>.md` (accounts, scopes, `fallback`, `auto_write`). Single-profile setups use profile `default`.
+- Secrets per profile: keychain `gilberto/<provider>/<profile>`; fallback `~/.config/gilberto/secrets/<provider>/<profile>.env`. Export/import bundles carry profiles.
+- Global default: `preferences.md > ## Integrations` (`google: personal`).
+- Context binding: any folder note (project, scope per ADR-0004, pillar) declares `connectors: {google: learnn, slack: learnn}` in frontmatter.
+- Resolution: explicit profile in the call > nearest folder note walking up from the target path > global default > error (`profile-unresolved`), never a guess.
+- Provenance: ingested notes carry `source_profile: <provider>:<profile>`.
+- Sources reference `provider:` and optionally `profile:`; omitted → resolved as above.
+
 ## Consequences
 
 - New epic "Connector framework" (contract, resolution, secrets, dispatcher wiring) in Initiative #2, before #11 ingest beyond RSS.
