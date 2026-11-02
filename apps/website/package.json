@@ -1,0 +1,43 @@
+{
+  "name": "@gilberto/website",
+  "version": "0.0.0",
+  "private": true,
+  "description": "gilberto documentation website (Fumadocs)",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "postinstall": "fumadocs-mdx",
+    "test": "vitest run",
+    "ts:check": "fumadocs-mdx && tsc --noEmit",
+    "lint": "eslint . --config eslint.config.cjs",
+    "lint:fix": "eslint . --config eslint.config.cjs --fix"
+  },
+  "dependencies": {
+    "@types/mdx": "catalog:",
+    "fumadocs-core": "catalog:",
+    "fumadocs-mdx": "catalog:",
+    "fumadocs-ui": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@gilberto/eslint-config": "workspace:*",
+    "@gilberto/ts-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "autoprefixer": "catalog:",
+    "eslint": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "prettier": "@gilberto/prettier-config"
+}

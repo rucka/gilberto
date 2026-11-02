@@ -23,3 +23,7 @@ CHANGELOG.md
 **/.pair/.skill-name-map.json
 **/.pair/adoption/tech/workflow-profiles/
 **/.pair/working/
+
+# fumadocs/next generated
+.source/
+next-env.d.ts
