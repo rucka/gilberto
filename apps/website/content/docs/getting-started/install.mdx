@@ -17,8 +17,8 @@ Answer the in-chat prompts (target path, topic seeds). Arguments you already gav
 
 The skill is a thin orchestrator. It never writes to the vault, `.claude/` or `~/Library/LaunchAgents/`. It:
 
-- detects the CLI: `which gilberto` → `npm ls -g gilberto --depth=0` → fallback `npx gilberto@latest` (project-local `node_modules/.bin` ignored);
-- checks the version against `>=0.1.0 <2`; on mismatch asks `upgrade` or `npx`, never proceeds silently;
+- detects the CLI: `which gilberto` → `npm ls -g gilberto --depth=0` → fallback `npx 'gilberto@>=0.1.0-0 <2'` (npm picks `latest` when it satisfies, else the newest matching pre/rc) (project-local `node_modules/.bin` ignored);
+- checks the version against `>=0.1.0-0 <2` (finals and the `0.1.0` pre/rc ladder); on mismatch asks `upgrade` or `npx`, never proceeds silently;
 - always runs `gilberto install <target> --non-interactive`; adds `--no-launchd` on non-macOS hosts;
 - reports a summary (target, pillars, anatomy seeds, hooks, launchd); `verbose` appends the CLI output.
 
@@ -29,12 +29,12 @@ If the npm registry is unreachable during the npx fallback, the skill exits non-
 ## Path B — CLI-direct
 
 ```bash
-npx gilberto@next install ~/vault
+npx gilberto install ~/vault
 # or
-npm i -g gilberto@next && gilberto install ~/vault
+npm i -g gilberto && gilberto install ~/vault
 ```
 
-Interactive by default; pass `--non-interactive` for scripts. The alpha is published on npm tag `next` (`0.x`).
+Interactive by default; pass `--non-interactive` for scripts. Finals publish on npm `latest`; pre/rc (`X.Y.Z-pre.N`, `-rc.N`) on `next` — use `gilberto@next` to try one.
 
 ### Flags
 

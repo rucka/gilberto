@@ -16,7 +16,7 @@ The alpha pipeline used Changesets pre mode (`next`) and a push-triggered `versi
 - **pre/rc**: ephemeral commit, tag-only push, npm dist-tag `next`, GitHub prerelease; must not move an existing `latest`. **final**: version commit + CHANGELOG on `main`, tag, npm `latest`, GitHub latest release.
 - **Every user-facing PR carries a changeset**; changesets accumulate on `main` until a final consumes them.
 - **Plugin manifests carry no `version`** (pair's marketplace ADL): Claude Code falls back to the commit SHA, so a hand-kept number never strands users.
-- **Skill range `>=0.1.0-0 <2`**: admits the `0.1.0` pre/rc ladder in strict SemVer, matching the skill's parser (compares `X.Y.Z`, ignores suffix).
+- **Skill range `>=0.1.0-0 <2`**: admits the `0.1.0` pre/rc ladder in strict SemVer, matching the skill's parser (compares `X.Y.Z`, ignores suffix). The npx fallback and upgrade use the same range as spec (`gilberto@>=0.1.0-0 <2`), not `@latest`: npm picks `latest` when it satisfies, else the newest matching pre/rc on `next` — one source of truth for channel and requirement.
 
 ### Adapted from pair, not copied
 
