@@ -168,6 +168,12 @@ describe('launchd', () => {
     expect(s).not.toContain('RunAtLoad')
   })
 
+  it('ingest-watch dispatches gilberto-process-ingest', () => {
+    expect(read('launchd/ingest-watch.plist')).toMatch(
+      /dispatch\.sh<\/string>\s*<string>gilberto-process-ingest<\/string>/,
+    )
+  })
+
   it('ingest-watch watches _ingest', () => {
     expect(read('launchd/ingest-watch.plist')).toMatch(
       /<key>WatchPaths<\/key>\s*<array>\s*<string>\{\{VAULT_ROOT\}\}\/_ingest<\/string>/,
