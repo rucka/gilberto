@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "getting-started",
+    "concepts",
+    "use-cases",
+    "a-day-with-gilberto",
+    "---Reference---",
+    "reference"
+  ]
+}

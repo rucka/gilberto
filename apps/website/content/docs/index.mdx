@@ -1,0 +1,32 @@
+---
+title: What is gilberto
+description: A personal AI-native second brain — a markdown vault on your filesystem, operated by portable skills.
+---
+
+gilberto is a **second brain you own**: a folder of markdown + JSON files (the *vault*) plus a set of skills that any AI assistant (Claude Code, Codex, …) can run on any model to capture, structure, surface and reflect on your information. No cloud backend, no lock-in.
+
+> **Status: alpha.** The installer and the vault mechanics are available; the daily processes (ingest, surface, reflect, …) are **Planned**. Every page marks planned parts with the issue that tracks them.
+
+## Two worlds: repo vs vault
+
+| | What | Runs |
+| --- | --- | --- |
+| **Repo** `rucka/gilberto` | source only: CLI, vault content package, plugins | never as an instance |
+| **Vault** `$GILBERTO_ROOT` | your data + anatomy + `.claude/skills/` | self-sufficient at runtime ([ADR-0001](https://github.com/rucka/gilberto/blob/main/.pair/adoption/tech/adr/0001-vault-self-sufficiency.md)) |
+
+The `gilberto` CLI is install/update tooling only. After install, everything runs from the vault.
+
+## The building blocks
+
+- **Pillars** — `me/`, `pulse/` (health & life signals), `projects/`, `intelligence/` (knowledge), `journey/` (days and tasks), plus the transversal `network/` (people, companies). See [Vault](/docs/concepts/vault).
+- **Anatomy** — `anatomy/`, the vault's operating manual: structure rules, topics, types, templates, playbooks, preferences. See [Skills & anatomy](/docs/concepts/skills-and-anatomy).
+- **Topics** — horizontal subjects (`ai`, `health`, …) registered in `anatomy/topics.md`.
+- **Scopes** — optional vertical contexts (an employer, a venture). See [Scopes & topics](/docs/concepts/scopes-and-topics).
+- **Skills** — process · capability · utility · mechanic. Shipped today: the bootstrap process and 9 mechanics. See [Skills catalog](/docs/reference/skills).
+- **Connectors** — opt-in plugins per provider family (Google, media, Slack, …). **Planned**. See [Connectors](/docs/concepts/connectors).
+
+## Next
+
+- [Install](/docs/getting-started/install)
+- [Use cases](/docs/use-cases)
+- [A day with gilberto](/docs/a-day-with-gilberto)

@@ -1,0 +1,30 @@
+---
+title: Vault
+description: Filesystem-as-database — pillars, network, anatomy.
+---
+
+The vault is a plain folder, navigable in Obsidian or any markdown editor (folder-notes, wikilinks, consistent frontmatter).
+
+```text
+$GILBERTO_ROOT/
+├── me/me.md                                 person (single)
+├── network/{people,companies}/              one entity per person/company
+├── pulse/<topic>/ + history/                health & life signals
+├── journey/YYYY/MM/YYYY-MM-DD.md + tasks.md one day; single task registry
+├── projects/ intelligence/ journal/         root pillars
+├── scopes/<scope>/                          optional (layout: folder)
+├── _ingest/                                 drop zone
+├── anatomy/                                 operating manual
+└── .claude/{settings.json,skills/}
+```
+
+## Entities
+
+An entity is either a **file** (`<pillar>/<name>.md`) or a **folder-note** (`<pillar>/<name>/<name>.md`, room for sub-content). Switch with [promote / collapse](/docs/use-cases/promote-and-collapse); wikilinks keep resolving because the name is preserved.
+
+Frontmatter: `type` (`<scope>-<role>`, or `person` / `company`), `topics`, `created`, `updated`, plus fields from the type schema.
+
+## Constraints
+
+- Data never leaves the filesystem unless user-initiated.
+- Single user, single vault. Skills idempotent; snapshot before destructive ops; fork-on-write upgrades.

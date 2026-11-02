@@ -1,0 +1,35 @@
+---
+title: A day with gilberto
+description: The target experience, step by step — what works today and what is planned.
+---
+
+> **Target experience.** Most of this day depends on process skills that are **Planned**. Each step is labeled. Available today: the install wiring (hooks + plists) and the mechanics that shape the vault.
+
+## 07:00 — Morning briefing · Planned
+
+launchd fires `com.foomakers.gilberto.morning-briefing`, which runs `claude -p "/gilberto-process-surface morning-briefing"`. Surface reads `anatomy/playbooks/surface/morning-briefing.md` and writes a briefing into today's `journey/YYYY/MM/YYYY-MM-DD.md`: calendar, open tasks, what is new per topic.
+
+- Available: plist written at install (not loaded); playbook can be authored with `mechanic-forge-playbook`.
+- Planned: surface process [#13](https://github.com/rucka/gilberto/issues/13), calendar via `connector-google` [#27](https://github.com/rucka/gilberto/issues/27).
+
+## 09:00 — Open a session · Planned
+
+Claude Code starts in the vault; the SessionStart hook runs `/gilberto-process-next` to suggest what to work on. Disable with `- session-start: off` in `anatomy/preferences.md`.
+
+- Available: hook installed (exits 0 with `skill not installed` until the skill exists).
+- Planned: next process [#20](https://github.com/rucka/gilberto/issues/20).
+
+## During the day — Capture · partly available
+
+- Drop a PDF or link into `_ingest/`; the `ingest` launchd job (WatchPaths) runs `/gilberto-process-ingest`, which classifies it into a pillar with a sidecar. **Planned** [#70](https://github.com/rucka/gilberto/issues/70), [#74](https://github.com/rucka/gilberto/issues/74).
+- Met someone new, started a side project, a new interest? Shape the vault now: `mechanic-forge-topic`, `mechanic-vault-new`, `mechanic-vault-promote`. **Available.**
+- Found a blog worth following: `mechanic-forge-source`. Register **available**; periodic fetch **Planned** [#11](https://github.com/rucka/gilberto/issues/11).
+- Long session compacts: PreCompact hook runs `/gilberto-process-capture` to snapshot it. Hook **available**, skill **Planned**.
+
+## 22:00 — Reflect on the day · Planned
+
+The `reflect-day` plist (and the first SessionEnd of the day) runs `/gilberto-process-reflect day`: fills the `## Summary` of today's journey with a cross-pillar summary and proposes anatomy evolutions (new topics, silence rules). Tracked in [#13](https://github.com/rucka/gilberto/issues/13).
+
+## Sunday · monthly · yearly — Planned
+
+`reflect week` (Sun 22:00), monthly (1st), yearly (Jan 1). Cadences overridable in `anatomy/preferences.md > ## Cadences`. Jobs land with the reflect process and Linux timers with Initiative [#5](https://github.com/rucka/gilberto/issues/5).

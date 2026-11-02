@@ -1,0 +1,29 @@
+---
+title: Bootstrap a vault
+description: From zero to a working vault, from the chat or the terminal.
+---
+
+## From Claude Code
+
+```text
+/plugin marketplace add rucka/gilberto
+/plugin install gilberto-core@gilberto
+/gilberto-process-vault-bootstrap
+> target ~/vault, seed intelligence with ai and product, pulse with health
+```
+
+The skill runs:
+
+```bash
+gilberto install ~/vault --non-interactive --seed-topics "intelligence=ai,product;pulse=health"
+```
+
+## From the terminal
+
+```bash
+npx gilberto@next install ~/vault --seed-topics "intelligence=ai,product;pulse=health"
+```
+
+## Result
+
+Pillars with one folder-note per seeded topic, `anatomy/` seeds, Claude Code hooks, and (macOS) three launchd plists written but not loaded. See [What install writes](/docs/getting-started/what-install-writes). Re-running on an existing vault exits `2` and changes nothing.

@@ -1,0 +1,18 @@
+---
+title: Capture a source
+description: Register a feed, channel or device as an ingestion source.
+---
+
+```text
+/mechanic-forge-source
+> follow https://simonwillison.net/atom/everything/ daily into intelligence/ai
+```
+
+```bash
+python3 script.py --type=atom --url=https://simonwillison.net/atom/everything/ \
+  --cadence=daily --target-pillar=intelligence --target-topic=ai
+```
+
+Appends a YAML block keyed by url to `anatomy/playbooks/intelligence/sources/core.md`. Dedup by normalized url. Plugins pass `--contributor=<plugin>` to write their own file.
+
+> **Planned** — actually fetching registered sources (`gilberto-capability-fetch`, RSS utility) and dropping files in `_ingest/` for classification: [#11](https://github.com/rucka/gilberto/issues/11), [#70](https://github.com/rucka/gilberto/issues/70), [#71](https://github.com/rucka/gilberto/issues/71), [#72](https://github.com/rucka/gilberto/issues/72).

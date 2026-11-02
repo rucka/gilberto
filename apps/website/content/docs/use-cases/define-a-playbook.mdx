@@ -1,0 +1,20 @@
+---
+title: Define a playbook
+description: Declare what happens on an event — triggers and the skills to dispatch.
+---
+
+```text
+/mechanic-forge-playbook
+> on surface "morning-briefing" at 07:00, dispatch to gilberto-capability-journey-summarize
+```
+
+```bash
+python3 script.py --event=morning-briefing --domain=surface --mode=core \
+  --frontmatter='{"triggers":[{"cron":"0 7 * * *"}],"dispatch_to":["gilberto-capability-journey-summarize"],"silence_learned":[]}'
+```
+
+Writes `anatomy/playbooks/surface/morning-briefing.md` with validated frontmatter and a placeholder body. A plugin uses `--mode=contributor --contributor=<plugin>` → `anatomy/playbooks/surface/morning-briefing/<plugin>.md`, leaving other files untouched.
+
+Triggers: single-key objects `cron` · `keyword` · `file` · `event`. Domains: `ingest structure surface act reflect next`. The mechanic does not check that dispatched skills exist.
+
+> **Planned** — the process skills that read playbooks and dispatch (surface, reflect, …): [#13](https://github.com/rucka/gilberto/issues/13), [#20](https://github.com/rucka/gilberto/issues/20). The skill name above is illustrative.

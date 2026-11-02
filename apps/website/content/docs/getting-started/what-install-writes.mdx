@@ -1,0 +1,50 @@
+---
+title: What install writes
+description: File-level detail of wizard steps 4-8.
+---
+
+Steps 1-3 never write. Steps 4-6 write only inside `$TMPDIR/gilberto-install-<pid>/`, then a single rename moves it to the target (cross-device: copy to a sibling staging dir, then rename). Any failure or Ctrl+C removes the temp dir and leaves the target untouched.
+
+## Step 4 — skeleton
+
+```text
+me/me.md  journey/journey.md  network/network.md  network/{people,companies}/
+pulse/pulse.md  pulse/<topic>/<topic>.md  pulse/<topic>/history/
+intelligence/intelligence.md  intelligence/<topic>/<topic>.md
+projects/projects.md  projects/<topic>/<topic>.md
+_ingest/.gitkeep  anatomy/  .claude/skills/  CLAUDE.md
+```
+
+Folder-notes come from `@foomakers/gilberto-vault-bootstrap` templates; topics from step 3.
+
+## Step 5 — plugins
+
+Prints the bundled first-party plugins, one line each. Info only: no prompt, no install. Plugin install is **Planned** ([#15](https://github.com/rucka/gilberto/issues/15)).
+
+## Step 6 — anatomy
+
+Copies `seed/anatomy/` from the vault-bootstrap package into `anatomy/`. In `.md` files the date placeholder becomes the install date; one row per seeded topic is appended to `topics.md`.
+
+## Step 7 — Claude Code hooks
+
+JSON-merges three hooks into `.claude/settings.json` (atomic), dispatchers in `.claude/hooks/`. Your keys and hooks are preserved; a gilberto hook already pointing elsewhere triggers a `settings.json.bak-<ISO8601>` backup, then overwrite.
+
+| Hook id | Event | Runs |
+| --- | --- | --- |
+| `gilberto.session-start` | SessionStart | `/gilberto-process-next` (off via `- session-start: off` in `anatomy/preferences.md`) |
+| `gilberto.pre-compact` | PreCompact | `/gilberto-process-capture` |
+| `gilberto.session-end` | SessionEnd | `/gilberto-process-reflect day` (first end of the day) |
+
+The target skills are **Planned** ([#20](https://github.com/rucka/gilberto/issues/20), [#13](https://github.com/rucka/gilberto/issues/13)). Until they exist, dispatchers exit 0 and log `skill not installed: <skill>`.
+
+## Step 8 — launchd (macOS)
+
+Three plists in `~/Library/LaunchAgents/`, `RunAtLoad=false`, linted with `plutil`, never loaded:
+
+| Label | When | Runs |
+| --- | --- | --- |
+| `com.foomakers.gilberto.morning-briefing` | 07:00 | `/gilberto-process-surface morning-briefing` |
+| `com.foomakers.gilberto.reflect-day` | 22:00 | `/gilberto-process-reflect day` |
+| `com.foomakers.gilberto.ingest` | on change in `<vault>/_ingest/` | `/gilberto-process-ingest` |
+
+Jobs run `claude -p` (resolved from `PATH` at install). Each process skill will activate its own job when installed (**Planned**: ingest [#70](https://github.com/rucka/gilberto/issues/70), surface/reflect [#13](https://github.com/rucka/gilberto/issues/13)). Re-run install after moving `claude`.

@@ -1,0 +1,46 @@
+---
+title: CLI
+description: gilberto install / update / status / plugin.
+---
+
+The CLI (`npm: gilberto`) is install/update tooling only; the vault never needs it at runtime.
+
+## Global options
+
+| Option | Effect |
+| --- | --- |
+| `-V`, `--version` | print version |
+| `--log-level <level>` | `debug` · `info` · `warn` · `error` |
+| `-v`, `--verbose` | alias of `--log-level debug` (deprecated) |
+| `--no-banner` | suppress the banner |
+| `--json` | structured output (suppresses the banner) |
+
+## `gilberto install [target]` — available
+
+Bootstrap a vault. Flags, wizard steps and exit codes: [Install](/docs/getting-started/install).
+
+```bash
+gilberto install ~/vault --seed-topics "intelligence=ai,product;pulse=health"
+gilberto install ~/vault --non-interactive --no-launchd
+```
+
+## `gilberto update` — Planned
+
+Propagate framework updates to the vault with fork-on-write. Option: `--dry-run`. Placeholder today; tracked in [#25](https://github.com/rucka/gilberto/issues/25).
+
+## `gilberto status` — Planned
+
+Report installed vault state and drift from the release (inactive launchd jobs, dangling links, unscoped entities). Structured output via global `--json`. Placeholder today; tracked in [#25](https://github.com/rucka/gilberto/issues/25).
+
+## `gilberto plugin <action>` — Planned
+
+Placeholder today; tracked in [#15](https://github.com/rucka/gilberto/issues/15). Bare `gilberto plugin` prints help.
+
+| Action | Usage | Options |
+| --- | --- | --- |
+| `list` | `gilberto plugin list` | |
+| `enable` | `gilberto plugin enable <name>` | |
+| `disable` | `gilberto plugin disable <name>` | |
+| `install` | `gilberto plugin install <source>` | `--force` overwrite existing |
+| `update` | `gilberto plugin update [name]` | `--dry-run` |
+| `remove` | `gilberto plugin remove <name>` | `--purge` also delete plugin data |
