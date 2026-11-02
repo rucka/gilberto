@@ -43,3 +43,28 @@ def source(fetch):
         return f
 
     return write
+
+
+FAKE = """import json, os, sys
+open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "args.json"), "w").write(json.dumps(sys.argv[1:]))
+sys.stderr.write({stderr!r})
+print({stdout!r})
+sys.exit({code})
+"""
+
+
+@pytest.fixture
+def utility(tmp_path):
+    """utility(name, items=None, code=0, stdout=None, stderr='') installs a fake utility; -> dir it lives under (GILBERTO_UTILITY_PATH)."""
+    base = tmp_path / "utilities"
+
+    def install(name, items=(), code=0, stdout=None, stderr=""):
+        d = base / name
+        d.mkdir(parents=True, exist_ok=True)
+        out = json.dumps({"items": list(items)}) if stdout is None else stdout
+        (d / "script.py").write_text(FAKE.format(stdout=out, stderr=stderr, code=code))
+        return str(base)
+
+    install.args = lambda name: json.loads((base / name / "args.json").read_text())
+    install.path = str(base)
+    return install
