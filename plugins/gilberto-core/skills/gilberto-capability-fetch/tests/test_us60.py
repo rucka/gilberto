@@ -63,3 +63,32 @@ def test_fallbacks_still_skipped_with_resolved_profile(fetch, source, utility):
     code, out, _ = run(fetch, utility)
     assert code == 0 and [s["reason"] for s in out["skipped"]] == ["mcp-fallback", "manual"]
     assert "_ingest/" in out["skipped"][1]["hint"]
+
+
+def test_omitted_profile_resolved_for_integration_lookup_and_mcp_request(fetch, source, utility):
+    put(fetch.root, "anatomy/integrations/slack/work.md", "---\ntype: integration\nfallback: mcp\n---\n")
+    put(fetch.root, "anatomy/preferences.md", "## Integrations\n\nslack: work\n")
+    source("intelligence", "core", block("https://m.example/s", provider="slack"))
+    code, out, _ = run(fetch, utility)
+    assert code == 0 and out.get("errors", []) == []
+    assert [(s["reason"], s["profile"]) for s in out["skipped"]] == [("mcp-fallback", "work")]
+
+
+def test_omitted_profile_no_utility_folder_note_beats_preferences_and_flat_layout(fetch, source, utility):
+    put(fetch.root, "intelligence/intelligence.md", "---\nconnectors: {slack: work}\n---\n")
+    put(fetch.root, "anatomy/preferences.md", "## Integrations\n\nslack: personal\n")
+    put(fetch.root, "anatomy/integrations/slack/work.md", "---\ntype: integration\nfallback: mcp\n---\n")
+    put(fetch.root, "anatomy/integrations/slack/personal.md", "---\ntype: integration\nfallback: none\n---\n")
+    put(fetch.root, "anatomy/integrations/slack.md", "---\ntype: integration\nfallback: none\n---\n")
+    source("intelligence", "core", block("https://m.example/s", provider="slack"))
+    code, out, _ = run(fetch, utility)
+    assert code == 0 and out.get("errors", []) == []
+    assert [(s["reason"], s["profile"]) for s in out["skipped"]] == [("mcp-fallback", "work")]
+
+
+def test_omitted_profile_unresolvable_no_utility_falls_through_to_default_layout(fetch, source, utility):
+    put(fetch.root, "anatomy/integrations/slack/default.md", "---\ntype: integration\nfallback: mcp\n---\n")
+    source("intelligence", "core", block("https://m.example/s", provider="slack"))
+    code, out, _ = run(fetch, utility)
+    assert code == 0 and out.get("errors", []) == []
+    assert [s["reason"] for s in out["skipped"]] == ["mcp-fallback"]
