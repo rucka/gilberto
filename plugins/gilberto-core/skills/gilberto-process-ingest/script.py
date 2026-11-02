@@ -20,7 +20,8 @@ SUPPORTED = {".pdf", ".md", ".txt", ".html", ".docx", ".png", ".jpg", ".jpeg"}
 SIDECARS = (".ingest.json", ".error.md", ".classification.json")
 CLASSIFICATION = ".classification.json"
 DEFAULT_THRESHOLD = 0.7
-THRESHOLD_LINE = re.compile(r"^ingest-confidence:[ \t]*(\d+(?:\.\d+)?|\.\d+)[ \t]*$")
+_N = r"(\d+(?:\.\d+)?|\.\d+)"
+THRESHOLD_LINE = re.compile(rf"^(?:[-*][ \t]+)?(?:`ingest-confidence:[ \t]*{_N}`(?:[ \t].*)?|ingest-confidence:[ \t]*{_N}[ \t]*)$")
 LOCK = ".ingest.lock"
 RUN = ".ingest.run"
 
@@ -61,8 +62,9 @@ def _threshold(root, flag):
             in_section = line.strip() == "## Thresholds"
         elif in_section:
             m = THRESHOLD_LINE.match(line.strip())
-            if m and 0.0 <= float(m.group(1)) <= 1.0:
-                return float(m.group(1))
+            v = m and float(m.group(1) or m.group(2))
+            if m and 0.0 <= v <= 1.0:
+                return v
     return DEFAULT_THRESHOLD
 
 
