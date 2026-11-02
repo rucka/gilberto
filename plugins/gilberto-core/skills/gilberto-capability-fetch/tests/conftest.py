@@ -23,6 +23,7 @@ def fetch(capsys, tmp_path, monkeypatch):
     root = tmp_path / "vault"
     root.mkdir()
     mod = load()
+    mod.SKILLS = str(tmp_path / "core-skills")  # hermetic: real core utilities must not shadow fakes
 
     def run(*argv, env=None):
         capsys.readouterr()
