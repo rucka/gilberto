@@ -1,28 +1,37 @@
-name: Version
+name: Version (release dispatch)
 
+# Dispatch-only: a merge never releases. Two runs per release: this one versions + tags,
+# then dispatches release.yml (publish). Mirrors foomakers/pair (ADL 2026-11-02-release-process).
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.changeset/**'
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release channel'
+        required: true
+        type: choice
+        options: [pre, rc, final]
+      version:
+        description: 'Optional base version override (X.Y.Z, > last final)'
+        required: false
+        type: string
 
 permissions:
   contents: write
-  pull-requests: write
+  actions: write
 
 concurrency:
-  group: version-${{ github.workflow }}-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
   version:
-    name: Open version packages PR
+    name: Version, tag, dispatch publish
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Install pnpm
@@ -40,11 +49,49 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Version packages
-        uses: changesets/action@v1
-        with:
-          version: pnpm changeset version
-          commit: 'chore(infra): version packages'
-          title: 'chore(infra): version packages'
+      - name: Version packages and plan
+        id: plan
         env:
+          CHANNEL: ${{ inputs.channel }}
+          OVERRIDE: ${{ inputs.version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git fetch --tags --force origin
+          pnpm changeset version
+          NEW=$(node -p "require('./apps/cli/package.json').version")
+          BASE="${OVERRIDE:-$NEW}"
+          PLAN=$(node scripts/release-plan.js "$CHANNEL" "$BASE")
+          VERSION=$(node -p "JSON.parse(process.argv[1]).version" "$PLAN")
+          # one version for the fixed group, incl. the -pre.N/-rc.N suffix
+          for f in apps/cli/package.json packages/vault-bootstrap/package.json; do
+            node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('$f'));p.version='$VERSION';fs.writeFileSync('$f',JSON.stringify(p,null,2)+'\n')"
+            c="$(dirname "$f")/CHANGELOG.md"
+            [ -f "$c" ] && sed -i "s/^## $NEW\$/## $VERSION/" "$c"
+          done
+          node scripts/release-check.js
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and tag
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          HUSKY=0 git commit -m "chore(infra): release $TAG"
+          git tag -a "$TAG" -m "Release $TAG"
+          if [ "$CHANNEL" = final ]; then
+            HUSKY=0 git push origin main "$TAG"   # version commit + changelog land on main
+          else
+            HUSKY=0 git push origin "$TAG"        # ephemeral commit: tag only, main untouched
+          fi
+
+      - name: Dispatch publish (second run)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: gh workflow run release.yml --ref main -f version="$TAG"

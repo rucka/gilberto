@@ -1,10 +1,11 @@
 name: Release
 
+# Dispatched by version.yml with the release tag; channel derives from the version suffix.
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release tag (e.g., v0.1.0-alpha)'
+        description: 'Release tag (e.g., v0.1.0, v0.1.0-pre.0)'
         required: true
         type: string
 
@@ -13,7 +14,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: release-${{ github.workflow }}
+  group: release-${{ inputs.version }}
   cancel-in-progress: false
 
 jobs:
@@ -27,6 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.version }} # build from the tag, not main
           fetch-depth: 0
 
       - name: Install pnpm
@@ -54,12 +56,18 @@ jobs:
       - name: Pack check
         run: node scripts/pack-check.js
 
-      - name: Release config check (fixed group, pre mode next, engines)
+      - name: Release config check (fixed group, no pre mode, engines)
         run: node scripts/release-check.js
 
       - name: Read published version
         id: version
-        run: echo "version=$(node -p "require('./apps/cli/package.json').version")" >> "$GITHUB_OUTPUT"
+        env:
+          TAG: ${{ inputs.version }}
+        run: |
+          V=$(node -p "require('./apps/cli/package.json').version")
+          [ "v$V" = "$TAG" ] || { echo "::error::tag $TAG != package version $V"; exit 1; }
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          case "$V" in *-*) echo "prerelease=true" >> "$GITHUB_OUTPUT" ;; *) echo "prerelease=false" >> "$GITHUB_OUTPUT" ;; esac
 
       - name: Detect NPM_TOKEN presence
         env:
@@ -78,7 +86,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          node scripts/publish-next.js "$VERSION"
+          node scripts/publish.js "$VERSION"
           echo "published=true" >> "$GITHUB_OUTPUT"
 
       - name: Warn — NPM_TOKEN missing
@@ -90,12 +98,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ inputs.version }}
-          TARGET_SHA: ${{ github.sha }}
+          PRE: ${{ steps.version.outputs.prerelease }}
         run: |
+          FLAGS=()
+          [ "$PRE" = true ] && FLAGS+=(--prerelease --latest=false)
           gh release create "$VERSION" \
             --title "$VERSION" \
             --generate-notes \
-            --target "$TARGET_SHA"
+            --verify-tag "${FLAGS[@]}"
 
   smoke:
     name: Smoke (${{ matrix.os }}, node ${{ matrix.node }})
@@ -113,12 +123,12 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: npx gilberto@next --version
+      - name: npx gilberto@<version> --version
         env:
           EXPECTED: ${{ needs.release.outputs.version }}
         run: |
           for i in 1 2 3 4 5 6; do
-            out="$(npx --yes gilberto@next --version)" && [ "$out" = "$EXPECTED" ] && exit 0
+            out="$(npx --yes "gilberto@$EXPECTED" --version)" && [ "$out" = "$EXPECTED" ] && exit 0
             echo "attempt $i: got '${out:-}', expected '$EXPECTED'"
             sleep 20
           done

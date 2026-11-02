@@ -1,9 +1,10 @@
-// Publishes the fixed group on dist-tag `next`. Not `changeset publish`: in pre mode it rejects
-// --tag and, without it, moves `latest` while only prereleases exist.
+// Publishes the fixed group: prerelease (X.Y.Z-ch.N) on dist-tag `next`, final on `latest`.
+// Not `changeset publish`: the version is set by release-plan.js, and a prerelease must never move `latest`.
 const { execFileSync } = require('node:child_process')
 const { PKGS } = require('./release-check.js')
 
 const version = process.argv[2]
+const tag = version.includes('-') ? 'next' : 'latest'
 const view = (...a) => execFileSync('npm', ['view', ...a], { encoding: 'utf8' }).trim()
 const latest = p => {
   try {
@@ -32,17 +33,17 @@ execFileSync(
     ...PKGS.flatMap(p => ['--filter', p]),
     'publish',
     '--tag',
-    'next',
+    tag,
     '--access',
     'public',
     '--no-git-checks',
   ],
   { stdio: 'inherit' },
 )
-// npm sets `latest` on a package's first publish; an existing `latest` must not move.
-const moved = PKGS.filter(p => before[p] && latest(p) !== before[p])
+// npm sets `latest` on a package's first publish; on a prerelease an existing `latest` must not move.
+const moved = tag === 'next' ? PKGS.filter(p => before[p] && latest(p) !== before[p]) : []
 if (moved.length) {
   console.error(`::error::dist-tag latest moved for ${moved.join(', ')}`)
   process.exit(1)
 }
-console.log(`published ${version} on next`)
+console.log(`published ${version} on ${tag}`)
