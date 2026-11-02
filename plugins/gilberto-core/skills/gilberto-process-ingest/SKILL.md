@@ -21,7 +21,7 @@ Idempotent. Loads the `com.foomakers.gilberto.ingest` job via `launchctl bootstr
 2. For each file: read it, choose `pillar` ∈ {me, pulse, projects, intelligence, journey} and `confidence` ∈ [0,1]. No fit ⇒ `--pillar=none`.
 3. `python3 script.py apply --file=<name> --pillar=<p> --confidence=<c> [--threshold=0.7]`
 
-`apply` outcomes (JSON, exit 0): `archived` (+ `archived` path) · `kept` (confidence < threshold; file stays, proposal sidecar owned by #74) · `skipped` (`locked` | `unstable`) · `error` (`UNSUPPORTED` | `UNCLASSIFIABLE` | `ARCHIVE_MISSING` | `ARCHIVE_FAILED`; file stays, `<name>.error.md` written). Exit 1: `INVALID_PATH`, `NOT_FOUND`.
+`apply` outcomes (JSON, exit 0): `archived` (+ `archived` path) · `kept` (confidence < threshold; file stays, proposal sidecar owned by #74) · `skipped` (`locked` | `unstable`) · `error` (`UNSUPPORTED` | `UNCLASSIFIABLE` | `ARCHIVE_MISSING` | `ARCHIVE_FAILED`; file stays, `<name>.error.md` written). Exit 1: `INVALID_PATH`, `NOT_FOUND`, `INVALID_ARGS` (`--confidence`/`--threshold` outside [0,1], NaN included). The launchd job sets no `GILBERTO_ROOT`: its WorkingDirectory is the vault, so export `GILBERTO_ROOT="$PWD"` before running.
 
 ## Archive contract
 

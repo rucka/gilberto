@@ -25,6 +25,13 @@ class Parser(result.ArgParser):
     pass
 
 
+def _unit(v):
+    f = float(v)
+    if not 0.0 <= f <= 1.0:  # rejects nan/inf too
+        raise argparse.ArgumentTypeError(f"{v!r} not in [0,1]")
+    return f
+
+
 def _parse(argv):
     p = Parser(prog="gilberto-process-ingest")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -32,8 +39,8 @@ def _parse(argv):
     a = sub.add_parser("apply")
     a.add_argument("--file", required=True)
     a.add_argument("--pillar", required=True)
-    a.add_argument("--confidence", type=float, required=True)
-    a.add_argument("--threshold", type=float, default=0.7)
+    a.add_argument("--confidence", type=_unit, required=True)
+    a.add_argument("--threshold", type=_unit, default=0.7)
     for x in (s, a):
         x.add_argument("--min-age", type=float, default=5.0)
     return p.parse_args(argv)
