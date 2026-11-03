@@ -165,3 +165,76 @@ def test_subprocess_smoke(vault):
     assert p.returncode == 0 and json.loads(p.stdout)["status"] == "ok"
     p2 = subprocess.run([sys.executable, str(SCRIPT), *args()], capture_output=True, text=True, env=env)
     assert json.loads(p2.stdout)["status"] == "skipped"
+
+
+def _intel(vault):
+    tpl = vault / "anatomy/templates/intelligence/note"
+    tpl.mkdir(parents=True)
+    (tpl / "note.md").write_text('---\ntype: intelligence-note\ntopics: []\n---\n\n# {{title}}\n')
+
+
+def nargs(path="health/acme", **over):
+    return args(pillar="intelligence", template="note", slug="e1", frontmatter=json.dumps({"topics": ["health"]}), path=path, **over)
+
+
+def test_path_writes_nested_note(mechanic, vault):
+    _intel(vault)
+    code, out, _ = mechanic("new", *nargs())
+    assert code == 0 and out["status"] == "ok"
+    assert (vault / "intelligence/health/acme/e1.md").is_file()
+    assert not (vault / "intelligence/health/acme/.e1.json").exists()
+    assert sorted(out["written"]) == [
+        "intelligence/health",
+        "intelligence/health/acme",
+        "intelligence/health/acme/e1.md",
+    ]
+
+
+def test_path_idempotent(mechanic, vault, tree):
+    _intel(vault)
+    mechanic("new", *nargs())
+    before = tree(vault)
+    code, out, _ = mechanic("new", *nargs())
+    assert code == 0 and out["skipped"] == ["intelligence/health/acme/e1.md"] and tree(vault) == before
+
+
+@pytest.mark.parametrize("bad", ["../x", "health/../..", "a//b", "/abs", "health/Acme", "health/", "a/b/c", "health/_x", "_uncategorized/_x"])
+def test_path_invalid_segments(mechanic, vault, tree, bad):
+    _intel(vault)
+    before = tree(vault)
+    code, out, _ = mechanic("new", *nargs(path=bad))
+    assert code == 1 and out["errors"][0]["code"] == "INVALID_SLUG"
+    assert tree(vault) == before
+
+
+def test_path_uncategorized_first_segment(mechanic, vault):
+    _intel(vault)
+    code, _, _ = mechanic("new", *nargs(path="_uncategorized/acme"))
+    assert code == 0 and (vault / "intelligence/_uncategorized/acme/e1.md").is_file()
+
+
+def test_path_symlink_escape_rejected(mechanic, vault, tmp_path, tree):
+    _intel(vault)
+    out_dir = tmp_path / "outside"
+    out_dir.mkdir()
+    (vault / "intelligence/health").symlink_to(out_dir)
+    code, out, _ = mechanic("new", *nargs())
+    assert code == 1 and out["errors"][0]["code"] == "INVALID_PATH" and not list(out_dir.iterdir())
+
+
+def test_path_rollback_removes_created_dirs(mechanic, vault, tree, monkeypatch):
+    _intel(vault)
+    before = tree(vault)
+    import _lib.atomic_write as aw
+
+    def boom(path, data):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(aw, "atomic_write", boom)
+    code, out, _ = mechanic("new", *nargs())
+    assert code == 1 and out["errors"][0]["code"] == "WRITE_FAILED" and tree(vault) == before
+
+
+def test_no_path_default_unchanged(mechanic, vault):
+    code, out, _ = mechanic("new", *args())
+    assert code == 0 and (vault / "projects/alpha/.alpha.json").is_file()

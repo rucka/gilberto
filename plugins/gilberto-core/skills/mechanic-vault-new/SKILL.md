@@ -9,12 +9,13 @@ Run, never reimplement:
 
 ```bash
 python3 "$(dirname "$0")/script.py" --pillar=<pillar> --template=<template> --slug=<slug> \
-  --frontmatter='<json>' [--force]
+  --frontmatter='<json>' [--path=<topic>/<source>] [--force]
 ```
 
 Vault root: `$GILBERTO_ROOT`. Surface the stdout JSON `{status, written, skipped, errors}` as-is; prose is on stderr.
 
 - Pillars: `me pulse projects intelligence journey network`.
+- `--path=<a>/<b>` (optional): flat note at `<pillar>/<a>/<b>/<slug>.md`, no folder, no sidecar; exactly 2 segments, each a slug (first may be `_uncategorized`); else `INVALID_SLUG`. Created parent dirs roll back on failure.
 - Slug/template: `^[a-z0-9][a-z0-9-]{0,63}$` → else `INVALID_SLUG`.
 - Frontmatter: template keys + `--frontmatter`, plus `created`/`updated` (today, ISO). Mandatory `type`, `topics`; `type` = `<scope>-<role>` or `person`/`company`; types with a `### <type>` YAML schema block (`mechanic-forge-type`) or a `Fields` column in `anatomy/anatomy.md > ## Types` are checked → `INVALID_FRONTMATTER` + diff.
 - Re-run with same inputs: `skipped (idempotent)`, no write. `--force`: rewrites frontmatter only (body and `created` kept).
