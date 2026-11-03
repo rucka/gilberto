@@ -82,7 +82,7 @@ def _item(e, feed_url):
 def _markdown(it, profile):
     fm = {"title": it["title"]} if it["title"] else {}
     md = frontmatter.dump(fm, it["body"])
-    if profile:
+    if profile is not None:
         return connector.normalize_item(md, it["source"], profile, created=it["date"])
     return frontmatter.dump({**fm, "type": connector.TYPE, "source": it["source"], "created": it["date"]}, it["body"])
 
@@ -104,6 +104,8 @@ def _parse(argv):
 def _run(argv, env):
     a = _parse(argv)
     validate_url(a.url)
+    if a.profile is not None:
+        connector.normalize_item("", a.url, a.profile)
     root = vault_io.vault_root(env)
     out = vault_io.resolve(root, OUT)
     state_path = os.path.join(out, STATE)

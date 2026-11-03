@@ -11,7 +11,7 @@ Run, never reimplement:
 python3 "$(dirname "$0")/script.py" --url=<http(s) feed url> [--profile=<provider>:<profile>]
 ```
 
-Vault root: `$GILBERTO_ROOT`. stdout JSON `{items:[{id,path}]}` (new items only) or `{errors:[{code}]}` (exit 1); prose on stderr. Reference implementation of the ADR-0003 utility contract (`_lib/connector`).
+Vault root: `$GILBERTO_ROOT`. stdout JSON `{items:[{id,path}]}` (new items only; files already written, `path` vault-relative; `gilberto-capability-fetch` accepts `{id,path}` and does not rewrite them) or `{errors:[{code}]}` (exit 1); prose on stderr. Reference implementation of the ADR-0003 utility contract (`_lib/connector`).
 
 - Requires `feedparser` (`pip install -r plugins/gilberto-core/requirements.txt`).
 - URL checked with `_lib/url_validate` before any network call.
@@ -22,4 +22,5 @@ Vault root: `$GILBERTO_ROOT`. stdout JSON `{items:[{id,path}]}` (new items only)
 - State: `_ingest/intelligence/.fetch-rss/_state.json` (`{url: {fetched: [ids]}}`). Re-run writes only unseen ids. State is saved only after every file write succeeds; a write failure removes the files it created. Missing/corrupt state → empty, logged.
 - Errors (exit 1, nothing written): `INVALID_URL`, `INVALID_ARGS`, `INVALID_PATH` (`GILBERTO_ROOT` unset), `not-found`, `rate-limit`, `provider`.
 - Writes only inside `$GILBERTO_ROOT/_ingest/intelligence/`; no secrets.
-- Gap: `gilberto-process-ingest scan` lists `_ingest/` non-recursively, so files in `_ingest/intelligence/` are accepted unchanged (`.md`) when that folder is scanned, not by a top-level scan.
+- `gilberto-process-ingest` scans `_ingest/` and `_ingest/intelligence/` (names `intelligence/<file>`), so output is accepted unchanged.
+- `--profile` (when given, even empty) is validated before any fetch: invalid → exit 1 `provider`.

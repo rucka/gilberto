@@ -124,9 +124,9 @@ def _run_utility(name, path, root, entry, env, profile):
         code = errs[0].get("code") if isinstance(errs, list) and errs and isinstance(errs[0], dict) else None
         raise bad(exit=p.returncode, utility_code=code)
     items = out.get("items") if isinstance(out, dict) else None
-    ok = isinstance(items, list) and all(isinstance(i, dict) and isinstance(i.get("id"), str) and isinstance(i.get("markdown"), str) for i in items)
+    ok = isinstance(items, list) and all(isinstance(i, dict) and isinstance(i.get("id"), str) and (isinstance(i.get("markdown"), str) or isinstance(i.get("path"), str)) for i in items)
     if not ok:
-        raise bad(reason="expected {items: [{id, markdown}]}")
+        raise bad(reason="expected {items: [{id, markdown|path}]}")
     return items
 
 
@@ -153,7 +153,7 @@ def dispatch(root, entry, env):
             raise unresolved
         items = _run_utility(name, path, root, entry, env, profile)
         if by_provider:
-            items = [{**i, "markdown": frontmatter.set_key(i["markdown"], "source_profile", f"{key}:{profile}")} for i in items]
+            items = [i if "markdown" not in i else {**i, "markdown": frontmatter.set_key(i["markdown"], "source_profile", f"{key}:{profile}")} for i in items]
         return "items", items
     if runner["reason"] == "mcp-fallback":
         return "mcp", {"provider": key, "profile": profile, "url": entry["url"], "utility": name}
@@ -189,13 +189,16 @@ def _write_items(root, e, items, state, written, skipped):
     fetched = _fetched(state, e["url"])
     for item in items:
         digest = hashlib.sha1(f"{e['url']}\0{item['id']}".encode()).hexdigest()[:12]
-        rel = f"_ingest/{e['contributor']}-{digest}.md"
+        rel = item.get("path") or f"_ingest/{e['contributor']}-{digest}.md"
         if item["id"] in fetched:
             skipped.append({"path": rel, "reason": "already-fetched"})
             continue
-        path = vault_io.resolve(root, rel)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        atomic_write(path, item["markdown"])
+        if "markdown" in item:
+            path = vault_io.resolve(root, rel)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            atomic_write(path, item["markdown"])
+        else:
+            vault_io.resolve(root, rel)
         fetched.append(item["id"])
         state[e["url"]] = {"fetched": fetched}
         written.append(rel)
