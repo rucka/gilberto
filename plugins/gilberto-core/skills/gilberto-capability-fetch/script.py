@@ -7,14 +7,14 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from _lib import frontmatter, result, vault_io  # noqa: E402
+from _lib import frontmatter, integrations, result, vault_io  # noqa: E402
 from _lib.atomic_write import atomic_write  # noqa: E402
+from _lib.connector import ConnectorError  # noqa: E402
 from _lib.result import MechanicError  # noqa: E402
 
 PLAYBOOKS = "anatomy/playbooks"
 SKILLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROUTES = {"rss": "utility-fetch-rss", "atom": "utility-fetch-rss", "http": "utility-download-html"}
-FALLBACKS = ("mcp", "none")
 TIMEOUT = 120
 _FENCE = re.compile(r"^```ya?ml[ \t]*\n(.*?)^```[ \t]*$", re.S | re.M)
 _TOP = re.compile(r'^(?:("(?:[^"\\\n]|\\.)*")|(https?://\S+?)):[ \t]*$')
@@ -82,9 +82,11 @@ def load_sources(root, pillar=None, source=None):
 
 
 def resolve_profile(root, entry):
-    """#60 seam, called only for a `provider:` entry without `profile:`: -> profile | None, or raise MechanicError("PROFILE_UNRESOLVED").
-    Stub until #60 (explicit > folder note > global default > profile-unresolved): no profile."""
-    return None
+    """Called only for a `provider:` entry without `profile:`: explicit > folder note `connectors:` walking up from the entry's `target` (else its pillar) > preferences > MechanicError("PROFILE_UNRESOLVED")."""
+    try:
+        return integrations.resolve_profile(root, entry.get("target") or entry["pillar"], entry["provider"])
+    except ConnectorError:
+        raise MechanicError("PROFILE_UNRESOLVED", provider=entry["provider"])
 
 
 def _utility_dirs(env):
@@ -98,29 +100,15 @@ def _script(name, env):
             return path
 
 
-def _integration(root, key, profile):
-    rels = [f"{key}.md"]
-    if not profile or _SLUG.fullmatch(profile):
-        rels.insert(0, f"{key}/{profile or 'default'}.md")
-    for rel in rels:
-        path = vault_io.resolve(root, f"anatomy/integrations/{rel}")
-        if os.path.isfile(path):
-            return path
-
-
 def _fallback(entry, integration):
     value = entry.get("fallback")
     if value is None and integration:
         with open(integration, encoding="utf-8") as f:
             value = frontmatter.parse(f.read())[0].get("fallback")
-    value = value or "none"
-    if value not in FALLBACKS:
-        raise MechanicError("INVALID_FALLBACK", fallback=value, allowed=list(FALLBACKS))
     return value
 
 
-def _run_utility(name, path, root, entry, env):
-    profile = entry.get("profile") or (resolve_profile(root, entry) if entry.get("provider") else None)
+def _run_utility(name, path, root, entry, env, profile):
     argv = [sys.executable, path, f"--url={entry['url']}"] + ([f"--profile={profile}"] if profile else [])
     bad = lambda **x: MechanicError("UTILITY_ERROR", utility=name, **x)
     try:
@@ -150,14 +138,26 @@ def dispatch(root, entry, env):
         raise MechanicError("INVALID_PROVIDER" if by_provider else "INVALID_TYPE", **{"provider" if by_provider else "type": key})
     name = (not by_provider and ROUTES.get(key)) or f"utility-{key}-read"
     path = _script(name, env)
-    integration = _integration(root, key, entry.get("profile"))
+    profile, unresolved = entry.get("profile"), None
+    if by_provider and not profile:
+        try:
+            profile = resolve_profile(root, entry)
+        except MechanicError as e:
+            unresolved = e
+    integration = integrations.integration_path(root, key, profile)
     if not (path or integration or entry.get("fallback")):
         raise MechanicError("UNKNOWN_PROVIDER" if by_provider else "UNKNOWN_TYPE", **{"provider" if by_provider else "type": key})
-    if path:
-        return "items", _run_utility(name, path, root, entry, env)
-    if _fallback(entry, integration) == "mcp":
-        return "mcp", {"provider": key, "profile": entry.get("profile"), "url": entry["url"], "utility": name}
-    return "manual", {"url": entry["url"], "utility": name, "hint": "utility unavailable: drop the content into _ingest/ manually"}
+    runner = integrations.resolve_runner(path, None if path else _fallback(entry, integration))
+    if runner["kind"] == "script":
+        if unresolved:
+            raise unresolved
+        items = _run_utility(name, path, root, entry, env, profile)
+        if by_provider:
+            items = [{**i, "markdown": frontmatter.set_key(i["markdown"], "source_profile", f"{key}:{profile}")} for i in items]
+        return "items", items
+    if runner["reason"] == "mcp-fallback":
+        return "mcp", {"provider": key, "profile": profile, "url": entry["url"], "utility": name}
+    return "manual", {"url": entry["url"], "utility": name, "hint": runner["hint"]}
 
 
 def _load_state(root, e):
