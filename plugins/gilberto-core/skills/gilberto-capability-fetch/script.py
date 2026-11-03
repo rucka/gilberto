@@ -90,7 +90,7 @@ def resolve_profile(root, entry):
 
 
 def _utility_dirs(env):
-    return [SKILLS] + [d for d in env.get("GILBERTO_UTILITY_PATH", "").split(os.pathsep) if d]
+    return [d for d in env.get("GILBERTO_UTILITY_PATH", "").split(os.pathsep) if d] + [SKILLS]
 
 
 def _script(name, env):
