@@ -78,7 +78,9 @@ function pillarErrors({ kind, pillar, playbooks = {} }: Manifest['gilberto']): s
     return [`pillar mismatch: kind "${kind}" must not declare gilberto.pillar ("${pillar}")`]
   return Object.keys(playbooks)
     .filter(key => key.split('/')[0] !== pillar)
-    .map(key => `pillar mismatch: playbook "${key}" does not belong to pillar "${pillar ?? '(none)'}"`)
+    .map(
+      key => `pillar mismatch: playbook "${key}" does not belong to pillar "${pillar ?? '(none)'}"`,
+    )
 }
 
 function insidePluginDir(dir: string, skill: string): boolean {
