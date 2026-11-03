@@ -190,7 +190,7 @@ def _write_items(root, e, items, state, written, skipped):
     for item in items:
         digest = hashlib.sha1(f"{e['url']}\0{item['id']}".encode()).hexdigest()[:12]
         rel = item.get("path") or f"_ingest/{e['contributor']}-{digest}.md"
-        if item["id"] in fetched:
+        if item["id"] in fetched and "path" not in item:
             skipped.append({"path": rel, "reason": "already-fetched"})
             continue
         if "markdown" in item:
@@ -199,7 +199,8 @@ def _write_items(root, e, items, state, written, skipped):
             atomic_write(path, item["markdown"])
         else:
             vault_io.resolve(root, rel)
-        fetched.append(item["id"])
+        if item["id"] not in fetched:
+            fetched.append(item["id"])
         state[e["url"]] = {"fetched": fetched}
         written.append(rel)
 

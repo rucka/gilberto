@@ -181,6 +181,9 @@ def _source(root, ingest, name):
     if base in ("", ".", "..") or name not in (base, f"{SUB}/{base}"):
         raise MechanicError("INVALID_PATH", input=name)
     src = vault_io.resolve(root, f"_ingest/{name}")
+    real = os.path.realpath(ingest)
+    if os.path.dirname(src) not in {real, os.path.join(real, SUB)}:
+        raise MechanicError("INVALID_PATH", input=name)
     if not os.path.isfile(src):
         raise MechanicError("NOT_FOUND", input=name)
     return src
