@@ -45,8 +45,9 @@ class Keychain:
         return subprocess.CompletedProcess(argv, 0, "", "")
 
 
-@pytest.fixture
-def kc(home, monkeypatch):
+@pytest.fixture(params=["darwin", "linux"])
+def kc(request, home, monkeypatch):
+    monkeypatch.setattr(sys, "platform", request.param)
     k = Keychain()
     monkeypatch.setattr(secrets.shutil, "which", lambda n: "/bin/" + n)
     monkeypatch.setattr(secrets, "_run", k)
