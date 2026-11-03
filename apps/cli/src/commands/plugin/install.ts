@@ -67,6 +67,11 @@ function prepare(vault: string, dir: string, opts: InstallOptions): Prepared {
   const { manifest } = parsed
   const name = manifest.name
   if (!SAFE.test(name)) throw new PluginInstallError([`${label}: invalid plugin name: ${name}`])
+  const version = versionOf(manifest)
+  if (/[|\r\n]/.test(version))
+    throw new PluginInstallError([
+      `${label}: invalid version (no '|' or newline): ${JSON.stringify(version)}`,
+    ])
   const installed = hasPlugin(vault, name)
   if (installed && !opts.force)
     throw new PluginInstallError([`${name}: already installed (use --force to overwrite)`])
