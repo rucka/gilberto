@@ -135,15 +135,18 @@ def get(provider, profile):
 
 def delete(provider, profile):
     provider, profile = _key(provider, profile)
-    cmds = _cmds(f"gilberto/{provider}/{profile}")
-    if cmds:
+    service = f"gilberto/{provider}/{profile}"
+    failed = None
+    if _cmds(service):
         try:
-            r = _run(cmds[3])
+            r = _run(_cmds(service)[3])
+            if r.returncode not in (0, 44):
+                failed = f"exit {r.returncode}"
         except (OSError, subprocess.SubprocessError) as e:
-            raise ConnectorError("provider", reason=f"keychain delete failed: {type(e).__name__}") from e
-        if r.returncode not in (0, 44):
-            raise ConnectorError("provider", reason=f"keychain delete failed (exit {r.returncode})")
+            failed = type(e).__name__
     try:
         os.remove(_path(provider, profile))
     except FileNotFoundError:
         pass
+    if failed and _kc("get", service):
+        raise ConnectorError("provider", reason=f"keychain delete failed ({failed})")
