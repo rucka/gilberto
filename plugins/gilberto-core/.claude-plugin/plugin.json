@@ -6,6 +6,7 @@
   },
   "skills": [
     "./skills/gilberto-capability-fetch",
+    "./skills/gilberto-capability-intelligence-archive",
     "./skills/gilberto-process-ingest",
     "./skills/gilberto-process-vault-bootstrap",
     "./skills/mechanic-forge-playbook",
