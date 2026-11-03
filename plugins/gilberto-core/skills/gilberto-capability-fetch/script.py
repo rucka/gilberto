@@ -144,8 +144,7 @@ def dispatch(root, entry, env):
             profile = resolve_profile(root, entry)
         except MechanicError as e:
             unresolved = e
-    # legacy flat `<provider>.md` also backs a named profile (#71 contract)
-    integration = integrations.integration_path(root, key, profile) or (profile and integrations.integration_path(root, key))
+    integration = integrations.integration_path(root, key, profile)
     if not (path or integration or entry.get("fallback")):
         raise MechanicError("UNKNOWN_PROVIDER" if by_provider else "UNKNOWN_TYPE", **{"provider" if by_provider else "type": key})
     runner = integrations.resolve_runner(path, None if path else _fallback(entry, integration))

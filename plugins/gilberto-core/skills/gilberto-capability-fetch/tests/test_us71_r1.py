@@ -98,9 +98,11 @@ def test_us71_r1_flat_layout_still_honoured(fetch, utility):
     assert dispatch(fetch, utility, provider="slack")[0] == "mcp"
 
 
-def test_us71_r1_profile_falls_back_to_flat(fetch, utility):
+def test_us71_r1_named_profile_never_reads_flat(fetch, utility):
     integration(fetch.root, "slack.md", "---\ntype: integration\nfallback: mcp\n---\n")
-    assert dispatch(fetch, utility, provider="slack", profile="work")[0] == "mcp"
+    with pytest.raises(fetch.mod.MechanicError) as e:
+        dispatch(fetch, utility, provider="slack", profile="work")
+    assert e.value.code == "UNKNOWN_PROVIDER"
 
 
 def test_us71_r1_default_file_wins_over_flat(fetch, utility):
