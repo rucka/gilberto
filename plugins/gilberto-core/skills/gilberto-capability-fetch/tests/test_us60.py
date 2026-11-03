@@ -92,3 +92,33 @@ def test_omitted_profile_unresolvable_no_utility_falls_through_to_default_layout
     code, out, _ = run(fetch, utility)
     assert code == 0 and out.get("errors", []) == []
     assert [s["reason"] for s in out["skipped"]] == ["mcp-fallback"]
+
+
+# #71 wiring: provenance on ingested notes (AC1)
+def test_provider_items_carry_source_profile(fetch, source, utility):
+    utility("utility-gmail-read", [{"id": "1", "markdown": "---\ntitle: t\n---\nbody\n"}])
+    put(fetch.root, "anatomy/preferences.md", "## Integrations\n\ngmail: personal\n")
+    source("intelligence", "core", block("https://m.example/i", provider="gmail"))
+    code, out, _ = run(fetch, utility)
+    assert code == 0
+    fm, body = fetch.mod.frontmatter.parse((fetch.root / out["written"][0]).read_text())
+    assert fm["source_profile"] == "gmail:personal" and fm["title"] == "t" and body == "body\n"
+
+
+def test_type_items_have_no_source_profile(fetch, source, utility):
+    utility("utility-fetch-rss", [ITEM])
+    source("intelligence", "core", block("https://m.example/f", type="rss"))
+    code, out, _ = run(fetch, utility)
+    assert code == 0 and "source_profile" not in (fetch.root / out["written"][0]).read_text()
+
+
+# #71 wiring: integration-file reading owned by _lib.integrations
+def test_dispatcher_reads_integration_via_lib(fetch, source, utility, monkeypatch):
+    seen = []
+    real = fetch.mod.integrations.integration_path
+    monkeypatch.setattr(fetch.mod.integrations, "integration_path", lambda *a: seen.append(a[1:]) or real(*a))
+    put(fetch.root, "anatomy/integrations/slack.md", "---\ntype: integration\nfallback: mcp\n---\n")
+    source("intelligence", "core", block("https://m.example/s", provider="slack", profile="default"))
+    code, out, _ = run(fetch, utility)
+    assert code == 0 and seen == [("slack", "default")]
+    assert [s["reason"] for s in out["skipped"]] == ["mcp-fallback"]

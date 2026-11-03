@@ -28,7 +28,7 @@ def test_routes_by_type(fetch, utility):
 def test_provider_wins_over_type(fetch, utility):
     utility("utility-fetch-rss", [ITEM])
     utility("utility-gmail-read", [{"id": "g", "markdown": "m"}])
-    assert dispatch(fetch, utility, entry(provider="gmail", profile="p")) == ("items", [{"id": "g", "markdown": "m"}])
+    assert dispatch(fetch, utility, entry(provider="gmail", profile="p")) == ("items", [{"id": "g", "markdown": '---\nsource_profile: "gmail:p"\n---\nm'}])
 
 
 def test_profile_passed_through(fetch, utility):

@@ -100,16 +100,6 @@ def _script(name, env):
             return path
 
 
-def _integration(root, key, profile):
-    rels = [f"{key}.md"]
-    if not profile or _SLUG.fullmatch(profile):
-        rels.insert(0, f"{key}/{profile or 'default'}.md")
-    for rel in rels:
-        path = vault_io.resolve(root, f"anatomy/integrations/{rel}")
-        if os.path.isfile(path):
-            return path
-
-
 def _fallback(entry, integration):
     value = entry.get("fallback")
     if value is None and integration:
@@ -118,8 +108,7 @@ def _fallback(entry, integration):
     return value
 
 
-def _run_utility(name, path, root, entry, env):
-    profile = entry.get("profile") or (resolve_profile(root, entry) if entry.get("provider") else None)
+def _run_utility(name, path, root, entry, env, profile):
     argv = [sys.executable, path, f"--url={entry['url']}"] + ([f"--profile={profile}"] if profile else [])
     bad = lambda **x: MechanicError("UTILITY_ERROR", utility=name, **x)
     try:
@@ -149,14 +138,26 @@ def dispatch(root, entry, env):
         raise MechanicError("INVALID_PROVIDER" if by_provider else "INVALID_TYPE", **{"provider" if by_provider else "type": key})
     name = (not by_provider and ROUTES.get(key)) or f"utility-{key}-read"
     path = _script(name, env)
-    integration = _integration(root, key, entry.get("profile"))
+    profile, unresolved = entry.get("profile"), None
+    if by_provider and not profile:
+        try:
+            profile = resolve_profile(root, entry)
+        except MechanicError as e:
+            unresolved = e
+    # legacy flat `<provider>.md` also backs a named profile (#71 contract)
+    integration = integrations.integration_path(root, key, profile) or (profile and integrations.integration_path(root, key))
     if not (path or integration or entry.get("fallback")):
         raise MechanicError("UNKNOWN_PROVIDER" if by_provider else "UNKNOWN_TYPE", **{"provider" if by_provider else "type": key})
     runner = integrations.resolve_runner(path, None if path else _fallback(entry, integration))
     if runner["kind"] == "script":
-        return "items", _run_utility(name, path, root, entry, env)
+        if unresolved:
+            raise unresolved
+        items = _run_utility(name, path, root, entry, env, profile)
+        if by_provider:
+            items = [{**i, "markdown": frontmatter.set_key(i["markdown"], "source_profile", f"{key}:{profile}")} for i in items]
+        return "items", items
     if runner["reason"] == "mcp-fallback":
-        return "mcp", {"provider": key, "profile": entry.get("profile"), "url": entry["url"], "utility": name}
+        return "mcp", {"provider": key, "profile": profile, "url": entry["url"], "utility": name}
     return "manual", {"url": entry["url"], "utility": name, "hint": runner["hint"]}
 
 
