@@ -1,0 +1,365 @@
+{
+  "$meta": {
+    "pr": "144",
+    "phase": "r1-g1",
+    "base": "51b965fd8404153fd93562a8b714ee0a3f4531e2",
+    "trailer": "Pair-RED-Snapshot: pr=144; phase=r1-g1; base=51b965fd8404153fd93562a8b714ee0a3f4531e2; manifest=.pair/red-snapshots/pr-144-r1-g1.json",
+    "artifacts": [
+      "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py"
+    ]
+  },
+  "phase": "r1-g1",
+  "mode": "repair",
+  "inputHead": "51b965fd8404153fd93562a8b714ee0a3f4531e2",
+  "sourceOfTruth": "dispatcher contract SKILL.md:18; ingest scan; AC5; connector.normalize_item",
+  "inventory": [
+    {
+      "id": "r0-1",
+      "producer": "utility-fetch-rss/script.py::_run output ({items:[{id,path}]}) vs gilberto-capability-fetch/script.py::_run_utility validator (contract SKILL.md:18)",
+      "inputs": [
+        "feed.xml fixture",
+        "entry {type:rss,url}",
+        "GILBERTO_ROOT"
+      ],
+      "representations": [
+        "utility stdout JSON",
+        "dispatcher write path _ingest/<contributor>-<sha1>.md",
+        "_state.json in both utility and dispatcher"
+      ],
+      "consumers": [
+        "gilberto-capability-fetch dispatch/main",
+        "gilberto-process-ingest scan"
+      ],
+      "classes": [
+        "fresh feed: items accepted",
+        "rerun: no new items accepted",
+        "dispatcher + utility both writing (duplicate risk)",
+        "type atom routed like rss"
+      ],
+      "interactions": [
+        "utility emission x dispatcher validation x ingest scan"
+      ]
+    },
+    {
+      "id": "r0-2",
+      "producer": "gilberto-process-ingest/script.py::_scan/_status/_source/_confirm/_reject/_archive (top-level _ingest only; names must be basenames) vs utility OUT=_ingest/intelligence",
+      "inputs": [
+        "utility output files",
+        "scan --min-age=0",
+        "apply --file=<name>"
+      ],
+      "representations": [
+        "_ingest top-level",
+        "_ingest/intelligence subfolder"
+      ],
+      "consumers": [
+        "ingest scan",
+        "ingest apply",
+        "ingest status",
+        "ingest confirm",
+        "ingest reject"
+      ],
+      "classes": [
+        "listed by scan",
+        "applicable by apply (archived to intelligence/<basename>, source removed, sidecars follow)",
+        "below threshold: classification sidecar listed by status under the scan name",
+        "confirm --file=<scan name> archives to intelligence/<basename> (not nested)",
+        "reject --file=<scan name> rejects, writes .error.md, removes classification",
+        "traversal/nesting rejected by apply"
+      ],
+      "interactions": [
+        "utility output location x ingest scan x apply x status x confirm x reject name handling"
+      ]
+    },
+    {
+      "id": "r0-3",
+      "producer": "utility-fetch-rss/script.py::_run profile validation (connector.normalize_item rule <provider>:<profile>)",
+      "inputs": [
+        "--profile",
+        "state (fetched or empty)",
+        "feed entries"
+      ],
+      "representations": [
+        "CLI flag"
+      ],
+      "consumers": [
+        "connector.run_utility exit code/errors"
+      ],
+      "classes": [
+        "invalid profile fresh items (already rejected)",
+        "invalid profile all fetched",
+        "invalid profile zero entries",
+        "valid profile all fetched",
+        "empty profile",
+        "malformed shapes (rss:, :x, a:b:c)",
+        "invalid profile + failing fetch"
+      ],
+      "interactions": [
+        "profile validation x state freshness",
+        "profile validation x fetch ordering"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "utility-fetch-rss",
+    "mode": "behavioral",
+    "allowedPaths": [
+      "plugins/gilberto-core/skills/utility-fetch-rss/script.py",
+      "plugins/gilberto-core/skills/utility-fetch-rss/SKILL.md",
+      "plugins/gilberto-core/skills/gilberto-capability-fetch/script.py",
+      "plugins/gilberto-core/skills/gilberto-capability-fetch/SKILL.md",
+      "plugins/gilberto-core/skills/gilberto-process-ingest/script.py",
+      "plugins/gilberto-core/skills/gilberto-process-ingest/SKILL.md"
+    ]
+  },
+  "matrix": [
+    {
+      "id": "M-r0-1-dispatch",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "dispatch(root,{type:rss,url}) real bundled utility, urlopen stubbed via sitecustomize",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_dispatch_real_utility_accepted[rss]",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "returns (\"items\", 2 items ids g-1,g-2), no UTILITY_ERROR (dispatcher SKILL.md contract)",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "M-r0-1-run",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "gilberto-capability-fetch main on rss source, real utility; then ingest scan --min-age=0",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_capability_run_items_reach_ingest_scan_once",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "exit 0, 2 written, exactly 2 md under _ingest, scan lists 2 existing files (no duplicate from utility+dispatcher)",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "M-r0-1-idem",
+      "kind": "boundary",
+      "baseline": "red",
+      "condition": "capability main run twice on same feed",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_capability_run_is_idempotent",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "both exit 0; second written [] and _ingest bytes unchanged, still 2 files",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "M-r0-2-scan",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "utility run standalone, real ingest main scan --min-age=0, apply --confidence=0.9 per listed file (stub archive)",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_utility_output_listed_by_scan_and_applicable",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "scan lists 2 files; each apply archived with archived == intelligence/<basename>, dest + .ingest.json exist, no intelligence/intelligence, source and sidecars gone from _ingest tree",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "M-r0-3-rerun",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "run feed, rerun same feed with --profile=nope",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_second_run_invalid_profile_rejected",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "exit 1, errors[0].code == provider",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "M-r0-3-valid",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "run feed, rerun with --profile=rss:default",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_second_run_valid_profile_still_empty",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "exit 0, items []",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "M-r0-3-empty",
+      "kind": "boundary",
+      "baseline": "red",
+      "condition": "feed with zero entries, --profile=nope",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_invalid_profile_on_empty_feed_rejected",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "exit 1, errors[0].code == provider",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "M-r0-1-dispatch-atom",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "dispatch real utility with type atom (parametrized with rss in M-r0-1-dispatch)",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_dispatch_real_utility_accepted[atom]",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "('items', ids g-1,g-2), no UTILITY_ERROR",
+      "covers": [
+        "r0-1"
+      ],
+      "rationale": "ROUTES maps rss and atom to utility-fetch-rss; atom witnessed explicitly"
+    },
+    {
+      "id": "M-r0-3-empty-rerun",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "rerun same feed with --profile= (empty)",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_malformed_profile_rejected_on_rerun[]",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "exit 1 errors[0].code == provider",
+      "covers": [
+        "r0-3"
+      ],
+      "rationale": "empty is falsy; 'if profile:' would skip validation"
+    },
+    {
+      "id": "M-r0-3-malformed-rerun",
+      "kind": "boundary",
+      "baseline": "red",
+      "condition": "rerun with --profile in {rss:, :x, a:b:c}",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_malformed_profile_rejected_on_rerun",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "exit 1 provider for each (parametrized: '', rss:, :x, a:b:c)",
+      "covers": [
+        "r0-3"
+      ],
+      "rationale": "each rejected by connector._PROFILE.fullmatch; not equivalent to 'nope' under a bare ':' check, so witnessed separately"
+    },
+    {
+      "id": "M-r0-3-empty-fresh",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "fresh feed with --profile=",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_empty_profile_rejected_on_fresh_feed",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "exit 1 provider, no md written",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "M-r0-3-order",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "invalid profile + http_error(404) via serve",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_invalid_profile_precedes_fetch",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "exit 1 provider, zero fetch calls (validation precedes fetch)",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "M-r0-2-apply-negative",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "ingest apply with intelligence/../x.md, intelligence/sub/x.md, sub/x.pdf, ../x.pdf (real main)",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_apply_rejects_traversal_and_nesting",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "exit 1 errors[0].code == INVALID_PATH for each",
+      "covers": [
+        "r0-2"
+      ],
+      "rationale": "guards confinement: a fix accepting _ingest/intelligence/<name> must not open traversal/nesting"
+    },
+    {
+      "id": "M-r0-2-status-confirm",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "after utility run: scan lists 2; apply --confidence=0.1 on first -> kept; status pending lists same name as scan with existing sidecar; confirm --file=<listed>",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_utility_low_confidence_status_then_confirm",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "confirm archived, archived == intelligence/<basename> (not nested), source + classification gone from _ingest, scan no longer lists it",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "M-r0-2-status-reject",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "after utility run: scan lists 2; apply --confidence=0.1 on second -> kept; status lists it; reject --file=<listed>",
+      "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py::test_us72_r1_utility_low_confidence_status_then_reject",
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "expected": "rejected; source stays with .error.md, classification sidecar removed, no longer in scan or status",
+      "covers": [
+        "r0-2"
+      ]
+    }
+  ],
+  "redTests": [
+    {
+      "file": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:fab579ae9461e1e5e6cb9c5dfc9983d40e706192fb51be7e376f844d4d4df5dc",
+      "command": "uv run --no-project --with pytest --with feedparser python -m pytest -q -p no:cacheprovider plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py",
+      "observed": "15 failed, 5 passed (UTILITY_ERROR from dispatch rss/atom; scan files [] -> 'assert len(files) == 2' at _utility_env for scan/status-confirm/status-reject, no FileExistsError; invalid/empty/malformed profile exit 0; 404 not-found before provider)"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "findings": [
+          "r0-1",
+          "r0-2",
+          "r0-3"
+        ],
+        "owner": "utility-fetch-rss",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "plugins/gilberto-core/skills/utility-fetch-rss/script.py",
+          "plugins/gilberto-core/skills/utility-fetch-rss/SKILL.md",
+          "plugins/gilberto-core/skills/gilberto-capability-fetch/script.py",
+          "plugins/gilberto-core/skills/gilberto-capability-fetch/SKILL.md",
+          "plugins/gilberto-core/skills/gilberto-process-ingest/script.py",
+          "plugins/gilberto-core/skills/gilberto-process-ingest/SKILL.md"
+        ],
+        "dependsOn": [],
+        "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py"
+      },
+      {
+        "groupId": "r1-g2",
+        "findings": [
+          "r0-4"
+        ],
+        "owner": "gilberto-capability-fetch",
+        "mode": "doc",
+        "allowedPaths": [
+          "plugins/gilberto-core/skills/gilberto-capability-fetch/SKILL.md"
+        ],
+        "dependsOn": [
+          "r1-g1"
+        ],
+        "oracle": "checklist: SKILL.md:17 states GILBERTO_UTILITY_PATH searched first, then core skills dir (script.py _utility_dirs)"
+      }
+    ],
+    "carried": []
+  },
+  "remediationBatchId": "r1",
+  "groupId": "r1-g1",
+  "notes": {
+    "worked": [
+      "w-1",
+      "w-2"
+    ]
+  },
+  "changedRows": [
+    "M-r0-2-scan",
+    "M-r0-2-status-confirm",
+    "M-r0-2-status-reject"
+  ]
+}
