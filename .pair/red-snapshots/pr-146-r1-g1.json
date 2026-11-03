@@ -1,0 +1,272 @@
+{
+  "$meta": {
+    "pr": "146",
+    "phase": "r1-g1",
+    "base": "4975cef252cbc07eaeb0dc6ff6785036c032a8e0",
+    "trailer": "Pair-RED-Snapshot: pr=146; phase=r1-g1; base=4975cef252cbc07eaeb0dc6ff6785036c032a8e0; manifest=.pair/red-snapshots/pr-146-r1-g1.json",
+    "artifacts": [
+      "apps/cli/src/commands/plugin/manifest.remediation.test.ts"
+    ]
+  },
+  "mode": "remediation",
+  "phase": "r1-g1",
+  "inputHead": "4975cef252cbc07eaeb0dc6ff6785036c032a8e0",
+  "sourceOfTruth": "manifest.ts validateManifest; card AC-3/AC-4/AC-5",
+  "inventory": [
+    {
+      "id": "r0-1",
+      "producer": "manifest.ts gilbertoBlock strict schema + validateManifest",
+      "inputs": [
+        "plugin.json gilberto.skills"
+      ],
+      "representations": [
+        "apps/cli/src/commands/plugin/manifest.ts"
+      ],
+      "consumers": [
+        "plugin validate command"
+      ],
+      "classes": [
+        "gilberto.skills absent (valid)",
+        "gilberto.skills duplicate with existing paths (reject)",
+        "gilberto.skills missing path (reject)"
+      ],
+      "interactions": [
+        "top-level skills + gilberto.skills duplicate entry (reject)"
+      ]
+    },
+    {
+      "id": "r0-2",
+      "producer": "manifest.ts pillarErrors",
+      "inputs": [
+        "gilberto.kind",
+        "gilberto.pillar",
+        "gilberto.playbooks keys"
+      ],
+      "representations": [
+        "manifest.ts"
+      ],
+      "consumers": [
+        "validateManifest"
+      ],
+      "classes": [
+        "kind pillar+matching playbooks (valid)",
+        "kind core/connector no pillar + playbooks (reject)"
+      ],
+      "interactions": [
+        "kind x pillar x playbook key segment"
+      ]
+    },
+    {
+      "id": "r0-3",
+      "producer": "manifest.ts missingSkills",
+      "inputs": [
+        "skills paths",
+        "filesystem symlinks"
+      ],
+      "representations": [
+        "manifest.ts"
+      ],
+      "consumers": [
+        "validateManifest"
+      ],
+      "classes": [
+        "plain dir inside (valid)",
+        "symlink inside (valid)",
+        "symlink outside (reject)",
+        "in-plugin skills dir whose first segment merely starts with .. (./..hidden, valid)"
+      ],
+      "interactions": [
+        "lexical resolve x realpath"
+      ]
+    },
+    {
+      "id": "r0-4",
+      "producer": "external: Claude Code plugin loader / PR body",
+      "inputs": [],
+      "representations": [
+        "PR #146 body"
+      ],
+      "consumers": [],
+      "classes": [
+        "carried: correction lies outside repo"
+      ],
+      "interactions": []
+    }
+  ],
+  "fixScope": {
+    "owner": "plugin-manifest",
+    "mode": "behavioral",
+    "allowedPaths": [
+      "apps/cli/src/commands/plugin/manifest.ts",
+      "plugins/MANIFEST.md"
+    ]
+  },
+  "matrix": [
+    {
+      "id": "W-r0-1a",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "gilberto.skills ['./skills/a','./skills/a'] (dup, paths exist)",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: W-r0-1a",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok false",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "W-r0-1b",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "gilberto.skills ['./nope'] (missing, single)",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: W-r0-1b",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok false",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "W-r0-1c",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "gilberto.skills ['./skills/a'] duplicating top-level ['./skills/a']",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: W-r0-1c",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok false",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "C-r0-1",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "top-level skills only, valid",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: C-r0-1",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok true",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "W-r0-2",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "kind core, no pillar, playbooks pulse/daily",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: W-r0-2 core",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok false; errors contain \"pillar mismatch\"",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "W-r0-2b",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "kind connector, no pillar, playbooks pulse/daily",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: W-r0-2b connector",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok false; errors contain \"pillar mismatch\"",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "C-r0-2",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "kind pillar pillar=pulse, playbook pulse/daily",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: C-r0-2",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok true",
+      "covers": [
+        "r0-2"
+      ]
+    },
+    {
+      "id": "W-r0-3",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "skills ./skills/evil is symlink to dir outside plugin dir",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: W-r0-3",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok false",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "C-r0-3",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "skills ./skills/link symlink to dir inside plugin dir",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: C-r0-3",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok true",
+      "covers": [
+        "r0-3"
+      ]
+    },
+    {
+      "id": "C-r0-3b",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "skills ['./..hidden'], dir ./..hidden exists inside plugin",
+      "oracle": "apps/cli/src/commands/plugin/manifest.remediation.test.ts :: C-r0-3b",
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "expected": "ok true",
+      "covers": [
+        "r0-3"
+      ]
+    }
+  ],
+  "redTests": [
+    {
+      "file": "apps/cli/src/commands/plugin/manifest.remediation.test.ts",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:8aa1613fbdafe519a44a74e2b53fc50875c14cf59853eb7e564f3970b0f930ae",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/manifest.remediation.test.ts",
+      "observed": "7 failed | 3 passed; W-r0-1a/1b/1c, W-r0-2, W-r0-2b, W-r0-3 fail: expected true to be false; C-r0-3b fails: expected false to be true"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "findings": [
+          "r0-1",
+          "r0-2",
+          "r0-3"
+        ],
+        "owner": "plugin-manifest",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "apps/cli/src/commands/plugin/manifest.ts",
+          "plugins/MANIFEST.md"
+        ],
+        "dependsOn": []
+      }
+    ],
+    "carried": [
+      {
+        "id": "r0-4",
+        "disposition": "external: run Claude Code plugin validate on plugins/gilberto-core and record command+output in PR #146 body (human/PR action)"
+      }
+    ]
+  }
+}
