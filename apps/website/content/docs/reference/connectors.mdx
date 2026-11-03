@@ -33,6 +33,15 @@ Shared helpers live in `plugins/gilberto-core/skills/_lib/` (`connector.py`, `in
 
 `validate_integration` rejects unknown keys, secret-looking values (known token prefixes, long opaque blobs), a literal `secret` and malformed frontmatter with `INVALID_INTEGRATION`.
 
+## Secrets
+
+`_lib/secrets.py`: `get/set/delete(provider, profile)`; both segments match `^[a-z0-9][a-z0-9_-]*$` (`default` for single-profile), else `provider` error.
+
+- Backend order: macOS `security` / Linux `secret-tool` (service `gilberto/<provider>/<profile>`, value via stdin, never argv); any keychain failure falls back to `~/.config/gilberto/secrets/<provider>/<profile>.env` (file `0600`, dir `0700`).
+- Read: keychain, then file. A file looser than `0600` → `auth` error naming path and `chmod 600` fix; value not returned.
+- Absent → `not-found`; `delete` is idempotent; empty value rejected.
+- Vault refs: `secret: keychain:gilberto/<provider>/<profile>`; `parse_ref` / `resolve(ref)`. Vault files never hold the value.
+
 ## Profile resolution
 
 `integrations.resolve_profile(root, target, provider, explicit)`:
