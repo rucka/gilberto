@@ -7,8 +7,11 @@ import { MANIFEST_PATH } from './manifest.js'
 
 export type PluginSource = { dirs: string[]; cleanup: () => void }
 
-export const defaultBundledRoot = (): string =>
-  resolve(dirname(fileURLToPath(import.meta.url)), '../../../../../plugins')
+export const defaultBundledRoot = (): string => {
+  const here = dirname(fileURLToPath(import.meta.url))
+  const packaged = resolve(here, '../../../plugins')
+  return existsSync(packaged) ? packaged : resolve(here, '../../../../../plugins')
+}
 
 const URL_RE = /^(https?:\/\/|ssh:\/\/|git:\/\/|file:\/\/|git@)|\.git$/
 
