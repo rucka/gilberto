@@ -164,14 +164,17 @@ describe('plugin', () => {
     expect(exit).toHaveBeenCalledWith(0)
   })
 
-  it.each(PLUGIN_ACTIONS)('AC-7: plugin %s prints canonical message, exit 0', async action => {
-    await run('plugin', action)
-    expect(err).toContain(
-      `plugin ${action} not yet implemented — Initiative #3 EP Plugin protocol (issue #15)`,
-    )
-    expect(out).toBe('')
-    expect(exit).toHaveBeenCalledWith(0)
-  })
+  it.each(PLUGIN_ACTIONS.filter(a => a !== 'install' && a !== 'remove'))(
+    'AC-7: plugin %s prints canonical message, exit 0',
+    async action => {
+      await run('plugin', action)
+      expect(err).toContain(
+        `plugin ${action} not yet implemented — Initiative #3 EP Plugin protocol (issue #15)`,
+      )
+      expect(out).toBe('')
+      expect(exit).toHaveBeenCalledWith(0)
+    },
+  )
 
   it('AC-8: bare plugin prints help and exits 0', async () => {
     await run('plugin')
@@ -188,8 +191,8 @@ describe('plugin', () => {
 
   it('sub-action options are parsed even though the handler no-ops', async () => {
     const p = createProgram()
-    await p.parseAsync(['node', 'gilberto', '--no-banner', 'plugin', 'install', 'src', '--force'])
-    expect(err).toContain(pluginPlaceholderMessage('install'))
+    await p.parseAsync(['node', 'gilberto', '--no-banner', 'plugin', 'update', '--dry-run'])
+    expect(err).toContain(pluginPlaceholderMessage('update'))
     expect(parsePluginCommand({ force: true }, ['install', 'src'])).toEqual({
       command: 'plugin',
       action: 'install',

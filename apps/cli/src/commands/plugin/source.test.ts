@@ -57,8 +57,6 @@ describe('resolveSource', () => {
   })
 
   it('clone failure -> error, no temp left', () => {
-    expect(() => resolveSource('file:///does/not/exist.git', bundled())).toThrow(
-      /git clone failed/,
-    )
+    expect(() => resolveSource('file:///does/not/exist.git', bundled())).toThrow(/git clone failed/)
   })
 })

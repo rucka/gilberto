@@ -5,7 +5,6 @@ import { describe, expect, it } from 'vitest'
 import { makeVault, SEED_PLUGINS as SEED } from './testkit.js'
 import { addRow, assertVault, hasPlugin, readRows, registryPath, removeRow } from './registry.js'
 
-
 const row = (name: string) => ({ name, version: '1.0.0', installed: '2026-01-01' })
 
 describe('registry', () => {
@@ -27,10 +26,7 @@ describe('registry', () => {
     expect(hasPlugin(vault, 'c')).toBe(false)
     expect(readRows(vault).map(r => r.name)).toEqual(['a', 'b'])
     expect(readFileSync(registryPath(vault), 'utf8')).toBe(
-      `${SEED}| a | 1.0.0 | 2026-01-01 |\n| b | 1.0.0 | 2026-01-01 |\n`.replace(
-        /\n\n$/,
-        '\n',
-      ),
+      `${SEED}| a | 1.0.0 | 2026-01-01 |\n| b | 1.0.0 | 2026-01-01 |\n`.replace(/\n\n$/, '\n'),
     )
   })
 
