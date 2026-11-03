@@ -4,5 +4,23 @@
   "author": {
     "name": "rucka"
   },
-  "skills": ["./skills/gilberto-process-vault-bootstrap"]
+  "skills": [
+    "./skills/gilberto-capability-fetch",
+    "./skills/gilberto-process-ingest",
+    "./skills/gilberto-process-vault-bootstrap",
+    "./skills/mechanic-forge-playbook",
+    "./skills/mechanic-forge-relationship-level",
+    "./skills/mechanic-forge-source",
+    "./skills/mechanic-forge-template",
+    "./skills/mechanic-forge-topic",
+    "./skills/mechanic-forge-type",
+    "./skills/mechanic-vault-collapse",
+    "./skills/mechanic-vault-new",
+    "./skills/mechanic-vault-promote",
+    "./skills/utility-download-html",
+    "./skills/utility-fetch-rss"
+  ],
+  "gilberto": {
+    "kind": "core"
+  }
 }
