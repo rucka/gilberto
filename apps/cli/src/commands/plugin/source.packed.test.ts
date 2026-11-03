@@ -6,6 +6,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -114,7 +115,7 @@ describe('r0-2 bundled plugins ship inside the CLI package', () => {
     expect(r.ok, r.out).toBe(true)
     const [dir] = JSON.parse(r.out) as string[]
     expect(dir).toBeDefined()
-    expect(relative(pkgDir, dir!).startsWith('..')).toBe(false)
+    expect(relative(realpathSync(pkgDir), realpathSync(dir!)).startsWith('..')).toBe(false)
     expect(existsSync(join(dir!, '.claude-plugin', 'plugin.json'))).toBe(true)
   })
 
