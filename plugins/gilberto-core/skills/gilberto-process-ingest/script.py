@@ -24,6 +24,7 @@ _N = r"(\d+(?:\.\d+)?|\.\d+)"
 THRESHOLD_LINE = re.compile(rf"^(?:[-*][ \t]+)?(?:`ingest-confidence:[ \t]*{_N}`(?:[ \t].*)?|ingest-confidence:[ \t]*{_N}[ \t]*)$")
 LOCK = ".ingest.lock"
 RUN = ".ingest.run"
+SUB = "intelligence"
 
 
 class Parser(result.ArgParser):
@@ -128,15 +129,20 @@ def _claim_run(ingest):
     return True
 
 
+def _dirs(ingest):
+    return [("", ingest), (f"{SUB}/", os.path.join(ingest, SUB))]
+
+
 def _scan(ingest, min_age):
     out = []
-    for n in sorted(os.listdir(ingest)):
-        p = os.path.join(ingest, n)
-        if n.startswith(".") or n.endswith(SIDECARS) or not os.path.isfile(p):
-            continue
-        if os.path.exists(p + ".error.md") or os.path.exists(p + CLASSIFICATION) or not _stable(p, min_age):
-            continue
-        out.append(n)
+    for prefix, d in _dirs(ingest):
+        for n in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+            p = os.path.join(d, n)
+            if n.startswith(".") or n.endswith(SIDECARS) or not os.path.isfile(p):
+                continue
+            if os.path.exists(p + ".error.md") or os.path.exists(p + CLASSIFICATION) or not _stable(p, min_age):
+                continue
+            out.append(prefix + n)
     return out
 
 
@@ -163,17 +169,20 @@ def _error(ingest, name, code, detail):
 
 def _status(ingest):
     return [
-        {"file": n[: -len(CLASSIFICATION)], "sidecar": f"_ingest/{n}"}
-        for n in sorted(os.listdir(ingest))
-        if n.endswith(CLASSIFICATION) and not n.startswith(".") and os.path.isfile(os.path.join(ingest, n[: -len(CLASSIFICATION)]))
+        {"file": prefix + n[: -len(CLASSIFICATION)], "sidecar": f"_ingest/{prefix}{n}"}
+        for prefix, d in _dirs(ingest)
+        for n in (sorted(os.listdir(d)) if os.path.isdir(d) else [])
+        if n.endswith(CLASSIFICATION) and not n.startswith(".") and os.path.isfile(os.path.join(d, n[: -len(CLASSIFICATION)]))
     ]
 
 
 def _source(root, ingest, name):
-    if os.path.basename(name) != name or name in ("", ".", ".."):
+    base = os.path.basename(name)
+    if base in ("", ".", "..") or name not in (base, f"{SUB}/{base}"):
         raise MechanicError("INVALID_PATH", input=name)
     src = vault_io.resolve(root, f"_ingest/{name}")
-    if os.path.dirname(src) != ingest:
+    real = os.path.realpath(ingest)
+    if os.path.dirname(src) not in {real, os.path.join(real, SUB)}:
         raise MechanicError("INVALID_PATH", input=name)
     if not os.path.isfile(src):
         raise MechanicError("NOT_FOUND", input=name)
@@ -185,7 +194,7 @@ def _archive(root, ingest, env, name, src, pillar, confidence):
     script = _find_skill(env, cap)
     if script is None:
         return _error(ingest, name, "ARCHIVE_MISSING", f"skill {cap} not installed")
-    target = _unique(root, pillar, name)
+    target = _unique(root, pillar, os.path.basename(name))
     r = subprocess.run(
         [sys.executable, script, f"--source={src}", f"--pillar={pillar}", f"--name={target}"],
         capture_output=True, text=True, env={**os.environ, **env},

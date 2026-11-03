@@ -5,7 +5,7 @@ description: Classify files dropped in `_ingest/` into a pillar (me, pulse, proj
 
 # gilberto-process-ingest
 
-CAPTURE step. You classify; `script.py` does every filesystem action (lock, stability, dispatch, collision suffix, sidecars). Never move, write or delete in the vault yourself. Paths confined to `$GILBERTO_ROOT/_ingest/`.
+CAPTURE step. You classify; `script.py` does every filesystem action (lock, stability, dispatch, collision suffix, sidecars). Never move, write or delete in the vault yourself. Paths confined to `$GILBERTO_ROOT/_ingest/` (top level and `_ingest/intelligence/`, listed/accepted as `intelligence/<file>`; archived under `<pillar>/<basename>`).
 
 ## First run: activation
 
