@@ -7,9 +7,10 @@ Each plugin ships `.claude-plugin/plugin.json`. Anthropic keys stay top-level; g
 | `name`, `description`    | string, required        |                                                                                |
 | `author`                 | `{ name }`, optional    |                                                                                |
 | `skills`                 | string[], default `[]`  | skill dirs; no duplicate name/path; each must exist                            |
+| `gilberto.skills`        | string[], optional      | extra skill dirs; validated with `skills` (no duplicates, must exist, symlinks resolved inside plugin dir) |
 | `gilberto.kind`          | enum: core, pillar, connector | required                                                                       |
 | `gilberto.pillar`        | string                  | required iff `kind` is `pillar`, forbidden otherwise                           |
-| `gilberto.playbooks`     | `{ "<pillar>/<event>": path }` | pillar segment must equal `gilberto.pillar` when set                    |
+| `gilberto.playbooks`     | `{ "<pillar>/<event>": path }` | pillar segment must equal `gilberto.pillar`; rejected when pillar unset                  |
 | `gilberto.templates`, `processes`, `capabilities` | string[] | optional                                                      |
 | `gilberto.preferences`   | string                  | optional                                                                       |
 | `gilberto.routes`        | `{ key: value }`        | optional                                                                       |
