@@ -32,6 +32,7 @@ Capabilities and utilities (e.g. `gilberto-capability-fetch`, connector utilitie
 | Skill | Purpose | Inputs |
 | --- | --- | --- |
 | `utility-download-html` | download a web article as clean Markdown to `_ingest/<slug>.md` with canonical frontmatter; idempotent, atomic | `--url` `[--force]` |
+| `utility-fetch-rss` | fetch an RSS/Atom feed, one Markdown file per new item in `_ingest/intelligence/`; incremental (`_state.json`), idempotent, atomic | `--url` `[--profile]` |
 
 ## Mechanics — vault entities
 
