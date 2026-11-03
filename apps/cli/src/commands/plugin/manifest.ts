@@ -83,7 +83,7 @@ function pillarErrors({ kind, pillar, playbooks = {} }: Manifest['gilberto']): s
     )
 }
 
-function insidePluginDir(dir: string, skill: string): boolean {
+export function insidePluginDir(dir: string, skill: string): boolean {
   try {
     const rel = relative(realpathSync(dir), realpathSync(resolve(dir, skill)))
     return !(rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel))
