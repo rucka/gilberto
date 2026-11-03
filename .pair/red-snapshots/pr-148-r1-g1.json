@@ -1,0 +1,185 @@
+{
+  "$meta": {
+    "pr": "148",
+    "phase": "r1-g1",
+    "base": "7a70808f31c76ff99cd45c0ca66b35160618c22e",
+    "trailer": "Pair-RED-Snapshot: pr=148; phase=r1-g1; base=7a70808f31c76ff99cd45c0ca66b35160618c22e; manifest=.pair/red-snapshots/pr-148-r1-g1.json",
+    "artifacts": [
+      "apps/cli/src/commands/plugin/install.version.test.ts"
+    ]
+  },
+  "status": "red",
+  "mode": "remediation",
+  "inputHead": "7a70808f31c76ff99cd45c0ca66b35160618c22e",
+  "sourceOfTruth": "apps/cli/src/commands/plugin/registry.ts + install.ts",
+  "inventory": [
+    {
+      "id": "r0-1",
+      "producer": "addRow/readRows in registry.ts (row grammar `| name | version | installed |`), fed by installPlugin versionOf(manifest)",
+      "inputs": [
+        "manifest.version (untrusted string)"
+      ],
+      "representations": [
+        "anatomy/plugins.md table"
+      ],
+      "consumers": [
+        "readRows",
+        "hasPlugin",
+        "removeRow",
+        "plugin list"
+      ],
+      "classes": [
+        "version with | and newline (ghost row)",
+        "version with | only (column shift)",
+        "version with newline only",
+        "plain semver (control)",
+        "force reinstall of installed plugin with injecting version"
+      ],
+      "interactions": [
+        "install -> addRow -> readRows",
+        "install --force: removeRow(old) -> addRow(new) with injecting version"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "apps/cli plugin registry row writer",
+    "mode": "behavioral",
+    "allowedPaths": [
+      "apps/cli/src/commands/plugin/install.ts",
+      "apps/cli/src/commands/plugin/registry.ts"
+    ]
+  },
+  "matrix": [
+    {
+      "id": "W-r0-1a",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "version '1.0 | x |\\n| ghost | 9 | 2020-01-01'",
+      "oracle": "apps/cli/src/commands/plugin/install.version.test.ts W-r0-1a",
+      "file": "apps/cli/src/commands/plugin/install.version.test.ts",
+      "expected": "install refused (PluginInstallError, registry unchanged) or readRows == [p] with installed=now",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "W-r0-1b",
+      "kind": "witness",
+      "baseline": "red",
+      "condition": "version '1.0 | evil'",
+      "oracle": "apps/cli/src/commands/plugin/install.version.test.ts W-r0-1b",
+      "file": "apps/cli/src/commands/plugin/install.version.test.ts",
+      "expected": "refused or single row p with installed=2026-01-02",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "B-r0-1c",
+      "kind": "boundary",
+      "baseline": "red",
+      "condition": "version '1.0\\n| ghost | 9 | 2020-01-01 |' (newline only)",
+      "oracle": "apps/cli/src/commands/plugin/install.version.test.ts B-r0-1c",
+      "file": "apps/cli/src/commands/plugin/install.version.test.ts",
+      "expected": "refused or single row p",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "C-r0-1d",
+      "kind": "control",
+      "baseline": "pass",
+      "condition": "version '1.2.3'",
+      "oracle": "apps/cli/src/commands/plugin/install.version.test.ts C-r0-1d",
+      "file": "apps/cli/src/commands/plugin/install.version.test.ts",
+      "expected": "one row {p,1.2.3,now}",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "W-r0-1e",
+      "kind": "interaction",
+      "baseline": "red",
+      "condition": "install p 1.0.0 then force reinstall with version '1.0 | x |\\n| ghost | 9 | 2020-01-01'",
+      "oracle": "apps/cli/src/commands/plugin/install.version.test.ts W-r0-1e",
+      "file": "apps/cli/src/commands/plugin/install.version.test.ts",
+      "expected": "refused with registry bytes == pre-force and contributed files intact, or readRows == [p] installed=NOW",
+      "covers": [
+        "r0-1"
+      ]
+    }
+  ],
+  "redTests": [
+    {
+      "file": "apps/cli/src/commands/plugin/install.version.test.ts",
+      "kind": "test",
+      "baseline": "red",
+      "sha256": "sha256:da636ab0d07f3acd264aeb40352b529610cd310d70d64fb43ad8008edc7c143d",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/plugin/install.version.test.ts",
+      "observed": "4 failed | 1 passed: W-r0-1a expected [p,ghost] to deeply equal [p]; W-r0-1b expected evil to be 2026-01-02; B-r0-1c expected [p,ghost] to deeply equal [p]; W-r0-1e expected [p,ghost] to deeply equal [p]"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "findings": [
+          "r0-1"
+        ],
+        "owner": "apps/cli plugin registry row writer",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "apps/cli/src/commands/plugin/install.ts",
+          "apps/cli/src/commands/plugin/registry.ts"
+        ],
+        "oracle": "readRows",
+        "dependsOn": []
+      },
+      {
+        "groupId": "r1-g2",
+        "findings": [
+          "r0-2"
+        ],
+        "owner": "apps/cli package bundling + defaultBundledRoot",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "apps/cli/src/commands/plugin/source.ts",
+          "apps/cli/package.json",
+          "apps/cli/scripts/postbuild.js"
+        ],
+        "oracle": "defaultBundledRoot + package.json files",
+        "dependsOn": []
+      },
+      {
+        "groupId": "r1-g3",
+        "findings": [
+          "r0-3"
+        ],
+        "owner": "handler temp cleanup guard",
+        "mode": "test",
+        "allowedPaths": [],
+        "oracle": "mutation of handler.ts cleanup",
+        "dependsOn": []
+      }
+    ],
+    "carried": []
+  },
+  "groupId": "r1-g1",
+  "findings": {
+    "received": [
+      "r0-1",
+      "r0-2",
+      "r0-3"
+    ],
+    "covered": [
+      "r0-1"
+    ]
+  },
+  "changedRows": [
+    "W-r0-1e"
+  ],
+  "formatGate": "pnpm prettier:check exit 0 at attempt 2"
+}
