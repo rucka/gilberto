@@ -1,0 +1,101 @@
+{
+  "$meta": {
+    "pr": "144",
+    "phase": "r1-g2",
+    "base": "5e4a5d2cc8827167354acdfd90c837dff177e1a9",
+    "trailer": "Pair-RED-Snapshot: pr=144; phase=r1-g2; base=5e4a5d2cc8827167354acdfd90c837dff177e1a9; manifest=.pair/red-snapshots/pr-144-r1-g2.json",
+    "artifacts": []
+  },
+  "phase": "r1-g2",
+  "mode": "remediation",
+  "inputHead": "5e4a5d2cc8827167354acdfd90c837dff177e1a9",
+  "sourceOfTruth": "plugins/gilberto-core/skills/gilberto-capability-fetch/script.py::_utility_dirs (line 92-93)",
+  "inventory": [
+    {
+      "id": "r0-4",
+      "producer": "gilberto-capability-fetch/script.py::_utility_dirs",
+      "inputs": [
+        "GILBERTO_UTILITY_PATH env",
+        "SKILLS dir"
+      ],
+      "representations": [
+        "SKILL.md:17 prose"
+      ],
+      "consumers": [
+        "readers/assistants predicting utility resolution"
+      ],
+      "classes": [
+        "GILBERTO_UTILITY_PATH set: its dirs searched first, then SKILLS",
+        "unset/empty: only SKILLS"
+      ],
+      "interactions": []
+    }
+  ],
+  "fixScope": {
+    "owner": "gilberto-capability-fetch",
+    "mode": "doc",
+    "allowedPaths": [
+      "plugins/gilberto-core/skills/gilberto-capability-fetch/SKILL.md"
+    ]
+  },
+  "matrix": [],
+  "checklist": [
+    {
+      "id": "C-r0-4",
+      "finding": "r0-4",
+      "requirement": "SKILL.md:17 states utilities are searched in `$GILBERTO_UTILITY_PATH` (`:`-separated skill dirs) FIRST, then the core skills dir; never the reverse order",
+      "authority": "plugins/gilberto-core/skills/gilberto-capability-fetch/script.py:93 `_utility_dirs` = GILBERTO_UTILITY_PATH dirs + [SKILLS]"
+    }
+  ],
+  "redTests": [],
+  "testExempt": true,
+  "exemptionRationale": "doc group: prose-only fix, acceptance by checklist",
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "findings": [
+          "r0-1",
+          "r0-2",
+          "r0-3"
+        ],
+        "owner": "utility-fetch-rss",
+        "mode": "behavioral",
+        "allowedPaths": [
+          "plugins/gilberto-core/skills/utility-fetch-rss/script.py",
+          "plugins/gilberto-core/skills/utility-fetch-rss/SKILL.md",
+          "plugins/gilberto-core/skills/gilberto-capability-fetch/script.py",
+          "plugins/gilberto-core/skills/gilberto-capability-fetch/SKILL.md",
+          "plugins/gilberto-core/skills/gilberto-process-ingest/script.py",
+          "plugins/gilberto-core/skills/gilberto-process-ingest/SKILL.md"
+        ],
+        "dependsOn": [],
+        "oracle": "plugins/gilberto-core/skills/utility-fetch-rss/tests/test_us72_r1.py"
+      },
+      {
+        "groupId": "r1-g2",
+        "findings": [
+          "r0-4"
+        ],
+        "owner": "gilberto-capability-fetch",
+        "mode": "doc",
+        "allowedPaths": [
+          "plugins/gilberto-core/skills/gilberto-capability-fetch/SKILL.md"
+        ],
+        "dependsOn": [
+          "r1-g1"
+        ],
+        "oracle": "checklist: SKILL.md:17 states GILBERTO_UTILITY_PATH searched first, then core skills dir (script.py _utility_dirs)"
+      }
+    ],
+    "carried": []
+  },
+  "remediationBatchId": "r1",
+  "groupId": "r1-g2",
+  "notes": {
+    "worked": [
+      "w-1",
+      "w-2"
+    ]
+  }
+}
