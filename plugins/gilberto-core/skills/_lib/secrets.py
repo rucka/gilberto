@@ -111,6 +111,10 @@ def set(provider, profile, value):  # noqa: A001
     provider, profile = _key(provider, profile)
     _check(value)
     if _kc("set", f"gilberto/{provider}/{profile}", value.encode().hex()):
+        try:
+            os.remove(_path(provider, profile))
+        except FileNotFoundError:
+            pass
         return
     _write_file(_path(provider, profile), value)
 
@@ -131,7 +135,14 @@ def get(provider, profile):
 
 def delete(provider, profile):
     provider, profile = _key(provider, profile)
-    _kc("delete", f"gilberto/{provider}/{profile}")
+    cmds = _cmds(f"gilberto/{provider}/{profile}")
+    if cmds:
+        try:
+            r = _run(cmds[3])
+        except (OSError, subprocess.SubprocessError) as e:
+            raise ConnectorError("provider", reason=f"keychain delete failed: {type(e).__name__}") from e
+        if r.returncode not in (0, 44):
+            raise ConnectorError("provider", reason=f"keychain delete failed (exit {r.returncode})")
     try:
         os.remove(_path(provider, profile))
     except FileNotFoundError:
