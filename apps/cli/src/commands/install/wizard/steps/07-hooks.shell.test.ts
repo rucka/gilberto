@@ -296,3 +296,18 @@ describe('ROW-r0-3 PreCompact transcript', () => {
     },
   )
 })
+
+describe('marketplace skills without local files', () => {
+  it.each(EVENTS)('%s dispatches from the vault with its process arguments', async ev => {
+    const { base, root, dispatcher } = await install('My Vault')
+    const log = join(base, 'marketplace.log')
+    const bin = await stubBin('pwd > "$LOG"; printf "%s\\n" "$@" >> "$LOG"')
+    const input = JSON.stringify({ transcript_path: '/tmp/a transcript.jsonl' })
+    const result = run([dispatcher(ev)], { PATH: PATHS(bin), LOG: log }, input)
+    const logged = await waitFor(log)
+    expect(result.status).toBe(0)
+    expect(logged).toContain(await realpath(root))
+    const args = ev === 'SessionEnd' ? ' day' : ev === 'PreCompact' ? ' /tmp/a transcript.jsonl' : ''
+    expect(logged).toContain(`/${SKILLS[ev]}${args}`)
+  })
+})
