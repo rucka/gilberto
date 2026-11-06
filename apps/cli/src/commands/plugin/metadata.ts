@@ -12,8 +12,11 @@ export const pluginMetadata = {
     {
       name: 'install',
       description: 'install a plugin from a source',
-      usage: '<source> [options]',
-      options: [{ flags: '--force', description: 'overwrite an existing plugin' }],
+      usage: '<name|repo-url> [options]',
+      options: [
+        { flags: '--force', description: 'overwrite an already installed plugin' },
+        { flags: '--dry-run', description: 'show what would change without writing' },
+      ],
     },
     {
       name: 'update',
@@ -25,9 +28,16 @@ export const pluginMetadata = {
       name: 'remove',
       description: 'remove an installed plugin',
       usage: '<name> [options]',
-      options: [{ flags: '--purge', description: 'also delete plugin data' }],
+      options: [
+        { flags: '--purge', description: 'also delete user-modified contributions' },
+        { flags: '--dry-run', description: 'show what would change without writing' },
+      ],
     },
   ],
-  examples: ['gilberto plugin list', 'gilberto plugin install ./my-plugin --force'],
-  notes: ['placeholder: real implementation tracked in issue #15'],
+  examples: ['gilberto plugin list', 'gilberto plugin install gilberto-core --dry-run'],
+  notes: [
+    'install/remove run in the current directory, which must be a vault',
+    'skills are never copied: install them with /plugin install <name>',
+    'list/enable/disable/update are placeholders (issue #15)',
+  ],
 } as const satisfies CommandMetadata
