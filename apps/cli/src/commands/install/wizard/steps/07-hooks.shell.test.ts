@@ -313,6 +313,37 @@ describe('marketplace skills without local files', () => {
 })
 
 describe('marketplace hook guards and failures', () => {
+  it.each(
+    EVENTS.flatMap(ev => (['dispatcher', 'settings'] as const).map(level => [ev, level] as const)),
+  )('ROW-r1-g1-%s-%s returns before Claude finishes', async (ev, level) => {
+    const { base, dispatcher, command } = await install(`async-${ev}-${level}`)
+    const file = dispatcher(ev)
+    if (process.env['GILBERTO_SYNC_PROBE'] === 'dispatcher') {
+      const original = await readFile(file, 'utf8')
+      const mutated = original.replace(') &', ')')
+      expect(mutated).not.toBe(original)
+      await writeFile(file, mutated)
+    }
+    const started = join(base, 'started')
+    const finished = join(base, 'finished')
+    const bin = await stubBin('echo started > "$STARTED"; sleep 2; echo finished > "$FINISHED"')
+    const installed = command(ev)
+    const shellCommand =
+      process.env['GILBERTO_SYNC_PROBE'] === 'settings' ? `${installed}; sleep 2` : installed
+    const args = level === 'settings' ? ['-c', shellCommand] : [file]
+    const result = spawnSync('sh', args, {
+      encoding: 'utf8',
+      input: '',
+      timeout: 1200,
+      env: { PATH: PATHS(bin), STARTED: started, FINISHED: finished },
+    })
+    const finishedAtReturn = await read(finished)
+    expect(await waitFor(started)).toContain('started')
+    expect(await waitFor(finished)).toContain('finished')
+    expect(result.status).toBe(0)
+    expect(finishedAtReturn).toBe('')
+  })
+
   it('disabled SessionStart does not invoke Claude', async () => {
     const { base, root, dispatcher } = await install('disabled')
     await mkdir(join(root, 'anatomy'), { recursive: true })

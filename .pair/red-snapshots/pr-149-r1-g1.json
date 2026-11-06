@@ -1,0 +1,229 @@
+{
+  "$meta": {
+    "pr": "149",
+    "phase": "r1-g1",
+    "base": "094f036d575f941a86e0bd21707820c2c2480bd4",
+    "trailer": "Pair-RED-Snapshot: pr=149; phase=r1-g1; base=094f036d575f941a86e0bd21707820c2c2480bd4; manifest=.pair/red-snapshots/pr-149-r1-g1.json",
+    "artifacts": [
+      "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts"
+    ]
+  },
+  "status": "red",
+  "mode": "remediation",
+  "inputHead": "094f036d575f941a86e0bd21707820c2c2480bd4",
+  "sourceOfTruth": "AC4 and generated dispatcher in apps/cli/src/commands/install/wizard/steps/07-hooks.ts",
+  "inventory": [
+    {
+      "id": "r0-1",
+      "producer": "hooksStep and renderDispatcher: generated shell dispatcher",
+      "inputs": [
+        "SessionStart",
+        "PreCompact",
+        "SessionEnd",
+        "running Claude stub"
+      ],
+      "representations": [
+        "generated hook shell script",
+        "installed settings command"
+      ],
+      "consumers": [
+        "Claude hook caller"
+      ],
+      "classes": [
+        "each of three hook events",
+        "asynchronous dispatcher",
+        "synchronous mutation"
+      ],
+      "interactions": [
+        "hook exits while Claude remains running"
+      ]
+    },
+    {
+      "id": "r0-2",
+      "producer": "renderDispatcher in 07-hooks.ts and hook documentation",
+      "inputs": [
+        "missing marketplace skill"
+      ],
+      "representations": [
+        "apps/cli/README.md",
+        "apps/website/content/docs/getting-started/what-install-writes.mdx",
+        "apps/website/content/docs/a-day-with-gilberto.mdx",
+        ".pair/adoption/decision-log/2026-10-27-spec-assessment-outcomes.md"
+      ],
+      "consumers": [
+        "installation documentation readers"
+      ],
+      "classes": [
+        "marketplace discovery",
+        "asynchronous zero exit",
+        "suppressed failure output"
+      ],
+      "interactions": [
+        "missing skill and suppressed subprocess output"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "hook shell tests",
+    "mode": "test",
+    "allowedPaths": []
+  },
+  "matrix": [
+    {
+      "id": "ROW-r1-g1-SessionStart",
+      "kind": "witness",
+      "baseline": "pass",
+      "condition": "SessionStart with slow Claude stub; compare synchronous mutation",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "expected": "Current exits zero before Claude finishes; synchronous dispatcher fails",
+      "covers": [
+        "r0-1"
+      ],
+      "observed": "Current: 6 passed. Dispatcher mutation: 6 failed.",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "mutationCommand": "env GILBERTO_SYNC_PROBE=dispatcher pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1"
+    },
+    {
+      "id": "ROW-r1-g1-PreCompact",
+      "kind": "witness",
+      "baseline": "pass",
+      "condition": "PreCompact with slow Claude stub; compare synchronous mutation",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "expected": "Current exits zero before Claude finishes; synchronous dispatcher fails",
+      "covers": [
+        "r0-1"
+      ],
+      "observed": "Current: 6 passed. Dispatcher mutation: 6 failed.",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "mutationCommand": "env GILBERTO_SYNC_PROBE=dispatcher pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1"
+    },
+    {
+      "id": "ROW-r1-g1-SessionEnd",
+      "kind": "witness",
+      "baseline": "pass",
+      "condition": "SessionEnd with slow Claude stub; compare synchronous mutation",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "expected": "Current exits zero before Claude finishes; synchronous dispatcher fails",
+      "covers": [
+        "r0-1"
+      ],
+      "observed": "Current: 6 passed. Dispatcher mutation: 6 failed.",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "mutationCommand": "env GILBERTO_SYNC_PROBE=dispatcher pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1"
+    },
+    {
+      "id": "ROW-r1-g1-SessionStart-settings",
+      "kind": "witness",
+      "baseline": "pass",
+      "condition": "SessionStart installed command with slow Claude stub",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "mutationCommand": "env GILBERTO_SYNC_PROBE=settings pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "expected": "Current exits zero before Claude finishes; synchronous command fails",
+      "observed": "Current: 6 passed. Command mutation: 3 settings cases failed.",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r1-g1-PreCompact-settings",
+      "kind": "witness",
+      "baseline": "pass",
+      "condition": "PreCompact installed command with slow Claude stub",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "mutationCommand": "env GILBERTO_SYNC_PROBE=settings pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "expected": "Current exits zero before Claude finishes; synchronous command fails",
+      "observed": "Current: 6 passed. Command mutation: 3 settings cases failed.",
+      "covers": [
+        "r0-1"
+      ]
+    },
+    {
+      "id": "ROW-r1-g1-SessionEnd-settings",
+      "kind": "witness",
+      "baseline": "pass",
+      "condition": "SessionEnd installed command with slow Claude stub",
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "oracle": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "mutationCommand": "env GILBERTO_SYNC_PROBE=settings pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "expected": "Current exits zero before Claude finishes; synchronous command fails",
+      "observed": "Current: 6 passed. Command mutation: 3 settings cases failed.",
+      "covers": [
+        "r0-1"
+      ]
+    }
+  ],
+  "redTests": [
+    {
+      "file": "apps/cli/src/commands/install/wizard/steps/07-hooks.shell.test.ts",
+      "kind": "test",
+      "baseline": "pass",
+      "sha256": "sha256:bb90995a641f5dd79d4629af514d1da3e701f13543e7932b2ef3a080b9b555eb",
+      "command": "pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+      "observed": "6 passed, 53 skipped"
+    }
+  ],
+  "testExempt": false,
+  "plan": {
+    "groups": [
+      {
+        "groupId": "r1-g1",
+        "owner": "hook shell tests",
+        "mode": "test",
+        "allowedPaths": [],
+        "oracle": "generated dispatcher process boundary",
+        "findings": [
+          "r0-1"
+        ],
+        "dependsOn": []
+      },
+      {
+        "groupId": "r1-g2",
+        "owner": "hook documentation",
+        "mode": "doc",
+        "allowedPaths": [
+          "apps/cli/README.md",
+          "apps/website/content/docs/getting-started/what-install-writes.mdx",
+          "apps/website/content/docs/a-day-with-gilberto.mdx",
+          ".pair/adoption/decision-log/2026-10-27-spec-assessment-outcomes.md"
+        ],
+        "oracle": "renderDispatcher in 07-hooks.ts",
+        "findings": [
+          "r0-2"
+        ],
+        "dependsOn": []
+      }
+    ],
+    "carried": []
+  },
+  "changedRows": [
+    "r0-1-tscheck",
+    "r0-1-settings",
+    "r0-1-oracles",
+    "contract-hash-field",
+    "ROW-r1-g1-SessionStart",
+    "ROW-r1-g1-PreCompact",
+    "ROW-r1-g1-SessionEnd",
+    "ROW-r1-g1-SessionStart-settings",
+    "ROW-r1-g1-PreCompact-settings",
+    "ROW-r1-g1-SessionEnd-settings"
+  ],
+  "validation": {
+    "typescript": "pnpm --dir apps/cli ts:check",
+    "typescriptObserved": "passed",
+    "lint": "pnpm --dir apps/cli lint",
+    "lintObserved": "passed",
+    "dispatcherMutation": "env GILBERTO_SYNC_PROBE=dispatcher pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+    "dispatcherMutationObserved": "6 failed with expected timeout status",
+    "settingsMutation": "env GILBERTO_SYNC_PROBE=settings pnpm --dir apps/cli exec vitest run src/commands/install/wizard/steps/07-hooks.shell.test.ts -t ROW-r1-g1",
+    "settingsMutationObserved": "3 settings cases failed with expected timeout status"
+  },
+  "contractHash": "sha256:b4cdff4a8e81ea486f90c518589c8cac4f79b4090ffecb7af3e4ae591d74318f"
+}
