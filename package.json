@@ -40,9 +40,13 @@
     "pair:install": "pair-cli install",
     "pair:update": "pair-cli update",
     "pair-run:refine": "pair-cli run --engine claude --autonomous --until ready --prepare hold-never",
+    "pair-run:refine:codex": "pair-cli run --engine codex --autonomous --until ready --prepare hold-never",
     "pair-run:dev": "pair-cli run --engine claude --autonomous --until merged --prepare hold-always",
+    "pair-run:dev:codex": "pair-cli run --engine codex --autonomous --until merged --prepare hold-always",
     "pair-run:full": "pair-cli run --engine claude --autonomous --until merged --prepare hold-never",
-    "pair-run:watch": "pair-cli run --engine claude --autonomous --until merged --prepare hold-never --watch --interval 10m"
+    "pair-run:full:codex": "pair-cli run --engine codex --autonomous --until merged --prepare hold-never",
+    "pair-run:watch": "pair-cli run --engine claude --autonomous --until merged --prepare hold-never --watch --interval 10m",
+    "pair-run:watch:codex": "pair-cli run --engine codex --autonomous --until merged --prepare hold-never --watch --interval 10m"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
