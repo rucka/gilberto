@@ -306,7 +306,8 @@ describe('marketplace skills without local files', () => {
     const logged = await waitFor(log)
     expect(result.status).toBe(0)
     expect([root, await realpath(root)]).toContain(logged.split('\n')[0])
-    const args = ev === 'SessionEnd' ? ' day' : ev === 'PreCompact' ? ' /tmp/a transcript.jsonl' : ''
+    const args =
+      ev === 'SessionEnd' ? ' day' : ev === 'PreCompact' ? ' /tmp/a transcript.jsonl' : ''
     expect(logged).toContain(`/${SKILLS[ev]}${args}`)
   })
 })

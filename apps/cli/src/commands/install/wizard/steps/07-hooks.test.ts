@@ -113,6 +113,8 @@ describe('step 7 hooks', () => {
     await writeFile(join(root, 'anatomy/preferences.md'), '- session-start: off\n')
     const start = join(root, 's.sh')
     await writeFile(start, renderDispatcher(root, 'gilberto.session-start'))
-    expect(spawnSync('sh', [start], { encoding: 'utf8', env: { PATH: '/usr/bin:/bin' } }).stderr).toBe('')
+    expect(
+      spawnSync('sh', [start], { encoding: 'utf8', env: { PATH: '/usr/bin:/bin' } }).stderr,
+    ).toBe('')
   })
 })
