@@ -1,0 +1,82 @@
+{
+  "$meta": {
+    "pr": "149",
+    "phase": "r1-g2",
+    "base": "f5528f1fced26f70dfcd66f43173672cb6ebc812",
+    "trailer": "Pair-RED-Snapshot: pr=149; phase=r1-g2; base=f5528f1fced26f70dfcd66f43173672cb6ebc812; manifest=.pair/red-snapshots/pr-149-r1-g2.json",
+    "artifacts": []
+  },
+  "status": "red",
+  "mode": "remediation",
+  "inputHead": "f5528f1fced26f70dfcd66f43173672cb6ebc812",
+  "sourceOfTruth": "apps/cli/src/commands/install/wizard/steps/07-hooks.ts: renderDispatcher invokes claude -p in background with stdout/stderr redirected to /dev/null, then exits 0; it has no local skill-file guard or missing-skill diagnostic.",
+  "inventory": [
+    {
+      "id": "r0-2",
+      "producer": "renderDispatcher and the four documentation locations",
+      "inputs": [
+        "missing target skill",
+        "marketplace resolution",
+        "Claude failure"
+      ],
+      "representations": [
+        "apps/cli/README.md",
+        "apps/website/content/docs/getting-started/what-install-writes.mdx",
+        "apps/website/content/docs/a-day-with-gilberto.mdx",
+        ".pair/adoption/decision-log/2026-10-27-spec-assessment-outcomes.md"
+      ],
+      "consumers": [
+        "CLI and website documentation readers",
+        "decision-log readers"
+      ],
+      "classes": [
+        "existing skill",
+        "missing skill",
+        "Claude failure",
+        "historical decision"
+      ],
+      "interactions": [
+        "background invocation and suppressed failure output"
+      ]
+    }
+  ],
+  "fixScope": {
+    "owner": "hook documentation",
+    "mode": "doc",
+    "allowedPaths": [
+      "apps/cli/README.md",
+      "apps/website/content/docs/getting-started/what-install-writes.mdx",
+      "apps/website/content/docs/a-day-with-gilberto.mdx",
+      ".pair/adoption/decision-log/2026-10-27-spec-assessment-outcomes.md"
+    ]
+  },
+  "checklist": [
+    {
+      "id": "DOC-r0-2-1",
+      "finding": "r0-2",
+      "requirement": "In apps/cli/README.md: remove the promise of a missing-skill diagnostic and accurately describe marketplace skill discovery, asynchronous dispatch, zero exit and suppressed subprocess output",
+      "authority": "apps/cli/src/commands/install/wizard/steps/07-hooks.ts: renderDispatcher invokes claude -p in background with stdout/stderr redirected to /dev/null, then exits 0; it has no local skill-file guard or missing-skill diagnostic."
+    },
+    {
+      "id": "DOC-r0-2-2",
+      "finding": "r0-2",
+      "requirement": "In apps/website/content/docs/getting-started/what-install-writes.mdx: remove the promise of a missing-skill diagnostic and accurately describe marketplace skill discovery, asynchronous dispatch, zero exit and suppressed subprocess output",
+      "authority": "apps/cli/src/commands/install/wizard/steps/07-hooks.ts: renderDispatcher invokes claude -p in background with stdout/stderr redirected to /dev/null, then exits 0; it has no local skill-file guard or missing-skill diagnostic."
+    },
+    {
+      "id": "DOC-r0-2-3",
+      "finding": "r0-2",
+      "requirement": "In apps/website/content/docs/a-day-with-gilberto.mdx: remove the promise of a missing-skill diagnostic and accurately describe marketplace skill discovery, asynchronous dispatch, zero exit and suppressed subprocess output",
+      "authority": "apps/cli/src/commands/install/wizard/steps/07-hooks.ts: renderDispatcher invokes claude -p in background with stdout/stderr redirected to /dev/null, then exits 0; it has no local skill-file guard or missing-skill diagnostic."
+    },
+    {
+      "id": "DOC-r0-2-4",
+      "finding": "r0-2",
+      "requirement": "In .pair/adoption/decision-log/2026-10-27-spec-assessment-outcomes.md: annotate the historical missing-skill diagnostic as superseded, preserving the decision history",
+      "authority": "apps/cli/src/commands/install/wizard/steps/07-hooks.ts: renderDispatcher invokes claude -p in background with stdout/stderr redirected to /dev/null, then exits 0; it has no local skill-file guard or missing-skill diagnostic."
+    }
+  ],
+  "testExempt": true,
+  "exemptionRationale": "Prose-only documentation remediation; acceptance is the checklist.",
+  "contractHash": "sha256:83b09e557c946f8ee174da0faa92e7b0823027eaaffa61c2b2cd973d011d6899"
+}
