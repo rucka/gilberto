@@ -1,19 +1,47 @@
 {
   "name": "economico-codex",
-  "description": "codex: gpt-6.1-sol medium su prepare/validate/implement/green/merge, high solo su verify; luna per contract",
-  "defaults": { "engine": "codex", "model": "balanced", "effort": "medium", "context": "fresh" },
+  "description": "codex: terra (cost/perf) on prepare/validate/implement/green/merge, sol high only on verify, luna for contract; astra (frontier, highest cost) unused",
+  "defaults": {
+    "engine": "codex",
+    "model": "balanced",
+    "effort": "medium",
+    "context": "fresh"
+  },
   "modelClasses": {
     "cheap": "gpt-6-luna",
-    "balanced": "gpt-6.1-sol",
+    "balanced": "gpt-6.1-terra",
     "frontier": "gpt-6.1-sol"
   },
   "stages": {
-    "contract": { "model": "cheap", "effort": "low" },
-    "prepare": { "model": "balanced", "effort": "medium", "context": "reuse" },
-    "validate": { "model": "balanced", "effort": "high" },
-    "implement": { "model": "balanced", "effort": "medium" },
-    "green": { "model": "balanced", "effort": "medium", "context": "reuse" },
-    "verify": { "model": "frontier", "effort": "high" },
-    "merge": { "model": "balanced", "effort": "low" }
+    "contract": {
+      "model": "cheap",
+      "effort": "low"
+    },
+    "prepare": {
+      "model": "balanced",
+      "effort": "medium",
+      "context": "reuse"
+    },
+    "validate": {
+      "model": "balanced",
+      "effort": "high"
+    },
+    "implement": {
+      "model": "balanced",
+      "effort": "medium"
+    },
+    "green": {
+      "model": "balanced",
+      "effort": "medium",
+      "context": "reuse"
+    },
+    "verify": {
+      "model": "frontier",
+      "effort": "high"
+    },
+    "merge": {
+      "model": "balanced",
+      "effort": "low"
+    }
   }
 }
