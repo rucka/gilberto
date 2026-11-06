@@ -310,3 +310,36 @@ describe('marketplace skills without local files', () => {
     expect(logged).toContain(`/${SKILLS[ev]}${args}`)
   })
 })
+
+describe('marketplace hook guards and failures', () => {
+  it('disabled SessionStart does not invoke Claude', async () => {
+    const { base, root, dispatcher } = await install('disabled')
+    await mkdir(join(root, 'anatomy'), { recursive: true })
+    await writeFile(join(root, 'anatomy/preferences.md'), '- session-start: off\n')
+    const log = join(base, 'log')
+    const bin = await stubBin('echo called > "$LOG"')
+    expect(run([dispatcher('SessionStart')], { PATH: PATHS(bin), LOG: log }).status).toBe(0)
+    await sleep(300)
+    expect(await read(log)).toBe('')
+  })
+  it('same-day SessionEnd does not invoke Claude twice', async () => {
+    const { base, dispatcher } = await install('stamp')
+    const log = join(base, 'log')
+    const bin = await stubBin('echo called >> "$LOG"')
+    const env = { PATH: PATHS(bin), LOG: log }
+    expect(run([dispatcher('SessionEnd')], env).status).toBe(0)
+    await waitFor(log)
+    expect(run([dispatcher('SessionEnd')], env).status).toBe(0)
+    await sleep(300)
+    expect((await read(log)).trim()).toBe('called')
+  })
+  it.each(EVENTS)('%s exits zero when Claude is missing or fails', async ev => {
+    const missing = await install(`missing-${ev}`)
+    expect(run([missing.dispatcher(ev)]).status).toBe(0)
+    const failed = await install(`failed-${ev}`)
+    const log = join(failed.base, 'failed.log')
+    const bin = await stubBin('echo called > "$LOG"; exit 1')
+    expect(run([failed.dispatcher(ev)], { PATH: PATHS(bin), LOG: log }).status).toBe(0)
+    expect(await waitFor(log)).toContain('called')
+  })
+})
