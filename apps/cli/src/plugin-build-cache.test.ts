@@ -10,7 +10,11 @@ const run = (cmd: string, args: string[]) =>
 describe('generated apps/cli/plugins (r1-5)', () => {
   it('is gitignored', () => {
     expect(() =>
-      run('git', ['check-ignore', '-q', 'apps/cli/plugins/gilberto-core/.claude-plugin/plugin.json']),
+      run('git', [
+        'check-ignore',
+        '-q',
+        'apps/cli/plugins/gilberto-core/.claude-plugin/plugin.json',
+      ]),
     ).not.toThrow()
   })
 
@@ -20,6 +24,8 @@ describe('generated apps/cli/plugins (r1-5)', () => {
     ) as { tasks: { taskId: string; outputs: string[]; inputs: Record<string, string> }[] }
     const task = dry.tasks.find(t => t.taskId === 'gilberto#build')!
     expect(task.outputs).toContain('plugins/**')
-    expect(Object.keys(task.inputs)).toContain('../../plugins/gilberto-core/.claude-plugin/plugin.json')
+    expect(Object.keys(task.inputs)).toContain(
+      '../../plugins/gilberto-core/.claude-plugin/plugin.json',
+    )
   }, 60_000)
 })
