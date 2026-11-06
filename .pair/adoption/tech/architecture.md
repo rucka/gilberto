@@ -136,7 +136,7 @@ See [`adr/0003-connector-plugins.md`](adr/0003-connector-plugins.md): plugins pe
 - Claude Code hooks: SessionStart (optional `next`) · PreCompact (snapshot) · SessionEnd (`reflect day`)
 - launchd / cron / systemd: 07:00 morning-briefing · 22:00 reflect-day · Sun 22:00 reflect-week · 1st-of-month · Jan 1 · periodic `fetch`
 - Override: `anatomy/preferences.md > ## Cadences`
-- Bootstrap writes plists without loading them; each process skill activates its job on install; hook dispatcher exits 0 if target skill missing
+- Bootstrap writes plists without loading them; each process skill activates its job on install; hook dispatchers invoke Claude from the vault root, allowing marketplace skill discovery; they run asynchronously and exit 0 even if Claude or a skill fails
 
 ## Cycles
 

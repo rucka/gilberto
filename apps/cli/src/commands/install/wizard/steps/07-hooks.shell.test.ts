@@ -64,21 +64,20 @@ const run = (args: string[], env: Record<string, string> = {}, input = '') =>
     env: { PATH: '/usr/bin:/bin', ...env },
   })
 const shC = (command: string) => run(['-c', command])
-const MISSING = (ev: Ev) => `skill not installed: ${SKILLS[ev]}`
 
 describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command>)', () => {
   it('ROW-r0-1f control: plain path hook command runs dispatcher', async () => {
     const { command } = await install('plain')
     const r = shC(command('PreCompact'))
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it('ROW-r0-1a space in vault path: hook command runs dispatcher', async () => {
     const { command } = await install('My Vault')
     const r = shC(command('PreCompact'))
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it.each(['SessionStart', 'SessionEnd'] as const)(
@@ -87,7 +86,7 @@ describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command
       const { command } = await install('My Vault')
       const r = shC(command(ev))
       expect(r.status).toBe(0)
-      expect(r.stderr).toContain(MISSING(ev))
+      expect(r.stderr).toBe('')
     },
   )
 
@@ -96,7 +95,7 @@ describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command
     const r = shC(command('PreCompact'))
     expect(r.stderr).not.toContain('INJECTED')
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it('ROW-r0-1k backtick in path: hook command has no expansion side effect', async () => {
@@ -104,21 +103,21 @@ describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command
     const r = shC(command('PreCompact'))
     expect(r.stderr).not.toContain('INJECTED')
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it('ROW-r0-1l dollar var in path: hook command does not expand $X', async () => {
     const { command } = await install('lit$X')
     const r = run(['-c', command('PreCompact')], { X: 'zzz' })
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it('ROW-r0-1d single quote in path: hook command runs dispatcher', async () => {
     const { command } = await install("it's mine")
     const r = shC(command('PreCompact'))
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it.each(cases)(
@@ -127,7 +126,7 @@ describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command
       const { command } = await install(name)
       const r = shC(command(ev))
       expect(r.status).toBe(0)
-      expect(r.stderr).toContain(MISSING(ev))
+      expect(r.stderr).toBe('')
     },
   )
 })
@@ -138,7 +137,7 @@ describe('ROW-r0-1 shell-safe vault path (dispatcher level: sh <dispatcher file>
     const r = run([dispatcher('PreCompact')])
     expect(r.stderr).not.toContain('INJECTED')
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it.each(['SessionStart', 'SessionEnd'].flatMap(ev => HOSTILE.map(n => [ev as Ev, n] as const)))(
@@ -148,7 +147,7 @@ describe('ROW-r0-1 shell-safe vault path (dispatcher level: sh <dispatcher file>
       const r = run([dispatcher(ev)])
       expect(r.stderr).not.toContain('INJECTED')
       expect(r.status).toBe(0)
-      expect(r.stderr).toContain(MISSING(ev))
+      expect(r.stderr).toBe('')
     },
   )
 
@@ -156,7 +155,7 @@ describe('ROW-r0-1 shell-safe vault path (dispatcher level: sh <dispatcher file>
     const { dispatcher } = await install("it's mine")
     const r = run([dispatcher('PreCompact')])
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it.each(cases)(
@@ -165,7 +164,7 @@ describe('ROW-r0-1 shell-safe vault path (dispatcher level: sh <dispatcher file>
       const { dispatcher } = await install(name)
       const r = run([dispatcher(ev)])
       expect(r.status).toBe(0)
-      expect(r.stderr).toContain(MISSING(ev))
+      expect(r.stderr).toBe('')
     },
   )
 
@@ -295,4 +294,84 @@ describe('ROW-r0-3 PreCompact transcript', () => {
       expect(logged).toContain('ARGV: -p /gilberto-process-capture')
     },
   )
+})
+
+describe('marketplace skills without local files', () => {
+  it.each(EVENTS)('%s dispatches from the vault with its process arguments', async ev => {
+    const { base, root, dispatcher } = await install('My Vault')
+    const log = join(base, 'marketplace.log')
+    const bin = await stubBin('pwd > "$LOG"; printf "%s\\n" "$@" >> "$LOG"')
+    const input = JSON.stringify({ transcript_path: '/tmp/a transcript.jsonl' })
+    const result = run([dispatcher(ev)], { PATH: PATHS(bin), LOG: log }, input)
+    const logged = await waitFor(log)
+    expect(result.status).toBe(0)
+    expect([root, await realpath(root)]).toContain(logged.split('\n')[0])
+    const args =
+      ev === 'SessionEnd' ? ' day' : ev === 'PreCompact' ? ' /tmp/a transcript.jsonl' : ''
+    expect(logged).toContain(`/${SKILLS[ev]}${args}`)
+  })
+})
+
+describe('marketplace hook guards and failures', () => {
+  it.each(
+    EVENTS.flatMap(ev => (['dispatcher', 'settings'] as const).map(level => [ev, level] as const)),
+  )('ROW-r1-g1-%s-%s returns before Claude finishes', async (ev, level) => {
+    const { base, dispatcher, command } = await install(`async-${ev}-${level}`)
+    const file = dispatcher(ev)
+    if (process.env['GILBERTO_SYNC_PROBE'] === 'dispatcher') {
+      const original = await readFile(file, 'utf8')
+      const mutated = original.replace(') &', ')')
+      expect(mutated).not.toBe(original)
+      await writeFile(file, mutated)
+    }
+    const started = join(base, 'started')
+    const finished = join(base, 'finished')
+    const bin = await stubBin('echo started > "$STARTED"; sleep 2; echo finished > "$FINISHED"')
+    const installed = command(ev)
+    const shellCommand =
+      process.env['GILBERTO_SYNC_PROBE'] === 'settings' ? `${installed}; sleep 2` : installed
+    const args = level === 'settings' ? ['-c', shellCommand] : [file]
+    const result = spawnSync('sh', args, {
+      encoding: 'utf8',
+      input: '',
+      timeout: 1200,
+      env: { PATH: PATHS(bin), STARTED: started, FINISHED: finished },
+    })
+    const finishedAtReturn = await read(finished)
+    expect(await waitFor(started)).toContain('started')
+    expect(await waitFor(finished)).toContain('finished')
+    expect(result.status).toBe(0)
+    expect(finishedAtReturn).toBe('')
+  })
+
+  it('disabled SessionStart does not invoke Claude', async () => {
+    const { base, root, dispatcher } = await install('disabled')
+    await mkdir(join(root, 'anatomy'), { recursive: true })
+    await writeFile(join(root, 'anatomy/preferences.md'), '- session-start: off\n')
+    const log = join(base, 'log')
+    const bin = await stubBin('echo called > "$LOG"')
+    expect(run([dispatcher('SessionStart')], { PATH: PATHS(bin), LOG: log }).status).toBe(0)
+    await sleep(300)
+    expect(await read(log)).toBe('')
+  })
+  it('same-day SessionEnd does not invoke Claude twice', async () => {
+    const { base, dispatcher } = await install('stamp')
+    const log = join(base, 'log')
+    const bin = await stubBin('echo called >> "$LOG"')
+    const env = { PATH: PATHS(bin), LOG: log }
+    expect(run([dispatcher('SessionEnd')], env).status).toBe(0)
+    await waitFor(log)
+    expect(run([dispatcher('SessionEnd')], env).status).toBe(0)
+    await sleep(300)
+    expect((await read(log)).trim()).toBe('called')
+  })
+  it.each(EVENTS)('%s exits zero when Claude is missing or fails', async ev => {
+    const missing = await install(`missing-${ev}`)
+    expect(run([missing.dispatcher(ev)]).status).toBe(0)
+    const failed = await install(`failed-${ev}`)
+    const log = join(failed.base, 'failed.log')
+    const bin = await stubBin('echo called > "$LOG"; exit 1')
+    expect(run([failed.dispatcher(ev)], { PATH: PATHS(bin), LOG: log }).status).toBe(0)
+    expect(await waitFor(log)).toContain('called')
+  })
 })

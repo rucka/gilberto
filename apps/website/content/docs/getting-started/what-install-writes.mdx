@@ -35,7 +35,7 @@ JSON-merges three hooks into `.claude/settings.json` (atomic), dispatchers in `.
 | `gilberto.pre-compact` | PreCompact | `/gilberto-process-capture` |
 | `gilberto.session-end` | SessionEnd | `/gilberto-process-reflect day` (first end of the day) |
 
-The target skills are **Planned** ([#20](https://github.com/rucka/gilberto/issues/20), [#13](https://github.com/rucka/gilberto/issues/13)). Until they exist, dispatchers exit 0 and log `skill not installed: <skill>`.
+The target skills are **Planned** ([#20](https://github.com/rucka/gilberto/issues/20), [#13](https://github.com/rucka/gilberto/issues/13)). Dispatchers invoke Claude asynchronously from the vault root, allowing marketplace skill discovery. They exit 0 and suppress Claude output, including failures or missing-skill errors.
 
 ## Step 8 — launchd (macOS)
 

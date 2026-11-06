@@ -91,13 +91,13 @@ describe('step 7 hooks', () => {
     await expect(hooksStep({}, h.ctx)).rejects.toThrow('targetPath')
   })
 
-  it('AC13: dispatcher with skill missing exits 0 and logs', async () => {
+  it('dispatcher with Claude missing exits 0', async () => {
     const root = await tmpRoot()
     const script = join(root, 'd.sh')
     await writeFile(script, renderDispatcher(root, 'gilberto.pre-compact'))
-    const r = spawnSync('sh', [script], { encoding: 'utf8' })
+    const r = spawnSync('sh', [script], { encoding: 'utf8', env: { PATH: '/usr/bin:/bin' } })
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain('skill not installed: gilberto-process-capture')
+    expect(r.stderr).toBe('')
   })
 
   it('session-end dispatcher runs once per day; session-start honours preferences off', async () => {
@@ -106,13 +106,15 @@ describe('step 7 hooks', () => {
     await mkdir(join(root, 'anatomy'), { recursive: true })
     const end = join(root, 'e.sh')
     await writeFile(end, renderDispatcher(root, 'gilberto.session-end'))
-    spawnSync('sh', [end])
-    const r = spawnSync('sh', [end], { encoding: 'utf8' })
+    spawnSync('sh', [end], { env: { PATH: '/usr/bin:/bin' } })
+    const r = spawnSync('sh', [end], { encoding: 'utf8', env: { PATH: '/usr/bin:/bin' } })
     expect(r.status).toBe(0)
     expect(r.stderr).toBe('')
     await writeFile(join(root, 'anatomy/preferences.md'), '- session-start: off\n')
     const start = join(root, 's.sh')
     await writeFile(start, renderDispatcher(root, 'gilberto.session-start'))
-    expect(spawnSync('sh', [start], { encoding: 'utf8' }).stderr).toBe('')
+    expect(
+      spawnSync('sh', [start], { encoding: 'utf8', env: { PATH: '/usr/bin:/bin' } }).stderr,
+    ).toBe('')
   })
 })

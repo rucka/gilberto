@@ -16,7 +16,7 @@ launchd fires `com.foomakers.gilberto.morning-briefing`, which runs `claude -p "
 
 Claude Code starts in the vault; the SessionStart hook runs `/gilberto-process-next` to suggest what to work on. Disable with `- session-start: off` in `anatomy/preferences.md`.
 
-- Available: hook installed (exits 0 with `skill not installed` until the skill exists).
+- Available: hook installed; it invokes Claude asynchronously from the vault root, allowing marketplace skill discovery. It exits 0 and suppresses Claude output, including failures or missing-skill errors.
 - Planned: next process [#20](https://github.com/rucka/gilberto/issues/20).
 
 ## During the day — Capture · partly available

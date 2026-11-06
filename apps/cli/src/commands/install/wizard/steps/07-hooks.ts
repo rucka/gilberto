@@ -44,10 +44,6 @@ export const renderDispatcher = (root: string, id: HookId): string => {
 [ -n "$GILBERTO_HOOK" ] && exit 0
 ROOT=${sq(root)}
 ${guard}
-if [ ! -f "$ROOT/.claude/skills/${skill}/SKILL.md" ]; then
-  echo "skill not installed: ${skill}" >&2
-  exit 0
-fi
 ${transcript ? TRANSCRIPT(process.execPath) : ''}export GILBERTO_HOOK=1
 (cd "$ROOT" && exec claude -p "/${skill}${args}${transcript ? '${TP:+ $TP}' : ''}" >/dev/null 2>&1 </dev/null) &
 exit 0
