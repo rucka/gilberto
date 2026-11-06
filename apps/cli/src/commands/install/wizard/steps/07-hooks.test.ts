@@ -97,7 +97,7 @@ describe('step 7 hooks', () => {
     await writeFile(script, renderDispatcher(root, 'gilberto.pre-compact'))
     const r = spawnSync('sh', [script], { encoding: 'utf8' })
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain('skill not installed: gilberto-process-capture')
+    expect(r.stderr).toBe('')
   })
 
   it('session-end dispatcher runs once per day; session-start honours preferences off', async () => {

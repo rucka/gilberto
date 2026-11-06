@@ -64,21 +64,20 @@ const run = (args: string[], env: Record<string, string> = {}, input = '') =>
     env: { PATH: '/usr/bin:/bin', ...env },
   })
 const shC = (command: string) => run(['-c', command])
-const MISSING = (ev: Ev) => `skill not installed: ${SKILLS[ev]}`
 
 describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command>)', () => {
   it('ROW-r0-1f control: plain path hook command runs dispatcher', async () => {
     const { command } = await install('plain')
     const r = shC(command('PreCompact'))
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it('ROW-r0-1a space in vault path: hook command runs dispatcher', async () => {
     const { command } = await install('My Vault')
     const r = shC(command('PreCompact'))
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it.each(['SessionStart', 'SessionEnd'] as const)(
@@ -87,7 +86,7 @@ describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command
       const { command } = await install('My Vault')
       const r = shC(command(ev))
       expect(r.status).toBe(0)
-      expect(r.stderr).toContain(MISSING(ev))
+      expect(r.stderr).toBe('')
     },
   )
 
@@ -96,7 +95,7 @@ describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command
     const r = shC(command('PreCompact'))
     expect(r.stderr).not.toContain('INJECTED')
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it('ROW-r0-1k backtick in path: hook command has no expansion side effect', async () => {
@@ -104,21 +103,21 @@ describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command
     const r = shC(command('PreCompact'))
     expect(r.stderr).not.toContain('INJECTED')
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it('ROW-r0-1l dollar var in path: hook command does not expand $X', async () => {
     const { command } = await install('lit$X')
     const r = run(['-c', command('PreCompact')], { X: 'zzz' })
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it('ROW-r0-1d single quote in path: hook command runs dispatcher', async () => {
     const { command } = await install("it's mine")
     const r = shC(command('PreCompact'))
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it.each(cases)(
@@ -127,7 +126,7 @@ describe('ROW-r0-1 shell-safe vault path (command level: sh -c <settings command
       const { command } = await install(name)
       const r = shC(command(ev))
       expect(r.status).toBe(0)
-      expect(r.stderr).toContain(MISSING(ev))
+      expect(r.stderr).toBe('')
     },
   )
 })
@@ -138,7 +137,7 @@ describe('ROW-r0-1 shell-safe vault path (dispatcher level: sh <dispatcher file>
     const r = run([dispatcher('PreCompact')])
     expect(r.stderr).not.toContain('INJECTED')
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it.each(['SessionStart', 'SessionEnd'].flatMap(ev => HOSTILE.map(n => [ev as Ev, n] as const)))(
@@ -148,7 +147,7 @@ describe('ROW-r0-1 shell-safe vault path (dispatcher level: sh <dispatcher file>
       const r = run([dispatcher(ev)])
       expect(r.stderr).not.toContain('INJECTED')
       expect(r.status).toBe(0)
-      expect(r.stderr).toContain(MISSING(ev))
+      expect(r.stderr).toBe('')
     },
   )
 
@@ -156,7 +155,7 @@ describe('ROW-r0-1 shell-safe vault path (dispatcher level: sh <dispatcher file>
     const { dispatcher } = await install("it's mine")
     const r = run([dispatcher('PreCompact')])
     expect(r.status).toBe(0)
-    expect(r.stderr).toContain(MISSING('PreCompact'))
+    expect(r.stderr).toBe('')
   })
 
   it.each(cases)(
@@ -165,7 +164,7 @@ describe('ROW-r0-1 shell-safe vault path (dispatcher level: sh <dispatcher file>
       const { dispatcher } = await install(name)
       const r = run([dispatcher(ev)])
       expect(r.status).toBe(0)
-      expect(r.stderr).toContain(MISSING(ev))
+      expect(r.stderr).toBe('')
     },
   )
 
@@ -306,7 +305,7 @@ describe('marketplace skills without local files', () => {
     const result = run([dispatcher(ev)], { PATH: PATHS(bin), LOG: log }, input)
     const logged = await waitFor(log)
     expect(result.status).toBe(0)
-    expect(logged).toContain(await realpath(root))
+    expect([root, await realpath(root)]).toContain(logged.split('\n')[0])
     const args = ev === 'SessionEnd' ? ' day' : ev === 'PreCompact' ? ' /tmp/a transcript.jsonl' : ''
     expect(logged).toContain(`/${SKILLS[ev]}${args}`)
   })
