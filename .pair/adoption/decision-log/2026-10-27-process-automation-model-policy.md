@@ -22,7 +22,7 @@ Project on pair 0.5.2 with no automation config: no `automation.md`, no `risk-ma
 - **Harness**: `claude-code`.
 - **Model Policy**: `risk:green` cheap, `risk:yellow` balanced, `risk:red` frontier.
 - **Tag Projection**: `Active: risk`. No Criticality Table (absent ⇒ Medium default; a table would make unlisted deployables High).
-- **Workflow profile** `economico` (default, `pair.config.json`):
+- **Workflow profiles** `economico-claude` (default, `pair.config.json`) and `economico-codex` (amended 2026-11-06: one profile per engine, same stage policy; selected by `pair-run:*:claude` / `pair-run:*:codex` via `--profile`):
 
 | Stage | Model | Effort | Context |
 | --- | --- | --- | --- |
@@ -53,4 +53,4 @@ Project on pair 0.5.2 with no automation config: no `automation.md`, no `risk-ma
 
 - `adoption/tech/automation.md` (new): `## Autonomy`, `## Harness`, `## Model Policy`, `## Working Cleanup`.
 - `adoption/tech/risk-matrix.md` (new): `## Tag Projection`.
-- `adoption/tech/workflow-profiles/economico.json` (new) + `pair.config.json` (new, `workflowProfiles`).
+- `adoption/tech/workflow-profiles/economico-{claude,codex}.json` (new) + `pair.config.json` (new, `workflowProfiles`).

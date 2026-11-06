@@ -39,14 +39,14 @@
     "sync-deps": "echo 'sync-deps placeholder'",
     "pair:install": "pair-cli install",
     "pair:update": "pair-cli update",
-    "pair-run:refine:claude": "pair-cli run --engine claude --autonomous --until ready --prepare hold-never",
-    "pair-run:refine:codex": "pair-cli run --engine codex --autonomous --until ready --prepare hold-never",
-    "pair-run:dev:claude": "pair-cli run --engine claude --autonomous --until merged --prepare hold-always",
-    "pair-run:dev:codex": "pair-cli run --engine codex --autonomous --until merged --prepare hold-always",
-    "pair-run:full:claude": "pair-cli run --engine claude --autonomous --until merged --prepare hold-never",
-    "pair-run:full:codex": "pair-cli run --engine codex --autonomous --until merged --prepare hold-never",
-    "pair-run:watch:claude": "pair-cli run --engine claude --autonomous --until merged --prepare hold-never --watch --interval 10m",
-    "pair-run:watch:codex": "pair-cli run --engine codex --autonomous --until merged --prepare hold-never --watch --interval 10m"
+    "pair-run:refine:claude": "pair-cli run --engine claude --autonomous --until ready --prepare hold-never --profile economico-claude",
+    "pair-run:refine:codex": "pair-cli run --engine codex --autonomous --until ready --prepare hold-never --profile economico-codex",
+    "pair-run:dev:claude": "pair-cli run --engine claude --autonomous --until merged --prepare hold-always --profile economico-claude",
+    "pair-run:dev:codex": "pair-cli run --engine codex --autonomous --until merged --prepare hold-always --profile economico-codex",
+    "pair-run:full:claude": "pair-cli run --engine claude --autonomous --until merged --prepare hold-never --profile economico-claude",
+    "pair-run:full:codex": "pair-cli run --engine codex --autonomous --until merged --prepare hold-never --profile economico-codex",
+    "pair-run:watch:claude": "pair-cli run --engine claude --autonomous --until merged --prepare hold-never --watch --interval 10m --profile economico-claude",
+    "pair-run:watch:codex": "pair-cli run --engine codex --autonomous --until merged --prepare hold-never --watch --interval 10m --profile economico-codex"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
